@@ -1,0 +1,53 @@
+/** Catálogo de planos exibido no fluxo de cadastro (preços e features de produto). */
+export const planos = [
+  {
+    id: "starter",
+    nome: "Starter",
+    badge: "Para começar",
+    preco_mensal: 497,
+    preco_anual: 397,
+    features: [
+      "Até 500 clientes",
+      "Disparos diários",
+      "Follow-up automático (4h/24h/48h)",
+      "Lembrete de rota",
+      "Relatório semanal",
+      "Suporte por e-mail",
+    ],
+    destaque: false,
+  },
+  {
+    id: "profissional",
+    nome: "Profissional",
+    badge: "Mais popular",
+    preco_mensal: 997,
+    preco_anual: 797,
+    features: [
+      "Até 2.000 clientes",
+      "Segmentação A/B/C automática",
+      "Fluxo PIX integrado",
+      "Régua de cobrança completa",
+      "Bloqueio de inadimplente",
+      "Relatório diário no WhatsApp",
+      "Aniversariante do dia",
+      "Suporte via WhatsApp",
+    ],
+    destaque: true,
+  },
+  {
+    id: "enterprise",
+    nome: "Enterprise",
+    badge: "Para grandes operações",
+    preco_mensal: 1997,
+    preco_anual: 1597,
+    features: [
+      "Clientes ilimitados",
+      "Instância exclusiva",
+      "Integração customizada com ERP",
+      "Painel web completo com API",
+      "Gerente de conta dedicado",
+      "SLA 99,5% + suporte 24/7",
+    ],
+    destaque: false,
+  },
+];

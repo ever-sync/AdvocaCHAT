@@ -1,0 +1,29 @@
+# Dispara Edge Functions que dependem de CRON_SECRET (ex.: poll de mensagens).
+# Configure os secrets: SUPABASE_FUNCTIONS_URL, CRON_SECRET (ver docs/SUPABASE_CRON.md).
+name: Supabase edge cron triggers
+
+on:
+  workflow_dispatch:
+  # Descomente após configurar secrets no repositório (intervalo mínimo comum: 5 min):
+  # schedule:
+  #   - cron: "*/5 * * * *"
+
+jobs:
+  invoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: POST uazapi-poll-sync
+        continue-on-error: true
+        env:
+          BASE_URL: ${{ secrets.SUPABASE_FUNCTIONS_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BASE_URL:-}" ] || [ -z "${CRON_SECRET:-}" ]; then
+            echo "Defina os secrets SUPABASE_FUNCTIONS_URL e CRON_SECRET para este workflow."
+            exit 1
+          fi
+          curl -sS -f -X POST "${BASE_URL%/}/uazapi-poll-sync" \
+            -H "Content-Type: application/json" \
+            -H "x-cron-secret: ${CRON_SECRET}" \
+            -d "{}"

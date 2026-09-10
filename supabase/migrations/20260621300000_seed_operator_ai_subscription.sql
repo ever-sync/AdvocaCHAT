@@ -1,0 +1,1 @@
+-- No inherited operator subscription in AdvocaCHAT.

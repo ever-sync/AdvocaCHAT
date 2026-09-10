@@ -1,0 +1,307 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Desktop App Titlebar Dragging */
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+@layer base {
+  :root {
+    /* wChat — paleta Caleo (Deep Forest + Electric Lime, light mode) */
+    --wchat-brand-900: 169 40% 8%;   /* Deep Forest (#0d1e1b) */
+    --wchat-brand-800: 170 35% 13%;  /* Moss Shield (#162e2a) */
+    --wchat-brand-700: 170 30% 18%;  /* Dark Green (#1f3e39) */
+    --wchat-brand-600: 170 25% 25%;  /* Medium Green (#30534d) */
+    --wchat-brand-500: 86 66% 68%;   /* Soft Pistachio (#b5e377) */
+    --wchat-brand-400: 82 100% 50%;  /* Electric Lime (#9eff00) */
+    --wchat-brand-200: 86 50% 85%;   /* Very Soft Pistachio (#def0cd) */
+    --wchat-brand-100: 169 15% 95%;  /* Light Gray-Green (#f2f6f5) */
+    --wchat-brand-50: 169 10% 98%;   /* Soft Background (#fafbfb) */
+    --wchat-text: 169 40% 8%;        /* Deep Forest para texto */
+    --wchat-text-muted: 170 20% 42%;  /* Muted Greenish Gray */
+    --wchat-white: 0 0% 100%;
+
+    /* Semânticos (shadcn / Tailwind) */
+    --background: var(--wchat-brand-50);
+    --foreground: var(--wchat-text);
+
+    --card: var(--wchat-white);
+    --card-foreground: var(--wchat-text);
+
+    --popover: var(--wchat-white);
+    --popover-foreground: var(--wchat-text);
+
+    --primary: var(--wchat-brand-900);
+    --primary-foreground: var(--wchat-white);
+
+    --secondary: var(--wchat-brand-200);
+    --secondary-foreground: var(--wchat-brand-900);
+
+    --muted: 169 10% 95%;
+    --muted-foreground: var(--wchat-text-muted);
+
+    --accent: var(--wchat-brand-200);
+    --accent-foreground: var(--wchat-brand-900);
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 134 50% 40%;
+    --success-foreground: var(--wchat-white);
+
+    --warning: 38 92% 50%;
+    --warning-foreground: var(--wchat-white);
+
+    --border: 169 15% 90%;
+    --input: 169 15% 90%;
+    --ring: var(--wchat-brand-900);
+
+    --radius: 0.625rem;
+
+    --sidebar-background: var(--wchat-brand-900); /* Sidebar escura no light mode fica premium */
+    --sidebar-foreground: 169 15% 90%;
+    --sidebar-primary: var(--wchat-brand-400);
+    --sidebar-primary-foreground: var(--wchat-brand-900);
+    --sidebar-accent: var(--wchat-brand-800);
+    --sidebar-accent-foreground: 169 15% 95%;
+    --sidebar-border: 170 35% 12%;
+    --sidebar-ring: var(--wchat-brand-400);
+  }
+
+  .dark {
+    /* wChat — paleta Caleo (Dark Mode) */
+    --wchat-brand-900: 0 0% 100%;  /* Pure White (#ffffff) */
+    --wchat-brand-800: 0 0% 90%;
+    --wchat-brand-700: 0 0% 70%;
+    --wchat-brand-600: 0 0% 50%;
+    --wchat-brand-500: 0 0% 40%;
+    --wchat-brand-400: 0 0% 30%;
+    --wchat-brand-200: 0 0% 18%;
+    --wchat-brand-100: 0 0% 12%;
+    --wchat-brand-50: 0 0% 5.49%;  /* Dark Neutral Background (#0e0e0e) */
+    --wchat-text: 0 0% 95%;
+    --wchat-text-muted: 0 0% 65%;
+    --wchat-white: 0 0% 100%;
+
+    --background: 0 0% 5.49%;     /* #0e0e0e */
+    --foreground: var(--wchat-text);
+
+    --card: 0 0% 8%;
+    --card-foreground: var(--wchat-text);
+
+    --popover: 0 0% 8%;
+    --popover-foreground: var(--wchat-text);
+
+    --primary: 0 0% 100%;          /* Pure White (#ffffff) */
+    --primary-foreground: 0 0% 5.49%; /* Dark text for readability on white primary */
+
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 12%;
+    --muted-foreground: var(--wchat-text-muted);
+
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 56%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 134 50% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 58%;
+    --warning-foreground: 0 0% 5.49%;
+
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 100%;
+
+    --sidebar-background: 0 0% 5.49%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 5.49%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 12%;
+    --sidebar-ring: 0 0% 100%;
+  }
+}
+
+@layer base {
+  /* Tokens das telas de CRM/cliente adaptados para Caleo */
+  :root {
+    --crm-brand: #0d1e1b;          /* Deep Forest */
+    --crm-brand-2: #162e2a;        /* Moss Shield */
+    --crm-brand-strong: #070e0d;
+    --crm-brand-tint: #def0cd;     /* Very Soft Pistachio */
+    --crm-brand-tint-hover: #cef0a8;
+    --crm-brand-border: #b5e377;   /* Soft Pistachio */
+
+    --crm-ink: #0d1e1b;
+    --crm-ink-2: #30534d;
+    --crm-ink-3: #5a7772;
+
+    --crm-surface: #fafbfb;
+    --crm-surface-2: #f2f6f5;
+    --crm-border: #e2e8e7;
+    --crm-border-2: #ccd5d4;
+
+    --crm-danger: #c62828;
+    --crm-danger-strong: #b71c1c;
+    --crm-danger-tint: #fdecea;
+    --crm-danger-border: #f5c2c7;
+    --crm-orange: #e65100;
+    --crm-amber: #ffc107;
+    --crm-amber-ink: #92400e;
+    --crm-amber-tint: #fff8e1;
+    --crm-amber-border: #ffe082;
+    --crm-amber-tint-hover: #ffecb3;
+    --crm-wa-green: #25d366;
+    --crm-wa-teal: #128c7e;
+    --crm-success-tint: #eaf8eb;
+    --crm-info-tint: #e3f2fd;
+    --crm-info: #1565c0;
+
+    /* Inbox/chat — paleta Caleo (light) */
+    --inbox-ink: #0d1e1b;
+    --inbox-ink-2: #30534d;
+    --inbox-muted: #5a7772;
+    --inbox-muted-2: #849c98;
+    --inbox-border: #e2e8e7;
+    --inbox-surface: #fafbfb;
+    --inbox-surface-2: #f2f6f5;
+    --inbox-chat-bg: #eaf0ef;
+    --inbox-green: #0d1e1b;
+    --inbox-green-soft: #b5e377;
+    --inbox-green-tint: #def0cd;
+    --inbox-green-bright: #9eff00;
+    --inbox-gold: #c9a020;
+    --inbox-gold-ink: #574500;
+    --inbox-gold-bg: #f5d96a;
+    --inbox-orange: #e56b22;
+    --inbox-orange-tint: #fff1e5;
+    --inbox-orange-border: #ffd7a8;
+    --inbox-blue: #162e2a;
+    --inbox-blue-tint: #f2f6f5;
+  }
+
+  .dark {
+    --crm-brand: #ffffff;          /* Pure White */
+    --crm-brand-2: #e5e5e5;
+    --crm-brand-strong: #ffffff;
+    --crm-brand-tint: #1a1a1a;
+    --crm-brand-tint-hover: #262626;
+    --crm-brand-border: #404040;
+
+    --crm-ink: #f5f5f5;
+    --crm-ink-2: #a3a3a3;
+    --crm-ink-3: #737373;
+
+    --crm-surface: #0e0e0e;
+    --crm-surface-2: #171717;
+    --crm-border: #262626;
+    --crm-border-2: #404040;
+
+    --crm-danger: #f1727a;
+    --crm-danger-strong: #e15a60;
+    --crm-danger-tint: #36211f;
+    --crm-danger-border: #5a2e30;
+    --crm-orange: #ff8a4d;
+    --crm-amber: #ffca28;
+    --crm-amber-ink: #fbbf24;
+    --crm-amber-tint: #322b16;
+    --crm-amber-border: #574a22;
+    --crm-amber-tint-hover: #423917;
+    --crm-wa-green: #25d366;
+    --crm-wa-teal: #2dc4ac;
+    --crm-success-tint: #122820;
+    --crm-info-tint: #122538;
+    --crm-info: #6ecfe0;
+
+    /* Inbox/chat — paleta Caleo (dark) */
+    --inbox-ink: #f5f5f5;
+    --inbox-ink-2: #a3a3a3;
+    --inbox-muted: #737373;
+    --inbox-muted-2: #525252;
+    --inbox-border: #262626;
+    --inbox-surface: #171717;
+    --inbox-surface-2: #262626;
+    --inbox-chat-bg: #0a0a0a;
+    --inbox-green: #ffffff;
+    --inbox-green-soft: #404040;
+    --inbox-green-tint: #171717;
+    --inbox-green-bright: #ffffff;
+    --inbox-gold: #e6c34d;
+    --inbox-gold-ink: #3a2f0e;
+    --inbox-gold-bg: #f5d96a;
+    --inbox-orange: #ff8a4d;
+    --inbox-orange-tint: #33241a;
+    --inbox-orange-border: #55401f;
+    --inbox-blue: #ffffff;
+    --inbox-blue-tint: #171717;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+
+  html.login-screen,
+  html.login-screen body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-[hsl(var(--wchat-brand-900))];
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply border border-border bg-card/80 backdrop-blur-xl;
+    box-shadow: 0 8px 32px hsl(var(--primary) / 0.08);
+  }
+
+  .glass-strong {
+    @apply border border-border bg-card/90 backdrop-blur-2xl;
+    box-shadow: 0 12px 40px hsl(var(--primary) / 0.12);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Swagger UI — página /configuracoes/api-docs */
+.api-docs-swagger .swagger-ui {
+  background: transparent;
+}
+.api-docs-swagger .swagger-ui .topbar {
+  display: none;
+}
+.api-docs-swagger .swagger-ui .info {
+  margin: 1rem 0;
+}

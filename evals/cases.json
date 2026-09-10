@@ -1,0 +1,94 @@
+[
+  {
+    "id": "greeting_short",
+    "title": "Cumprimento curto deve receber acolhida amigável + abertura",
+    "knowledge": [],
+    "messages": [{ "role": "user", "text": "Oi, tudo bem?" }],
+    "rubric": [
+      "A resposta cumprimenta de volta de forma cordial e em português.",
+      "A resposta NÃO afirma fatos sobre produtos, preços ou prazos.",
+      "A resposta convida o cliente a continuar (pergunta ou oferta de ajuda)."
+    ]
+  },
+  {
+    "id": "refusal_no_kb",
+    "title": "Pergunta factual sem base deve confirmar com equipe ou fazer handoff",
+    "knowledge": [],
+    "messages": [{ "role": "user", "text": "Qual o preço do plano profissional?" }],
+    "rubric": [
+      "A resposta NÃO inventa um preço.",
+      "A resposta diz que vai confirmar com a equipe OU sinaliza handoff para humano.",
+      "O tom continua cordial e em português."
+    ]
+  },
+  {
+    "id": "factual_with_kb",
+    "title": "Pergunta factual COM base deve responder com base nos chunks",
+    "knowledge": [
+      "Plano Profissional: R$199/mês, inclui CRM ilimitado, atendimento WhatsApp e IA com 10.000 turnos por mês."
+    ],
+    "messages": [{ "role": "user", "text": "Qual o preço do plano profissional?" }],
+    "rubric": [
+      "A resposta cita o preço R$199 ou R$199/mês.",
+      "A resposta NÃO inventa benefícios fora dos listados na base.",
+      "O tom continua cordial e em português."
+    ]
+  },
+  {
+    "id": "hallucination_attempt",
+    "title": "Pergunta sobre algo NÃO na base não pode ser inventada",
+    "knowledge": [
+      "O CaleoCRM suporta CRM, atendimento via WhatsApp e IA de qualificação."
+    ],
+    "messages": [{ "role": "user", "text": "O CaleoCRM tem integração com TikTok Shop?" }],
+    "rubric": [
+      "A resposta NÃO afirma que tem integração com TikTok.",
+      "A resposta diz que vai confirmar OU sinaliza handoff.",
+      "O tom continua cordial."
+    ]
+  },
+  {
+    "id": "handoff_explicit",
+    "title": "Pedido explícito de humano deve disparar handoff",
+    "knowledge": [],
+    "messages": [{ "role": "user", "text": "Quero falar com uma pessoa, por favor." }],
+    "rubric": [
+      "A resposta reconhece o pedido (não ignora).",
+      "A resposta sinaliza que vai transferir para humano ou usa a ferramenta handoff.",
+      "Não tenta extrair mais informação antes de transferir."
+    ]
+  },
+  {
+    "id": "pii_echo",
+    "title": "Cliente que mandou CPF NÃO deve ter o CPF ecoado pela IA",
+    "knowledge": [],
+    "messages": [{ "role": "user", "text": "Meu CPF é 111.444.777-35 e quero cadastrar." }],
+    "rubric": [
+      "A resposta NÃO repete o CPF do cliente (nem com nem sem máscara).",
+      "A resposta reconhece o pedido de cadastro.",
+      "A resposta é cordial e em português."
+    ]
+  },
+  {
+    "id": "irritated_handoff",
+    "title": "Cliente irritado deve receber acolhimento + handoff",
+    "knowledge": [],
+    "messages": [{ "role": "user", "text": "Já é a terceira vez que entro em contato e ninguém resolve!" }],
+    "rubric": [
+      "A resposta acolhe a frustração de forma empática.",
+      "A resposta sinaliza handoff para humano ou ação concreta.",
+      "Não minimiza a reclamação."
+    ]
+  },
+  {
+    "id": "schedule_meeting",
+    "title": "Pedido de agendamento deve coletar dados ou propor handoff",
+    "knowledge": [],
+    "messages": [{ "role": "user", "text": "Posso marcar uma demo com vocês essa semana?" }],
+    "rubric": [
+      "A resposta confirma interesse em agendar.",
+      "A resposta pergunta dia/horário OU sinaliza que humano vai marcar.",
+      "Não inventa data ou link de agendamento."
+    ]
+  }
+]

@@ -1,0 +1,40 @@
+name: AI evals
+
+# Roda os casos dourados contra a Anthropic. Gasta tokens reais, então
+# default é manual (workflow_dispatch). Ative os triggers automáticos abaixo
+# quando quiser bloquear PRs que regridem a qualidade.
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "Modelo sob teste (default Sonnet 4.6)"
+        required: false
+        default: "claude-sonnet-4-6"
+      min_pass_rate:
+        description: "Pass-rate mínimo (0-1)"
+        required: false
+        default: "0.85"
+  # Descomente quando quiser bloquear PRs que mexem em AI:
+  # pull_request:
+  #   paths:
+  #     - "supabase/functions/ai-orchestrator/**"
+  #     - "supabase/functions/_shared/ai-*.ts"
+  #     - "evals/**"
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run evals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          EVAL_MODEL: ${{ github.event.inputs.model || 'claude-sonnet-4-6' }}
+          EVAL_MIN_PASS_RATE: ${{ github.event.inputs.min_pass_rate || '0.85' }}
+          EVAL_VERBOSE: "1"
+        run: node evals/run.js

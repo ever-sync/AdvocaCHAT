@@ -1,0 +1,1 @@
+-- No inherited email-based platform administrator policy in AdvocaCHAT.

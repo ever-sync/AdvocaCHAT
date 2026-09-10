@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light" data-density="comfortable" data-summary="on">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CaleoCRM · Produtos — protótipo hi-fi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* ── Tokens espelhados de src/index.css (NÃO inventar cor: marca = roxo CaleoCRM) ── */
+  :root{
+    --wp-700:262 70% 35%; --wp-600:262 73% 40%; --wp-500:262 66% 51%;
+    --wp-200:270 45% 90%; --wp-100:270 48% 96%; --wp-50:270 43% 98%;
+    --ink:252 7% 34%; --ink-muted:252 6% 45%; --white:0 0% 100%;
+
+    --bg:hsl(var(--wp-50));
+    --surface:hsl(var(--white));
+    --surface-2:hsl(var(--wp-100));
+    --fg:hsl(var(--ink));
+    --fg-muted:hsl(var(--ink-muted));
+    --primary:hsl(var(--wp-600));
+    --primary-600:hsl(var(--wp-700));
+    --primary-tint:hsl(var(--wp-100));
+    --border:hsl(270 28% 88%);
+    --border-strong:hsl(270 24% 82%);
+    --radius:10px;
+    --shadow-sm:0 1px 2px hsl(262 40% 20% / .06), 0 1px 1px hsl(262 40% 20% / .04);
+    --shadow-md:0 8px 24px -8px hsl(262 50% 30% / .18);
+    --ok:hsl(152 52% 38%); --ok-tint:hsl(152 52% 95%);
+    --warn:hsl(28 80% 46%); --warn-tint:hsl(28 90% 95%);
+    --danger:hsl(0 65% 51%); --danger-tint:hsl(0 70% 96%);
+  }
+  [data-theme="dark"]{
+    --bg:hsl(264 24% 9%);
+    --surface:hsl(264 22% 13%);
+    --surface-2:hsl(264 16% 17%);
+    --fg:hsl(0 0% 92%);
+    --fg-muted:hsl(252 8% 64%);
+    --primary:hsl(262 72% 64%);
+    --primary-600:hsl(262 72% 70%);
+    --primary-tint:hsl(264 30% 20%);
+    --border:hsl(264 14% 22%);
+    --border-strong:hsl(264 14% 28%);
+    --shadow-md:0 8px 24px -8px hsl(0 0% 0% / .5);
+    --ok:hsl(152 45% 55%); --ok-tint:hsl(152 30% 16%);
+    --warn:hsl(28 75% 60%); --warn-tint:hsl(28 40% 16%);
+    --danger:hsl(0 65% 65%); --danger-tint:hsl(0 35% 18%);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:Poppins,system-ui,sans-serif;
+    background:var(--bg); color:var(--fg);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  .page{max-width:1100px; margin:0 auto; padding:28px 24px 64px}
+
+  /* ── Faixa meta (não faz parte do produto — é o "junior designer mostra a régua") ── */
+  .meta{
+    max-width:1100px; margin:0 auto 20px; padding:14px 18px;
+    border:1px dashed var(--border-strong); border-radius:var(--radius);
+    background:color-mix(in srgb, var(--surface) 70%, transparent);
+    font-size:12.5px; color:var(--fg-muted);
+  }
+  .meta b{color:var(--fg)}
+  .tweaks{display:flex; flex-wrap:wrap; gap:18px; align-items:center; margin-top:10px}
+  .tweak{display:flex; gap:6px; align-items:center}
+  .tweak > span{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--fg-muted)}
+  .seg{display:inline-flex; background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:2px}
+  .seg button{
+    font:inherit; font-size:12px; font-weight:500; border:0; background:transparent; color:var(--fg-muted);
+    padding:4px 10px; border-radius:6px; cursor:pointer;
+  }
+  .seg button[aria-pressed="true"]{background:var(--surface); color:var(--fg); box-shadow:var(--shadow-sm)}
+
+  /* ── Header da página ── */
+  .head{display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:22px}
+  .title h1{font-size:24px; font-weight:600; letter-spacing:-.01em; margin:0; text-wrap:balance}
+  .title p{margin:4px 0 0; color:var(--fg-muted); font-size:14px; max-width:46ch; text-wrap:pretty}
+  .btn{
+    font:inherit; font-weight:500; font-size:14px; cursor:pointer; border-radius:var(--radius);
+    display:inline-flex; align-items:center; gap:8px; border:1px solid transparent; padding:9px 14px;
+    transition:background .15s, border-color .15s, color .15s;
+  }
+  .btn svg{width:16px; height:16px}
+  .btn-primary{background:var(--primary); color:#fff; box-shadow:var(--shadow-sm)}
+  .btn-primary:hover{background:var(--primary-600)}
+  .btn-ghost{background:transparent; color:var(--fg-muted); border-color:transparent}
+  .btn-ghost:hover{background:var(--surface-2); color:var(--fg)}
+  .btn-outline{background:var(--surface); color:var(--fg); border-color:var(--border)}
+  .btn-outline:hover{border-color:var(--border-strong)}
+
+  /* ── Tabs ── */
+  .tabs{display:inline-flex; gap:2px; background:var(--surface-2); padding:4px; border-radius:var(--radius); margin-bottom:18px}
+  .tabs button{
+    font:inherit; font-size:13.5px; font-weight:500; border:0; background:transparent; color:var(--fg-muted);
+    padding:7px 16px; border-radius:7px; cursor:pointer;
+  }
+  .tabs button[aria-selected="true"]{background:var(--surface); color:var(--fg); box-shadow:var(--shadow-sm)}
+
+  /* ── Resumo (3 KPIs reais do catálogo — não decoração) ── */
+  .summary{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:18px}
+  [data-summary="off"] .summary{display:none}
+  .kpi{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:16px 18px; box-shadow:var(--shadow-sm);
+  }
+  .kpi .label{font-size:12px; color:var(--fg-muted); display:flex; align-items:center; gap:7px}
+  .kpi .label svg{width:15px; height:15px; color:var(--primary)}
+  .kpi .value{font-size:26px; font-weight:600; letter-spacing:-.02em; margin-top:8px; font-variant-numeric:tabular-nums}
+  .kpi .sub{font-size:12px; color:var(--fg-muted); margin-top:2px}
+  .kpi .split{display:flex; gap:8px; margin-top:10px; font-size:12px}
+  .kpi .split span{display:inline-flex; align-items:center; gap:5px; color:var(--fg-muted)}
+  .dot{width:7px; height:7px; border-radius:99px; display:inline-block}
+  .dot.prod{background:var(--primary)} .dot.serv{background:var(--primary-500,hsl(262 55% 62%))}
+
+  /* ── Card do catálogo ── */
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden}
+  .card-head{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:16px 18px; border-bottom:1px solid var(--border)}
+  .card-head h2{margin:0; font-size:15px; font-weight:600}
+  .card-head p{margin:2px 0 0; font-size:12.5px; color:var(--fg-muted)}
+
+  .toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:12px 18px; border-bottom:1px solid var(--border)}
+  .field{position:relative; flex:1 1 240px; max-width:320px}
+  .field svg{position:absolute; left:11px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--fg-muted)}
+  .field input{
+    width:100%; font:inherit; font-size:13.5px; color:var(--fg);
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:8px 12px 8px 34px; outline:none;
+  }
+  .field input:focus{border-color:var(--primary); box-shadow:0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent)}
+  .filter{display:inline-flex; background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:2px}
+  .filter button{font:inherit; font-size:12.5px; font-weight:500; border:0; background:transparent; color:var(--fg-muted); padding:6px 12px; border-radius:6px; cursor:pointer}
+  .filter button[aria-pressed="true"]{background:var(--surface); color:var(--fg); box-shadow:var(--shadow-sm)}
+  .spacer{flex:1}
+
+  /* ── Tabela ── */
+  table{width:100%; border-collapse:collapse}
+  thead th{
+    text-align:left; font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--fg-muted); padding:11px 18px; border-bottom:1px solid var(--border); background:color-mix(in srgb,var(--surface-2) 50%, transparent);
+  }
+  thead th.num{text-align:right}
+  tbody td{padding:14px 18px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle}
+  [data-density="compact"] tbody td{padding:8px 18px}
+  tbody tr{transition:background .12s}
+  tbody tr:hover{background:color-mix(in srgb, var(--primary) 5%, transparent)}
+  tbody tr:last-child td{border-bottom:0}
+  .name{font-weight:500}
+  .code{font-size:11.5px; color:var(--fg-muted); font-variant-numeric:tabular-nums; margin-top:2px}
+  .price{font-weight:600; font-variant-numeric:tabular-nums; text-align:right}
+  .price .cost{display:block; font-weight:400; font-size:11.5px; color:var(--fg-muted)}
+  .num{text-align:right; font-variant-numeric:tabular-nums}
+
+  .pill{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:500; padding:3px 9px; border-radius:999px; border:1px solid transparent; white-space:nowrap}
+  .pill.prod{color:var(--primary); background:var(--primary-tint); border-color:color-mix(in srgb,var(--primary) 25%, transparent)}
+  .pill.serv{color:var(--fg-muted); background:var(--surface-2); border-color:var(--border)}
+  .chip{display:inline-flex; font-size:11px; padding:2px 8px; border-radius:6px; background:var(--surface-2); color:var(--fg-muted); border:1px solid var(--border)}
+  .stock-ok{color:var(--ok)} .stock-low{color:var(--warn); font-weight:600} .stock-na{color:var(--fg-muted)}
+
+  .rowactions{display:flex; gap:4px; justify-content:flex-end; opacity:0; transition:opacity .12s}
+  tbody tr:hover .rowactions{opacity:1}
+  .icon-btn{display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:8px; border:0; background:transparent; color:var(--fg-muted); cursor:pointer}
+  .icon-btn:hover{background:var(--surface-2); color:var(--fg)}
+  .icon-btn.danger:hover{background:var(--danger-tint); color:var(--danger)}
+  .icon-btn svg{width:16px; height:16px}
+  .ck{width:16px; height:16px; border:1.5px solid var(--border-strong); border-radius:5px; cursor:pointer; appearance:none; background:var(--surface); vertical-align:middle}
+  .ck:checked{background:var(--primary); border-color:var(--primary)}
+
+  /* ── Empty state composto ── */
+  .empty{padding:64px 24px; text-align:center}
+  .empty .ill{width:56px; height:56px; border-radius:14px; margin:0 auto 16px; display:grid; place-items:center; background:var(--primary-tint); color:var(--primary)}
+  .empty .ill svg{width:28px; height:28px}
+  .empty h3{margin:0 0 6px; font-size:16px; font-weight:600}
+  .empty p{margin:0 auto 18px; max-width:38ch; color:var(--fg-muted); font-size:13.5px; text-wrap:pretty}
+
+  /* ── Barra de seleção (bulk) ── */
+  .bulkbar{display:none; align-items:center; gap:12px; padding:10px 18px; background:var(--primary-tint); border-bottom:1px solid var(--border); font-size:13px}
+  [data-bulk="on"] .bulkbar{display:flex}
+  [data-bulk="on"] .toolbar{display:none}
+  .bulkbar .count{font-weight:600; color:var(--primary)}
+
+  @media (max-width:720px){
+    .summary{grid-template-columns:1fr}
+    .hide-sm{display:none}
+  }
+</style>
+</head>
+<body>
+
+  <!-- META · assumptions/reasoning visíveis (some ao portar pro React) -->
+  <div class="meta">
+    <b>Protótipo hi-fi · aba Catálogo</b> — tokens reais do CaleoCRM (roxo da marca, Poppins, raio 10px). Dados são amostra.
+    Mudanças vs. atual: header com ação primária promovida · 3 KPIs do catálogo · coluna <b>Tipo</b> (produto/serviço) + código ·
+    preço em destaque (não mais cinza) · estoque com alerta · empty-state composto · seleção em massa (já existe <code>useDeleteProducts</code>).
+    <div class="tweaks">
+      <div class="tweak"><span>Densidade</span>
+        <div class="seg" data-set="density"><button data-v="comfortable" aria-pressed="true">Confortável</button><button data-v="compact" aria-pressed="false">Compacto</button></div>
+      </div>
+      <div class="tweak"><span>Resumo</span>
+        <div class="seg" data-set="summary"><button data-v="on" aria-pressed="true">Mostrar</button><button data-v="off" aria-pressed="false">Ocultar</button></div>
+      </div>
+      <div class="tweak"><span>Tema</span>
+        <div class="seg" data-set="theme"><button data-v="light" aria-pressed="true">Claro</button><button data-v="dark" aria-pressed="false">Escuro</button></div>
+      </div>
+      <div class="tweak"><span>Estado</span>
+        <div class="seg" data-set="state"><button data-v="data" aria-pressed="true">Com dados</button><button data-v="empty" aria-pressed="false">Vazio</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page">
+    <!-- Header -->
+    <div class="head">
+      <div class="title">
+        <h1>Serviços e produtos</h1>
+        <p>Seu catálogo de venda no WhatsApp. Nome e valor são o essencial; campos extras e categorias ficam nas abas ao lado.</p>
+      </div>
+      <button class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Novo produto
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true">Catálogo</button>
+      <button role="tab" aria-selected="false">Campos personalizados</button>
+      <button role="tab" aria-selected="false">Categorias</button>
+    </div>
+
+    <!-- Resumo -->
+    <div class="summary">
+      <div class="kpi">
+        <div class="label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+          Itens no catálogo
+        </div>
+        <div class="value" id="kpi-total">7</div>
+        <div class="split">
+          <span><i class="dot prod"></i> <span id="kpi-prod">4</span> produtos</span>
+          <span><i class="dot serv"></i> <span id="kpi-serv">3</span> serviços</span>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Valor de venda somado
+        </div>
+        <div class="value" id="kpi-value">R$ 4.286,60</div>
+        <div class="sub">Soma do preço de venda dos itens listados</div>
+      </div>
+      <div class="kpi">
+        <div class="label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><circle cx="7" cy="7" r="1.5" fill="currentColor" stroke="none"/></svg>
+          Categorias
+        </div>
+        <div class="value">5</div>
+        <div class="sub">2 produtos sem categoria</div>
+      </div>
+    </div>
+
+    <!-- Catálogo -->
+    <div class="card" id="catalog" data-bulk="off">
+      <div class="card-head">
+        <div>
+          <h2>Seus produtos</h2>
+          <p>Clique numa linha para editar. Selecione para ações em massa.</p>
+        </div>
+        <button class="btn btn-outline hide-sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
+          Exportar
+        </button>
+      </div>
+
+      <!-- bulk bar (aparece com seleção) -->
+      <div class="bulkbar">
+        <span class="count"><span id="bulk-count">2</span> selecionados</span>
+        <span class="spacer"></span>
+        <button class="btn btn-ghost" onclick="clearSel()">Limpar</button>
+        <button class="btn btn-outline" style="color:var(--danger); border-color:color-mix(in srgb,var(--danger) 40%,transparent)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+          Excluir
+        </button>
+      </div>
+
+      <!-- toolbar -->
+      <div class="toolbar">
+        <div class="field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input placeholder="Buscar por nome ou código…" />
+        </div>
+        <div class="filter" data-set="kind">
+          <button data-v="all" aria-pressed="true">Todos</button>
+          <button data-v="prod" aria-pressed="false">Produtos</button>
+          <button data-v="serv" aria-pressed="false">Serviços</button>
+        </div>
+        <span class="spacer"></span>
+      </div>
+
+      <!-- tabela -->
+      <div id="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px"><input type="checkbox" class="ck" id="ck-all" onchange="toggleAll(this)"></th>
+              <th>Item</th>
+              <th class="hide-sm">Tipo</th>
+              <th class="hide-sm">Categorias</th>
+              <th class="num hide-sm">Estoque</th>
+              <th class="num">Valor de venda</th>
+              <th style="width:90px"></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
+      <!-- empty -->
+      <div class="empty" id="empty" style="display:none">
+        <div class="ill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
+        </div>
+        <h3>Nenhum produto ainda</h3>
+        <p>Cadastre seu primeiro item para enviá-lo em conversas, vincular a negociações e medir o catálogo.</p>
+        <button class="btn btn-primary" style="margin:0 auto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Cadastrar primeiro produto
+        </button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ── dados de amostra (placeholder honesto, não dados reais) ──
+  const DATA = [
+    {sel:false, code:"001", name:"Plano Pro · mensal",        kind:"serv", cats:["Assinaturas"],            stock:null, sell:149.90, cost:0},
+    {sel:false, code:"014", name:"Consultoria de implantação", kind:"serv", cats:["Serviços","Onboarding"],  stock:null, sell:1200.00, cost:0},
+    {sel:false, code:"022", name:"Kit Sensor Wi-Fi",          kind:"prod", cats:["Hardware"],                stock:3,    sell:389.00, cost:210.00},
+    {sel:false, code:"023", name:"Cabo USB-C 2m",             kind:"prod", cats:[],                          stock:128,  sell:39.90,  cost:12.50},
+    {sel:false, code:"031", name:"Treinamento avançado (4h)", kind:"serv", cats:["Serviços"],                stock:null, sell:780.00, cost:0},
+    {sel:false, code:"045", name:"Fonte 12V 5A",              kind:"prod", cats:["Hardware","Acessórios"],   stock:0,    sell:89.90,  cost:34.00},
+    {sel:false, code:"046", name:"Adaptador de trilho DIN",   kind:"prod", cats:[],                          stock:41,   sell:638.00, cost:280.00},
+  ];
+  const brl = n => n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+  let kindFilter = "all";
+
+  function rowHtml(p,i){
+    const cats = p.cats.length
+      ? p.cats.map(c=>`<span class="chip">${c}</span>`).join(" ")
+      : `<span style="color:var(--fg-muted);font-size:12px">—</span>`;
+    let stock;
+    if(p.kind==="serv") stock = `<span class="stock-na">—</span>`;
+    else if(p.stock===0) stock = `<span class="stock-low">Esgotado</span>`;
+    else if(p.stock<=5) stock = `<span class="stock-low">${p.stock} un</span>`;
+    else stock = `<span class="stock-ok">${p.stock} un</span>`;
+    const cost = (p.kind==="prod" && p.cost>0) ? `<span class="cost">custo ${brl(p.cost)}</span>` : "";
+    return `<tr data-i="${i}">
+      <td><input type="checkbox" class="ck row-ck" ${p.sel?"checked":""} onchange="onRowCk()"></td>
+      <td><div class="name">${p.name}</div><div class="code">#${p.code}</div></td>
+      <td class="hide-sm"><span class="pill ${p.kind}">${p.kind==="prod"?"Produto":"Serviço"}</span></td>
+      <td class="hide-sm">${cats}</td>
+      <td class="num hide-sm">${stock}</td>
+      <td class="price">${brl(p.sell)}${cost}</td>
+      <td>
+        <div class="rowactions">
+          <button class="icon-btn" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+          <button class="icon-btn danger" title="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+        </div>
+      </td>
+    </tr>`;
+  }
+  function render(){
+    const rows = DATA.map((p,i)=>({p,i})).filter(({p})=> kindFilter==="all" || p.kind===kindFilter);
+    document.getElementById("rows").innerHTML = rows.map(({p,i})=>rowHtml(p,i)).join("");
+    onRowCk();
+  }
+  function onRowCk(){
+    const cks=[...document.querySelectorAll(".row-ck")];
+    const n=cks.filter(c=>c.checked).length;
+    document.getElementById("catalog").dataset.bulk = n>0?"on":"off";
+    document.getElementById("bulk-count").textContent=n;
+  }
+  function toggleAll(el){ document.querySelectorAll(".row-ck").forEach(c=>c.checked=el.checked); onRowCk(); }
+  function clearSel(){ document.querySelectorAll(".row-ck").forEach(c=>c.checked=false); document.getElementById("ck-all").checked=false; onRowCk(); }
+
+  // ── tweaks ──
+  document.querySelectorAll(".seg,.filter").forEach(grp=>{
+    grp.addEventListener("click",e=>{
+      const b=e.target.closest("button"); if(!b) return;
+      [...grp.children].forEach(c=>c.setAttribute("aria-pressed", c===b));
+      const set=grp.dataset.set, v=b.dataset.v;
+      if(set==="theme") document.documentElement.dataset.theme=v;
+      else if(set==="density") document.documentElement.dataset.density=v;
+      else if(set==="summary") document.documentElement.dataset.summary=v;
+      else if(set==="kind"){ kindFilter=v; render(); }
+      else if(set==="state"){
+        if(v==="empty") clearSel();
+        document.getElementById("table-wrap").style.display = v==="empty"?"none":"";
+        document.querySelector(".toolbar").style.display = v==="empty"?"none":"";
+        document.getElementById("empty").style.display = v==="empty"?"block":"none";
+      }
+    });
+  });
+  render();
+</script>
+</body>
+</html>

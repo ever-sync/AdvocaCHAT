@@ -1,0 +1,173 @@
+# Configuracao lida pelo CLI no deploy. Ver:
+# https://supabase.com/docs/guides/functions/function-configuration
+#
+# Webhooks externos (UAZAPI) nao enviam Authorization: Bearer — sem isto o gateway
+# responde 401 UNAUTHORIZED_NO_AUTH_HEADER antes do Deno rodar.
+[functions.uazapi-webhook]
+verify_jwt = false
+
+# Webhook da Meta (Instagram Direct): GET hub.challenge + POST assinado com
+# X-Hub-Signature-256 (META_APP_SECRET) — sem Authorization header.
+[functions.instagram-webhook]
+verify_jwt = false
+
+# OAuth da Meta: GET e o redirect do navegador (state assinado autentica);
+# POST valida JWT manualmente via requireTenantPermission.
+[functions.meta-oauth]
+verify_jwt = false
+
+# Criacao de canal UAZAPI via app (JWT do tenant; requireTenantPermission valida).
+[functions.uazapi-instance-create]
+verify_jwt = false
+
+# Garante conversa WhatsApp por telefone (CRM → inbox): JWT do tenant; gate atendimento.
+[functions.uazapi-ensure-chat]
+verify_jwt = false
+
+# Edicao de colaboradores e redefinicao de senha: JWT do tenant; gate admin/superadmin.
+[functions.collaborator-admin]
+verify_jwt = false
+
+# n8n envia com HMAC ou N8N_SERVICE_KEY — sem JWT de usuario
+[functions.n8n-reply]
+verify_jwt = false
+
+# API publica: Bearer wchat_<secret> (sem JWT de usuario)
+[functions.wchat-api]
+verify_jwt = false
+
+# Gestao de chaves: JWT do admin no app
+[functions.wchat-api-keys]
+verify_jwt = true
+
+# Click-to-call: inicia a ligação com JWT do atendente no app
+[functions.twilio-call]
+verify_jwt = true
+
+# TwiML chamado pelo Twilio (sem JWT) — protegido por assinatura X-Twilio-Signature
+[functions.twilio-voice-twiml]
+verify_jwt = false
+
+# StatusCallback do Twilio (sem JWT) — protegido por assinatura X-Twilio-Signature
+[functions.twilio-voice-webhook]
+verify_jwt = false
+
+# Formulários públicos: GET (config do form) + POST (submit) embedados em sites externos.
+# Sem JWT — protegido por allowed_domains, honeypot e rate-limit.
+[functions.forms-public]
+verify_jwt = false
+
+# Dispatch de e-mails: cron (x-cron-secret) processa todos; admin (JWT) processa o próprio tenant.
+[functions.marketing-email-dispatch]
+verify_jwt = false
+
+# Boas-vindas por e-mail: cron (x-cron-secret) processa todos; app (JWT) processa o próprio tenant.
+[functions.welcome-email-dispatch]
+verify_jwt = false
+
+[functions.password-recovery-request]
+verify_jwt = false
+
+# Worker dos fluxos de automação de marketing: chamado por cron (x-cron-secret).
+[functions.marketing-flow-worker]
+verify_jwt = false
+
+# Dispatcher de webhooks de saída: cron (x-cron-secret) drena tudo; app (JWT) testa/processa o próprio tenant.
+[functions.webhook-dispatcher]
+verify_jwt = false
+
+# Dispatch de conversões de Ads (Meta CAPI / Google Ads): chamado por cron (x-cron-secret).
+[functions.marketing-ad-conversion-dispatch]
+verify_jwt = false
+
+# Ingestão de eventos externos para automações de marketing via API key.
+[functions.marketing-webhook-ingest]
+verify_jwt = false
+
+# Orquestrador de IA: drenado por cron (x-cron-secret); valida internamente.
+[functions.ai-orchestrator]
+verify_jwt = false
+
+# Ingestão da base de conhecimento (RAG): JWT do admin (requireTenantContext valida).
+[functions.ai-knowledge]
+verify_jwt = false
+
+# Painel super-admin do add-on de IA: JWT validado + gate por platform_admins.
+[functions.ai-admin]
+verify_jwt = false
+
+# Alertas de quota por e-mail (agendado por pg_cron via x-cron-secret).
+[functions.ai-alerts]
+verify_jwt = false
+
+# Playground de teste da IA: JWT do tenant (requireTenantContext valida).
+[functions.ai-playground]
+verify_jwt = false
+
+# Resumo IA de negociação (CRM): JWT do tenant; gate crm/view via requireTenantPermission.
+[functions.crm-summarize-negotiation]
+verify_jwt = false
+
+# Sugestão de próxima mensagem (CRM): JWT do tenant; gate crm/edit.
+[functions.crm-suggest-next-message]
+verify_jwt = false
+
+# Checkout Asaas: JWT do admin no app; requireTenantPermission valida.
+[functions.asaas-create-checkout]
+verify_jwt = false
+
+# Checkout recorrente AbacatePay: JWT validado por requireTenantPermission.
+[functions.abacatepay-create-checkout]
+verify_jwt = false
+
+# Webhook AbacatePay: sem JWT, validado por secret + HMAC.
+[functions.abacatepay-webhook]
+verify_jwt = false
+
+# Webhook Asaas: sem JWT; protegido por header asaas-access-token.
+[functions.asaas-webhook]
+verify_jwt = false
+
+# Alertas de limite de plano: chamado por cron (x-cron-secret).
+[functions.billing-usage-alerts]
+verify_jwt = false
+
+# Painel super-admin de billing: JWT validado + gate por platform_admins.
+[functions.billing-admin]
+verify_jwt = false
+
+# Cockpit super-admin de operacao: JWT validado + gate por platform_admins.
+[functions.operation-admin]
+verify_jwt = false
+
+# Heartbeat generico de workers: chamado apenas pelo cron externo com x-cron-secret.
+[functions.worker-heartbeat]
+verify_jwt = false
+
+# Alerta generico de workers: chamado apenas pelo cron externo com x-cron-secret.
+[functions.worker-alerts]
+verify_jwt = false
+
+# Agendamento: disponibilidade (slots livres). JWT validado manualmente.
+[functions.scheduling-availability]
+verify_jwt = false
+
+# Agendamento público: auto-agendamento sem login (slug + honeypot + rate-limit).
+[functions.scheduling-public]
+verify_jwt = false
+
+# Agendamento: worker de lembretes WhatsApp (chamado só pelo cron, x-cron-secret).
+[functions.scheduling-reminder-dispatch]
+verify_jwt = false
+
+# Agendamento: conexão Google Calendar (POST JWT manual + GET callback OAuth).
+[functions.scheduling-google-connect]
+verify_jwt = false
+
+# Agendamento: escreve agendamentos no Google Calendar (cron, x-cron-secret).
+[functions.scheduling-google-push]
+verify_jwt = false
+
+# Agendamento: importa ocupação do Google como bloqueios (cron, x-cron-secret).
+[functions.scheduling-google-pull]
+verify_jwt = false
