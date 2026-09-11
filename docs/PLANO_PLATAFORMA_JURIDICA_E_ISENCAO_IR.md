@@ -1,6 +1,6 @@
 # Plano de evolução do AdvocaCHAT: plataforma jurídica e isenção de IR
 
-Data de referência: **11/09/2026** · Versão: **1.4** · Situação: **F1–F4 com entregas técnicas verificadas; F5 em implementação**.
+Data de referência: **11/09/2026** · Versão: **1.5** · Situação: **F1–F5 com entregas técnicas verificadas; F6 em implementação**.
 
 Este é o roteiro de execução do produto. Reúne as 30 ideias de plataforma jurídica
 aprovadas na conversa e 25 funcionalidades específicas para escritórios que atuam
@@ -358,15 +358,19 @@ reconhecido. Controles de cálculo detalhados na seção 10. Cobertura: IR11–I
 
 Registro de execução: [Fase 5 — portal e financeiro](FASE_5_PORTAL_E_FINANCEIRO.md).
 
-- [ ] F5.01 Publicar portal com autorização por caso e acesso individual do representante.
-- [ ] F5.02 Disponibilizar status compreensível, pendências, documentos liberados e agenda.
-- [ ] F5.03 Criar comunicações por evento com aprovação e comprovante de entrega/falha.
-- [ ] F5.04 Implementar honorários e base de êxito conforme contrato, separado de valores do cliente.
-- [ ] F5.05 Controlar custas, reembolsos, adiantamentos e repasses com conciliação.
+- [x] F5.01 Publicar portal com autorização por caso e acesso individual do representante.
+- [x] F5.02 Disponibilizar status compreensível, pendências, documentos liberados e agenda.
+- [x] F5.03 Criar comunicações por evento com aprovação e comprovante de entrega/falha. Entrega real pelo canal contratado permanece P06.
+- [x] F5.04 Implementar honorários e base de êxito conforme contrato, separado de valores do cliente.
+- [x] F5.05 Controlar custas, reembolsos, adiantamentos e repasses com conciliação.
 - [ ] F5.06 Integrar cobrança contratada e tratar duplicação, estorno e pagamento parcial.
-- [ ] F5.07 Implementar colaboração com contador e exportações mínimas por caso.
-- [ ] F5.08 Programar acompanhamento anual e alertas de retenção reaberta.
-- [ ] F5.09 Criar Meu dia e fila de clientes aguardando resposta.
+- [x] F5.07 Implementar colaboração com contador e exportações mínimas por caso.
+- [x] F5.08 Programar acompanhamento anual e alertas de retenção reaberta.
+- [x] F5.09 Criar Meu dia e fila de clientes aguardando resposta.
+
+F5.06: adapter Asaas, fila, controles de duplicação, recibos e conciliação foram
+implementados e testados. Conta contratada, cobrança e callbacks reais permanecem
+P07; o ensaio não enviou cobrança nem movimentou dinheiro.
 
 Saída M2: caso acompanhado até resultado financeiro e prestação de contas.
 Cliente recebe atualização autorizada; status “entregue” depende de recibo do
@@ -653,7 +657,7 @@ implementação**. O núcleo jurídico foi construído e publicado; o detalhamen
 as evidências estão em [Entrega da fase 1](FASE_1_NUCLEO_JURIDICO.md). F0 continua
 pendente nas decisões de negócio, validação jurídica e recuperação integral.
 O usuário autorizou continuar automaticamente até F9 e reunir as dependências
-externas ao final. F2–F4 têm entregas técnicas verificadas; F5 está
+externas ao final. F2–F5 têm entregas técnicas verificadas; F6 está
 em implementação. O [registro contínuo](EXECUCAO_CONTINUA.md) acompanha as
 pendências sem confundir publicação técnica com homologação profissional.
 Mudanças de escopo entram aqui com justificativa e efeito em dependências/custo.
@@ -669,8 +673,8 @@ o critério; implementação local, deploy e homologação são evidências dist
 | F2 | em_validacao | Codex (implementação técnica) | [Entrega técnica verificada](FASE_2_OPERACAO_JURIDICA.md); assinatura P01 e calendário externo P02 pendentes |
 | F3 | em_validacao | Codex (implementação técnica) | [Dossiê, SQL, API e navegador publicado verificados](FASE_3_DOSSIE_ASSISTIDO_IR.md); cenários fiscais seguem em F4, homologação P03 pendente |
 | F4 | em_validacao | Codex (implementação técnica) | [Cálculos, pedidos, SQL, API e navegador verificados](FASE_4_CALCULOS_PEDIDOS_E_RESULTADOS.md); homologação profissional F4.10 permanece P03 |
-| F5 | em_execucao | Codex (implementação técnica) | [Arquitetura e contratos](FASE_5_ARQUITETURA.md); portal, comunicação, financeiro e rotina em implementação |
-| F6 | planejado | A definir | Fonte habilitada e cobertura definida |
+| F5 | em_validacao | Codex (implementação técnica) | [Portal e financeiro verificados](FASE_5_PORTAL_E_FINANCEIRO.md); entrega real P06, cobrança P07 e homologação profissional P03 pendentes |
+| F6 | em_execucao | Codex (implementação técnica) | Monitoramento, publicações e contador assistido; habilitação real e cobertura dependem de P04 |
 | F7 | planejado | A definir | Dados autorizados e conjunto de avaliações |
 | F8 | planejado | A definir | Habilitações e demanda dos pilotos |
 | F9 | planejado | A definir | Métricas, carga e recuperação comprovadas |
@@ -738,3 +742,4 @@ não evidência de que a integração já está ativa.
 | 11/09/2026 | 1.2 | Entrega técnica F2: instrumentos, coleta privada, tarefas e agenda; provedores externos pendentes |
 | 11/09/2026 | 1.3 | Entrega técnica F3: dossiê IR, fontes e rendas distintas, análise humana e representação |
 | 11/09/2026 | 1.4 | F4 publicada e verificada com cálculos decimais, pedidos e conciliação; avanço automático para F5 |
+| 11/09/2026 | 1.5 | F5 publicada e verificada com portal individual, financeiro e rotinas; avanço automático para F6 |

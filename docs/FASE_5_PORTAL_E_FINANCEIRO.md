@@ -1,8 +1,8 @@
 # Fase 5 — Portal individual, atendimento e financeiro do caso
 
-Estado: implementação concluída e validada localmente; publicação e prova em
-produção em andamento. Nenhum e-mail, cobrança ou transferência real foi feito
-nos ensaios desta fase.
+Estado: entrega técnica publicada e verificada em produção. Homologações de
+comunicação, cobrança e regras profissionais continuam nas dependências abaixo.
+Nenhum e-mail, cobrança ou transferência real foi feito nos ensaios desta fase.
 
 ## Entrega
 
@@ -99,8 +99,62 @@ O read-back confirmou os dois registros no ledger, a preservação exata dos dad
 das 58 tabelas anteriores verificadas, 29 tabelas IR com RLS, o papel externo sem
 USAGE em public e uma única ativação jurídica, do escritório sintético de teste.
 
-Em andamento: registrar SHAs Git, deployments SUCCESS, prova de isolamento
-GoTrue/PostgREST, retorno das APIs e navegação real após o rollout.
+Código `e2476ef5dc2327facd82a6c097f6c5bf5ebff3ae`, publicado e conferido em
+`origin/main`. CI e os três serviços terminaram com sucesso:
+
+| Serviço | Deployment do código F5 | Estado |
+| --- | --- | --- |
+| web | `ebb37657-2afe-46ee-a2bb-297a27dc681a` | SUCCESS |
+| functions | `f6e0fb4d-1b9b-4e6e-a0c7-69587c6b7345` | SUCCESS |
+| scheduler | `a053ab0f-6f3a-439a-abd5-a7b616379aeb` | SUCCESS |
+
+Provas com fixtures exclusivas do escritório sintético:
+
+- Auth/Edge/PostgREST: 13 verificações passaram, incluindo reserva de UUID,
+  usuário externo, convite sem credencial de autenticação, confirmação técnica,
+  senha própria, aceite e login persistente. O papel efetivo é `legal_portal`;
+  consultas diretas a dados internos e RPCs de serviço foram recusadas.
+- Read-back: uma identidade externa, uma autorização de caso e nenhum perfil
+  interno para ela. Contagens de perfis, tenants e assinaturas permaneceram em
+  quatro, como antes da criação dessa identidade. A sessão da equipe foi preservada.
+- Financeiro via API real: entrada de 200,00, compensação autorizada de 40,00 e
+  estorno de 10,00 deixaram 170,00 do cliente e 30,00 do escritório. Honorário de
+  100,00 ficou com 30,00 conciliados e 70,00 restantes. Replay idêntico devolveu o
+  mesmo movimento; alteração sob a mesma chave foi recusada. Compensação sem
+  autorização e escrita por membro fiscal sem poderes foram recusadas.
+- A prestação aprovada foi liberada individualmente ao cliente; a cobrança de
+  teste permaneceu rascunho em conexão não configurada, sem chamada ao Asaas.
+- Navegador em produção: senha, publicação e confirmação de leitura, upload TXT
+  com HTTP 201, download com SHA-256 idêntico, pacote fiscal, mensagem preservada
+  após reload, prestação com saldos 170/30 e logout preservado após reload.
+- Cinco abas externas, cinco de atendimento e quatro financeiras foram
+  verificadas em 375 px, sem overflow e sem erro de página. Um 403 do painel
+  administrativo legado foi esperado para o usuário sintético sem papel de
+  administrador da plataforma; os fluxos jurídicos passaram. Nenhuma ação
+  financeira foi realizada pelo navegador; essas mutações foram provadas pela API.
+
+### Templates de autenticação
+
+A verificação detectou que `serve -s` redirecionava o arquivo `.html` para uma
+rota que devolvia a página SPA. `035b34d7c7d70714ed47cd6aa8615668520ed64f` corrigiu
+o problema com `public/serve.json`. O servidor de produção foi reproduzido
+localmente: os dois templates e três rotas internas retornaram o conteúdo correto.
+O deploy web `45d86a9f-b5c4-4639-809b-cece47a04cca` terminou SUCCESS e os arquivos
+remotos foram comparados byte a byte com os arquivos publicados:
+
+- confirmation: `8d184dad751a0ef326a46e2f4b8a891ec2546660801dba07ed1ab20d9cc9257f`;
+- magic-link: `04cda291e1b7dee861975b069daca1b1d5ecd920c630f57da42116146da42837`.
+
+As URLs de configuração ficam em `/auth-email/confirmation.html` e
+`/auth-email/magic-link.html` no domínio web do projeto. O template inclui OTP e
+preserva a confirmação de cadastro interno; no fluxo do portal o código é usado
+na página de ativação. A entrega efetiva ao destinatário continua pendente P06.
+
+As duas variáveis `GOTRUE_MAILER_TEMPLATES_CONFIRMATION` e
+`GOTRUE_MAILER_TEMPLATES_MAGIC_LINK` foram configuradas no serviço Gotrue Auth
+exclusivo do AdvocaCHAT. O deployment `ab621087-d5c5-49ef-8fec-07b44a2f89ff`
+terminou SUCCESS; o read-back conferiu ambas as URLs e a preservação de toda a
+configuração SMTP anterior. Nenhuma mensagem foi gerada nessa configuração.
 
 ## Dependências preservadas
 

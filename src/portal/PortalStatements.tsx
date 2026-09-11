@@ -106,8 +106,8 @@ export function PortalStatements({
             <div>
               <h2 className="break-words text-lg font-semibold">{row.title}</h2>
               <p className="mt-1 text-xs text-muted-foreground">
-                Versão {row.version_number} · Período {row.period_start} a{" "}
-                {row.period_end} · Publicado em {portalDate(row.published_at)}
+                Versão {row.version_number} · Período {portalDate(row.period_start)} a{" "}
+                {portalDate(row.period_end)} · Publicado em {portalDate(row.published_at)}
               </p>
             </div>
             {row.public_note && (
