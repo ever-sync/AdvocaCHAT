@@ -1,3 +1,4 @@
+import { SalesWorkflowPanel } from "@/components/ai-workflow/SalesWorkflowPanel";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PageShell } from "@/components/layout/PageShell";
 import {
@@ -206,6 +207,7 @@ export default function AgenteIA() {
             <Sparkles className="h-4 w-4" />
             Análise de atendimento
           </TabsTrigger>
+          <TabsTrigger value="equipe" className="shrink-0 gap-2 rounded-lg px-4 py-2 text-sm font-medium"><Bot className="h-4 w-4" />SDR e closer</TabsTrigger>
           <TabsTrigger value="configuracao" className="shrink-0 gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
             <SlidersHorizontal className="h-4 w-4" />
             Configuração
@@ -228,6 +230,7 @@ export default function AgenteIA() {
           </TabsTrigger>
         </TabsList>
 
+        <TabsContent value="equipe" className="mt-0"><SalesWorkflowPanel /></TabsContent>
         <TabsContent value="operacional" className="mt-0 focus-visible:outline-none">
           <AiOpsOverview
             activeChannels={activeChannels.length}

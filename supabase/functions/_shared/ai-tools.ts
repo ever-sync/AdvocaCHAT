@@ -1,3 +1,4 @@
+import { executeSalesTool, SALES_TOOLS, type SalesWorkflow } from "./ai-sales-workflow.ts";
 // Catálogo de tools da IA de atendimento (Fase 2).
 // Definições (schemas Claude) + executores (ações com admin client) + allowlist por
 // ai_mode. Reusado pelo orquestrador nativo (ai-orchestrator) e pelo n8n-reply, para
@@ -469,9 +470,10 @@ export type ToolContext = {
   negotiationId: string | null;
   customerId: string | null;
   aiMode: ChatAiMode;
+  salesWorkflow?: SalesWorkflow | null;
 };
 
-export type ToolOutcome = { content: string; isError: boolean; aborted?: boolean };
+export type ToolOutcome = { content: string; isError: boolean; aborted?: boolean; deliveredText?: string };
 
 /** Recarrega o estado do chat e reavalia elegibilidade (corrida: humano assumiu). */
 export async function isChatStillEligible(admin: Admin, chatId: string): Promise<boolean> {
@@ -506,6 +508,23 @@ export async function executeTool(
   name: string,
   input: Record<string, unknown> | undefined,
 ): Promise<ToolOutcome> {
+  if (ctx.salesWorkflow?.stopped) return { content: "Etapa encerrada neste turno.", isError: true, aborted: true };
+  if (ctx.salesWorkflow) {
+    if (!(await isChatStillEligible(ctx.admin, String(ctx.chat.id)))) return { content: "Conversa pausada.", isError: true, aborted: true };
+    // Recheck configuration before every side effect, including messages.
+    const { data: config, error } = await ctx.admin.from("ai_sales_workflow_config").select("enabled,revision").eq("tenant_id", ctx.tenantId).maybeSingle();
+    if (error || !config?.enabled || config.revision !== ctx.salesWorkflow.config.revision) return { content: "Configuração alterada; atendimento será retomado com a versão atual.", isError: true, aborted: true };
+    if (SALES_TOOLS.some((tool) => tool.name === name)) {
+      const result = await executeSalesTool(ctx, name, input ?? {});
+      if (result.transitionNotice && await isChatStillEligible(ctx.admin, String(ctx.chat.id))) {
+        await sendWhatsappText(ctx.admin, ctx.chat, result.transitionNotice);
+        return { ...result, deliveredText: result.transitionNotice };
+      }
+      return result;
+    }
+    if (!["send_whatsapp_message", "handoff"].includes(name)) return { content: "Ação fora do fluxo de agentes.", isError: true };
+    if (ctx.salesWorkflow.phase === "paused" && name === "send_whatsapp_message") return { content: "Contato pausou a coleta. Não enviar mensagens.", isError: true, aborted: true };
+  }
   // Allowlist por modo (defesa em profundidade — o modelo só recebe as liberadas).
   if (!toolNamesForMode(ctx.aiMode).has(name as ToolName)) {
     return { content: `Ferramenta "${name}" não disponível no modo atual.`, isError: true };
