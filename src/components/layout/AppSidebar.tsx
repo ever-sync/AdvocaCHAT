@@ -163,7 +163,7 @@ function RailNavLink({ item, pathname }: { item: MenuItem; pathname: string }) {
         )}
         activeClassName=""
       >
-        <item.icon strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden truncate text-sm font-medium group-data-[expanded=true]/sidebar:block">{item.title}</span>
+        <item.icon strokeWidth={1.5} className="h-4 w-4 shrink-0" aria-hidden /><span className="hidden truncate text-sm font-medium group-data-[expanded=true]/sidebar:block">{item.title}</span>
       </NavLink>
     </SidebarTooltip>
   );
@@ -269,7 +269,7 @@ export function AppSidebar() {
           <button type="button" onClick={toggleSidebar} aria-expanded={expanded}
             aria-controls="app-sidebar-navigation" aria-label={expanded ? "Recolher menu" : "Expandir menu"}
             className="flex h-9 w-full items-center justify-center gap-3 rounded-md border border-sidebar-border text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3">
-            {expanded ? <PanelLeftClose className="h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden /> : <PanelLeftOpen className="h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden />}
+            {expanded ? <PanelLeftClose className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden /> : <PanelLeftOpen className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden />}
             <span className="hidden text-xs group-data-[expanded=true]/sidebar:block">Recolher menu</span>
           </button>
         </SidebarTooltip>
@@ -449,7 +449,7 @@ export function AppSidebar() {
               )}
               activeClassName=""
             >
-              <Settings2 strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden text-sm group-data-[expanded=true]/sidebar:block">Configurações</span>
+              <Settings2 strokeWidth={1.5} className="h-4 w-4 shrink-0" aria-hidden /><span className="hidden text-sm group-data-[expanded=true]/sidebar:block">Configurações</span>
             </NavLink>
           </SidebarTooltip>
         ) : null}
@@ -464,9 +464,9 @@ export function AppSidebar() {
             className="flex h-10 w-10 items-center justify-center gap-3 rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[expanded=true]/sidebar:w-full group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3"
           >
             {isDark ? (
-              <Sun strokeWidth={1.5} className="h-[18px] w-[18px]" aria-hidden />
+              <Sun strokeWidth={1.5} className="h-4 w-4" aria-hidden />
             ) : (
-              <Moon strokeWidth={1.5} className="h-[18px] w-[18px]" aria-hidden />
+              <Moon strokeWidth={1.5} className="h-4 w-4" aria-hidden />
             )}
             <span className="hidden text-sm group-data-[expanded=true]/sidebar:block">{isDark ? "Tema claro" : "Tema escuro"}</span>
           </button>
@@ -483,7 +483,7 @@ export function AppSidebar() {
             }}
             className="flex h-10 w-10 items-center justify-center gap-3 rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[expanded=true]/sidebar:w-full group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3"
           >
-            <LogOut strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden text-sm group-data-[expanded=true]/sidebar:block">Sair</span>
+            <LogOut strokeWidth={1.5} className="h-4 w-4 shrink-0" aria-hidden /><span className="hidden text-sm group-data-[expanded=true]/sidebar:block">Sair</span>
           </button>
         </SidebarTooltip>
       </div>
