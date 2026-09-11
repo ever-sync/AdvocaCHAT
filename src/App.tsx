@@ -27,6 +27,7 @@ const Configuracoes = lazyWithReload(() => import("./pages/Configuracoes"));
 const ConfiguracoesFila = lazyWithReload(() => import("./pages/ConfiguracoesFila"));
 const ApiDocs = lazyWithReload(() => import("./pages/ApiDocs"));
 const ClientePerfil = lazyWithReload(() => import("./pages/ClientePerfil"));
+const LegalCases = lazyWithReload(() => import("./pages/LegalCases"));
 const Crm = lazyWithReload(() => import("./pages/Crm"));
 const Agenda = lazyWithReload(() => import("./pages/Agenda"));
 const AgendamentosConfig = lazyWithReload(() => import("./pages/AgendamentosConfig"));
@@ -147,6 +148,8 @@ const App = () => (
 
                   {/* Authenticated */}
                   <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+                    <Route path="/casos" element={<LegalCases />} />
+                    <Route path="/casos/:id" element={<LegalCases />} />
                     <Route
                       path="/inbox"
                       element={

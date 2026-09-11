@@ -62,6 +62,7 @@ import {
   toCustomerUpsertInput,
 } from "@/lib/api/customers";
 import { useTenantCollaborators } from "@/lib/api/settings";
+import { LegalCustomerCaseLink } from "@/components/legal/LegalCustomerCaseLink";
 import {
   crmNegotiationRecordToCard,
   isPersistedCrmNegotiationId,
@@ -650,6 +651,7 @@ function CrmNegotiationDetailContent({
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      {negotiation.customerId ? <LegalCustomerCaseLink customerId={negotiation.customerId} negotiationId={isPersistedRow ? negotiation.id : undefined} /> : null}
       <ClienteRdPerfilView
         cliente={displayCustomer}
         daysContact={daysContact}

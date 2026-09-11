@@ -11,6 +11,7 @@ import {
   UserRound,
   Users2,
   FileText,
+  Scale,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
@@ -38,8 +39,9 @@ import { cn } from "@/lib/utils";
 
 type NavIcon = typeof MessageSquare;
 
-const linkItems: { title: string; url: string; icon: NavIcon; permission: "inbox" | "crm" | "agenda" | "clientes" | "produtos" | "marketing" | "configuracoes" }[] = [
+const linkItems: { title: string; url: string; icon: NavIcon; permission?: "inbox" | "crm" | "agenda" | "clientes" | "produtos" | "marketing" | "configuracoes" }[] = [
   { title: "Chat", url: "/inbox", icon: MessageSquare, permission: "inbox" },
+  { title: "Casos jurídicos", url: "/casos", icon: Scale },
   { title: "CRM", url: "/crm", icon: Briefcase, permission: "crm" },
   { title: "Agenda", url: "/agenda", icon: CalendarDays, permission: "agenda" },
   { title: "Clientes", url: "/clientes", icon: Users2, permission: "clientes" },
@@ -131,7 +133,7 @@ export function MobileNav() {
                 <div className="space-y-2">
                   {!permissionsLoading
                     ? linkItems
-                        .filter((item) => can(item.permission, "view"))
+                        .filter((item) => !item.permission || can(item.permission, "view"))
                         .map((item) => (
                           <MobileNavLink key={item.url} item={item} pathname={pathname} />
                         ))

@@ -37,9 +37,10 @@ A configuração operacional e os resultados da validação estão em `docs/depl
 ## Escopo do produto
 
 A base entrega clientes, atendimento, CRM, documentos, agenda e permissões por escritório.
-A identidade AdvocaCHAT é o primeiro passo da adaptação. Gestão processual,
-integrações com tribunais e cálculo de prazos judiciais não foram implementados
-nesta implantação. Provedores de WhatsApp, e-mail, IA e pagamentos precisam ser
+A fase 1 adiciona a área **Casos jurídicos**, com clientes, partes, processos
+cadastrados manualmente, responsáveis, participantes, histórico e documentos
+restritos por caso e categoria. Veja a [entrega e operação da fase 1](docs/FASE_1_NUCLEO_JURIDICO.md).
+Integrações com tribunais e cálculo de prazos judiciais pertencem às próximas fases. Provedores de WhatsApp, e-mail, IA e pagamentos precisam ser
 configurados especificamente para esta operação.
 
 O [plano de evolução da plataforma jurídica e da especialidade de isenção de IR](docs/PLANO_PLATAFORMA_JURIDICA_E_ISENCAO_IR.md)

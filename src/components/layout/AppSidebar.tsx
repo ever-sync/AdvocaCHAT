@@ -18,6 +18,7 @@ import {
   Users2,
   FileText,
   Hourglass,
+  Scale,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -96,11 +97,12 @@ type MenuItem = {
   title: string;
   url: string;
   icon: React.ComponentType<{ className?: string }>;
-  permission: "inbox" | "crm" | "agenda" | "clientes" | "produtos" | "relatorios" | "marketing" | "ia" | "configuracoes";
+  permission?: "inbox" | "crm" | "agenda" | "clientes" | "produtos" | "relatorios" | "marketing" | "ia" | "configuracoes";
 };
 
 const primaryItems: MenuItem[] = [
   { title: "Chat", url: "/inbox", icon: MessageCircle, permission: "inbox" },
+  { title: "Casos jurídicos", url: "/casos", icon: Scale },
   { title: "CRM", url: "/crm", icon: Briefcase, permission: "crm" },
   { title: "Agenda", url: "/agenda", icon: CalendarDays, permission: "agenda" },
   { title: "Clientes", url: "/clientes", icon: Users2, permission: "clientes" },
@@ -247,7 +249,7 @@ export function AppSidebar() {
       <div className="flex flex-col items-center gap-1 px-2">
         {!permissionsLoading
           ? primaryItems
-              .filter((item) => can(item.permission, "view"))
+              .filter((item) => !item.permission || can(item.permission, "view"))
               .map((item) => <RailNavLink key={item.url} item={item} pathname={pathname} />)
           : null}
       </div>

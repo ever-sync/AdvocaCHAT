@@ -10,7 +10,7 @@ export type PermissionFunctionKey =
 
 type FunctionPermissionFlags = Record<PermissionAction, boolean>;
 type RolePermissionMatrix = Record<PermissionFunctionKey, FunctionPermissionFlags>;
-type TenantRolePermissionsConfig = Record<string, RolePermissionMatrix>;
+export type TenantRolePermissionsConfig = Record<string, RolePermissionMatrix>;
 
 function fullAccess(): FunctionPermissionFlags {
   return { view: true, edit: true, delete: true };

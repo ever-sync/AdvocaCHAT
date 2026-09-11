@@ -58,12 +58,16 @@ export async function requireTenantContext(request: Request) {
 
   const { data: profile, error: profileError } = await admin
     .from("profiles")
-    .select("tenant_id, role")
+    .select("tenant_id, role, status")
     .eq("id", userData.user.id)
     .single();
 
   if (profileError || !profile?.tenant_id) {
     throw new Error("User has no tenant.");
+  }
+
+  if (profile.status !== "active") {
+    throw new PermissionDeniedError("Seu acesso está inativo. Procure o administrador do escritório.");
   }
 
   return {
@@ -154,10 +158,10 @@ export async function assertTenantBillingActive(
   const status = data?.status ? String(data.status) : null;
   const trialActive = status === "trialing"
     && Boolean(data?.trial_ends_at)
-    && new Date(String(data.trial_ends_at)).getTime() > now;
+    && new Date(String(data?.trial_ends_at)).getTime() > now;
   const subscriptionActive = status === "active"
     && Boolean(data?.current_period_end)
-    && new Date(String(data.current_period_end)).getTime() > now;
+    && new Date(String(data?.current_period_end)).getTime() > now;
 
   if (trialActive || subscriptionActive) {
     return {

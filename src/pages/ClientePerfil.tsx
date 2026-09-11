@@ -33,6 +33,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClienteRdPerfilView } from "@/components/cliente/ClienteRdPerfilView";
+import { LegalCustomerCaseLink } from "@/components/legal/LegalCustomerCaseLink";
 import { CustomerCrmPipelineForm } from "@/components/cliente/CustomerCrmPipelineForm";
 import { useEffectiveCrmFunnels } from "@/lib/api/crm-funnel-config";
 import { useAuth } from "@/hooks/useAuth";
@@ -735,6 +736,7 @@ export function ClientePerfilContent({
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <LegalCustomerCaseLink customerId={cliente.id} />
       {crmEnabled && effectiveCrmFunnels.length > 0 ? (
         <div className="border-b border-border bg-muted/30 px-4 py-3 md:px-6">
           <CustomerCrmPipelineForm
