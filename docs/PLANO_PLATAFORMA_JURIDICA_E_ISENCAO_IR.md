@@ -1,6 +1,6 @@
 # Plano de evolução do AdvocaCHAT: plataforma jurídica e isenção de IR
 
-Data de referência: **11/09/2026** · Versão: **1.6** · Situação: **F1–F6 com entregas técnicas verificadas; F7 em implementação**.
+Data de referência: **11/09/2026** · Versão: **1.7** · Situação: **F1–F7 com entregas técnicas verificadas; F8 em implementação**.
 
 Este é o roteiro de execução do produto. Reúne as 30 ideias de plataforma jurídica
 aprovadas na conversa e 25 funcionalidades específicas para escritórios que atuam
@@ -400,14 +400,16 @@ fonte e revisão. Cobertura: J08–J11, J13, J14 e primeira versão de J30.
 
 ### F7 — Acrescentar OCR, pesquisa e IA com revisão
 
-- [ ] F7.01 Implementar OCR de informes, contracheques e provas com referência à página e confiança.
-- [ ] F7.02 Criar biblioteca de modelos/jurisprudência com origem e versão.
-- [ ] F7.03 Gerar rascunhos de cronologia, resumo, mensagem e peça com citações recuperáveis.
-- [ ] F7.04 Impedir invenção de dados ausentes; destacar fatos não comprovados e divergências.
-- [ ] F7.05 Aplicar autorização antes da recuperação de documentos; revogação invalida acesso/indexação.
-- [ ] F7.06 Separar assistente interno do advogado e assistente voltado ao cliente.
-- [ ] F7.07 Avaliar vazamento entre casos, instruções maliciosas em anexos e fidelidade das referências.
-- [ ] F7.08 Configurar cotas/custos e alternativa manual quando IA estiver indisponível.
+- [x] F7.01 Implementar OCR de informes, contracheques e provas com referência à página e confiança.
+- [x] F7.02 Criar biblioteca de modelos/jurisprudência com origem e versão.
+- [ ] F7.03 Gerar rascunhos de cronologia, resumo, mensagem e peça com citações recuperáveis. Fluxo manual, adaptador e contrato SQL validados; geração por modelo real depende de P08.
+- [x] F7.04 Impedir invenção de dados ausentes; destacar fatos não comprovados e divergências.
+- [x] F7.05 Aplicar autorização antes da recuperação de documentos; revogação invalida acesso/indexação.
+- [x] F7.06 Separar assistente interno do advogado e assistente voltado ao cliente.
+- [x] F7.07 Avaliar vazamento entre casos, instruções maliciosas em anexos e fidelidade das referências.
+- [x] F7.08 Configurar cotas/custos e alternativa manual quando IA estiver indisponível.
+
+Entrega técnica F7: [OCR, testes, cotas, revisão e Railway](FASE_7_ASSISTENCIA_DOCUMENTAL.md). Ganho de produtividade e fidelidade em documentos reais exigem piloto P03/P08.
 
 Saída M3: tarefas assistidas ganham tempo com avaliação registrada. IA não é motor
 tributário; cálculos vêm do serviço determinístico aprovado. Nenhum envio, ciência
@@ -662,7 +664,7 @@ implementação**. O núcleo jurídico foi construído e publicado; o detalhamen
 as evidências estão em [Entrega da fase 1](FASE_1_NUCLEO_JURIDICO.md). F0 continua
 pendente nas decisões de negócio, validação jurídica e recuperação integral.
 O usuário autorizou continuar automaticamente até F9 e reunir as dependências
-externas ao final. F2–F5 têm entregas técnicas verificadas; F6 está
+externas ao final. F2–F7 têm entregas técnicas verificadas; F8 está
 em implementação. O [registro contínuo](EXECUCAO_CONTINUA.md) acompanha as
 pendências sem confundir publicação técnica com homologação profissional.
 Mudanças de escopo entram aqui com justificativa e efeito em dependências/custo.
@@ -679,9 +681,9 @@ o critério; implementação local, deploy e homologação são evidências dist
 | F3 | em_validacao | Codex (implementação técnica) | [Dossiê, SQL, API e navegador publicado verificados](FASE_3_DOSSIE_ASSISTIDO_IR.md); cenários fiscais seguem em F4, homologação P03 pendente |
 | F4 | em_validacao | Codex (implementação técnica) | [Cálculos, pedidos, SQL, API e navegador verificados](FASE_4_CALCULOS_PEDIDOS_E_RESULTADOS.md); homologação profissional F4.10 permanece P03 |
 | F5 | em_validacao | Codex (implementação técnica) | [Portal e financeiro verificados](FASE_5_PORTAL_E_FINANCEIRO.md); entrega real P06, cobrança P07 e homologação profissional P03 pendentes |
-| F6 | em_execucao | Codex (implementação técnica) | Monitoramento, publicações e contador assistido; habilitação real e cobertura dependem de P04 |
-| F7 | planejado | A definir | Dados autorizados e conjunto de avaliações |
-| F8 | planejado | A definir | Habilitações e demanda dos pilotos |
+| F6 | em_validacao | Codex (implementação técnica) | [Monitoramento e prazos verificados](FASE_6_MONITORAMENTO_E_PRAZOS.md); homologação e cobertura reais P03/P04 |
+| F7 | em_validacao | Codex (implementação técnica) | [OCR e assistência verificados](FASE_7_ASSISTENCIA_DOCUMENTAL.md); modelo e piloto reais P03/P08 |
+| F8 | em_execucao | Codex (implementação técnica) | Diligências, sucessores, pacotes e cobertura; [arquitetura](FASE_8_ARQUITETURA.md), habilitações P04 |
 | F9 | planejado | A definir | Métricas, carga e recuperação comprovadas |
 
 Modelo de ticket:
@@ -748,3 +750,6 @@ não evidência de que a integração já está ativa.
 | 11/09/2026 | 1.3 | Entrega técnica F3: dossiê IR, fontes e rendas distintas, análise humana e representação |
 | 11/09/2026 | 1.4 | F4 publicada e verificada com cálculos decimais, pedidos e conciliação; avanço automático para F5 |
 | 11/09/2026 | 1.5 | F5 publicada e verificada com portal individual, financeiro e rotinas; avanço automático para F6 |
+
+| 11/09/2026 | 1.6 | F6 publicada e verificada com monitoramento, regras e prazos assistidos; avanço para F7 |
+| 11/09/2026 | 1.7 | F7 publicada e verificada com OCR privado real, pesquisa, revisão e cotas; avanço para F8 |

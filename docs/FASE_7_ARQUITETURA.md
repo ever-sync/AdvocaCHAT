@@ -1,7 +1,7 @@
 # F7 — OCR, biblioteca e assistência revisável
 
 Decisões de implementação preparadas em 11/09/2026, durante o fechamento da F6.
-Este documento especifica trabalho seguinte; não afirma que o módulo esteja entregue.
+A entrega técnica foi publicada e verificada; consulte [evidências F7](FASE_7_ASSISTENCIA_DOCUMENTAL.md). Habilitação de IA e avaliação profissional reais permanecem pendentes.
 
 ## Fluxo e limites
 

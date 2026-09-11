@@ -17,8 +17,9 @@ concluída porque um adaptador ou teste simulado passou.
   Evidências: [Fase 4](FASE_4_CALCULOS_PEDIDOS_E_RESULTADOS.md). Homologação profissional permanece P03.
 - F5: entrega técnica publicada e verificada (`e2476ef`, correção de rota `035b34d`), com portal, comunicação, honorários, prestação de contas e rotina. [Evidências SQL, API e navegador](FASE_5_PORTAL_E_FINANCEIRO.md); entregas reais e cobrança seguem P06/P07.
 - F6: entrega técnica publicada e verificada (`e6af248`), incluindo API/navegador, 735 asserções SQL e oito testes de concorrência. [Evidências](FASE_6_MONITORAMENTO_E_PRAZOS.md); fontes e homologação reais seguem P03/P04.
-- F7: em execução — OCR privado, biblioteca e rascunhos com revisão; [arquitetura](FASE_7_ARQUITETURA.md). Nenhum provedor de IA ativado.
-- F8–F9: continuar pela ordem do plano, respeitando dependências técnicas reais.
+- F7: entrega técnica publicada e verificada (`ac6545d`, worker `a08ed0c`), com OCR Linux real, SQL/API/navegador, pesquisa e rascunhos revisáveis. [Evidências](FASE_7_ASSISTENCIA_DOCUMENTAL.md); nenhum provedor de IA ativado, P08.
+- F8: em execução — diligências, sucessores, especialidades e avaliação de cobertura; [arquitetura](FASE_8_ARQUITETURA.md). Conectores institucionais reais seguem P04.
+- F9: continuar após F8, com indicadores, carga, recuperação e preparação comercial.
 - Continuação vinculada à mesma tarefa por automação `continuar-fases-do-advocachat`.
 
 Em cada etapa: conferir estado Git, preservar trabalho alheio, implementar,
@@ -50,6 +51,6 @@ Não contratar serviços nem enviar mensagens a terceiros sem autorização espe
 ## Acompanhamento técnico para as fases seguintes
 
 - F3: preservar natureza de renda e fontes separadas; avaliação conjunta exige acesso médico e fiscal.
-- Fixtures F3–F6 mantidas isoladamente para validar as próximas fases; remover blobs, registros e usuários internos/externos sintéticos e conferir estado original antes do encerramento disponível.
+- Fixtures F3–F7 mantidas isoladamente para validar as próximas fases; remover blobs, registros e usuários internos/externos sintéticos e conferir preservação do estado real antes do encerramento disponível. O recurso jurídico do tenant real foi habilitado por usuário em 11/09/2026 às 22:13 UTC; preservar esse estado, sem restaurar o antigo valor desligado.
 - F5: integração Auth real passou sem envio; tipos herdados de convite/scheduling-public foram corrigidos e verificados. Preservar a separação entre convite e credenciais próprias do cliente.
 - F9: paginação das listas jurídicas (limite atual 200), tratamento auditado de uploads interrompidos, carga e recuperação integral. Medir também volume de snapshots F4 e custo de conferir atualidade de todas as versões; consultas fiscais recusam silenciosa truncagem acima de 25.000 linhas, mas ainda precisam de filtros/paginação apropriados para grandes casos.
