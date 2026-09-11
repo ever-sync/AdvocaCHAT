@@ -41,3 +41,7 @@ A identidade AdvocaCHAT é o primeiro passo da adaptação. Gestão processual,
 integrações com tribunais e cálculo de prazos judiciais não foram implementados
 nesta implantação. Provedores de WhatsApp, e-mail, IA e pagamentos precisam ser
 configurados especificamente para esta operação.
+
+O [plano de evolução da plataforma jurídica e da especialidade de isenção de IR](docs/PLANO_PLATAFORMA_JURIDICA_E_ISENCAO_IR.md)
+organiza o trabalho futuro por fases, com funcionalidades, dependências e critérios
+de conclusão. O documento é um roteiro; não indica que essas funções já estejam implementadas.
