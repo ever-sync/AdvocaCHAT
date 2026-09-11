@@ -16,8 +16,9 @@ concluída porque um adaptador ou teste simulado passou.
 - F4: entrega técnica publicada e verificada (`8825197`), incluindo SQL, API e navegador.
   Evidências: [Fase 4](FASE_4_CALCULOS_PEDIDOS_E_RESULTADOS.md). Homologação profissional permanece P03.
 - F5: entrega técnica publicada e verificada (`e2476ef`, correção de rota `035b34d`), com portal, comunicação, honorários, prestação de contas e rotina. [Evidências SQL, API e navegador](FASE_5_PORTAL_E_FINANCEIRO.md); entregas reais e cobrança seguem P06/P07.
-- F6: em execução — monitoramento, conferência de publicações e prazos assistidos; nenhuma fonte externa ativada.
-- F7–F9: continuar pela ordem do plano, respeitando dependências técnicas reais.
+- F6: entrega técnica publicada e verificada (`e6af248`), incluindo API/navegador, 735 asserções SQL e oito testes de concorrência. [Evidências](FASE_6_MONITORAMENTO_E_PRAZOS.md); fontes e homologação reais seguem P03/P04.
+- F7: em execução — OCR privado, biblioteca e rascunhos com revisão; [arquitetura](FASE_7_ARQUITETURA.md). Nenhum provedor de IA ativado.
+- F8–F9: continuar pela ordem do plano, respeitando dependências técnicas reais.
 - Continuação vinculada à mesma tarefa por automação `continuar-fases-do-advocachat`.
 
 Em cada etapa: conferir estado Git, preservar trabalho alheio, implementar,
@@ -41,6 +42,7 @@ encerrar a execução disponível com relatório consolidado e pausar a continua
 | P05 | Política de retenção por finalidade, orçamento e metas de recuperação | Preservação sem descarte automático, controles e medição em testes | Prazos/obrigações contratuais e aceite das metas de operação |
 | P06 | Canal de comunicação autorizado do escritório e destinatários verificados | Portal, conteúdo aprovado, fila, adapters e recibos verificáveis; templates de OTP | Homologação real de entrega pelo canal contratado e recebimento de OTP no endereço correto |
 | P07 | Gateway de honorários e conta recebedora do escritório, sandbox e regras de estorno | Obrigações, conciliação, reversões e adapter isolado do billing SaaS | Cobrança e callback reais com provedor contratado |
+| P08 | Provedor/modelo de IA, política de tratamento de documentos, orçamento e credenciais próprios | OCR privado, transcrição, pesquisa e rascunhos manuais revisáveis; adaptador isolado | Habilitação e homologação de geração real com o modelo e política contratados |
 
 Não reutilizar credenciais, clientes ou base de dados de outros produtos.
 Não contratar serviços nem enviar mensagens a terceiros sem autorização específica.
@@ -48,6 +50,6 @@ Não contratar serviços nem enviar mensagens a terceiros sem autorização espe
 ## Acompanhamento técnico para as fases seguintes
 
 - F3: preservar natureza de renda e fontes separadas; avaliação conjunta exige acesso médico e fiscal.
-- Fixtures F3–F5 mantidas isoladamente para validar as próximas fases; remover blobs, registros e usuários internos/externos sintéticos e conferir estado original antes do encerramento disponível.
+- Fixtures F3–F6 mantidas isoladamente para validar as próximas fases; remover blobs, registros e usuários internos/externos sintéticos e conferir estado original antes do encerramento disponível.
 - F5: integração Auth real passou sem envio; tipos herdados de convite/scheduling-public foram corrigidos e verificados. Preservar a separação entre convite e credenciais próprias do cliente.
 - F9: paginação das listas jurídicas (limite atual 200), tratamento auditado de uploads interrompidos, carga e recuperação integral. Medir também volume de snapshots F4 e custo de conferir atualidade de todas as versões; consultas fiscais recusam silenciosa truncagem acima de 25.000 linhas, mas ainda precisam de filtros/paginação apropriados para grandes casos.

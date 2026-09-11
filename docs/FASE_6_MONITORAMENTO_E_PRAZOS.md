@@ -1,7 +1,7 @@
 # F6 — Monitoramento, publicações e prazos assistidos
 
-Entrega técnica em fechamento em 11/09/2026. A publicação e a verificação funcional
-no Railway serão registradas após sua conclusão. Nenhuma fonte real foi ativada.
+Entrega técnica publicada e verificada em 11/09/2026, código `e6af248`.
+Nenhuma fonte real foi ativada.
 O [contrato](FASE_6_CONTRATO.md) descreve tabelas, RPCs e estados;
 [fontes e limites](FASE_6_FONTES_E_LIMITES.md) registra documentação consultada,
 limites contratuais e cenários jurídicos que exigem homologação profissional.
@@ -89,3 +89,45 @@ operação a operação. P03 continua pendente: validação profissional das reg
 calendários e casos de referência. Datas e consultas sintéticas não validam um
 prazo real nem comprovam cobertura de tribunal. Paginação e carga de grandes
 contextos judiciais permanecem no trabalho de escala da F9.
+
+## Publicação e verificação no Railway
+
+Commit `e6af248b23ada9057a2c25399cfa4ae09a8e1c1d` publicado em `origin/main`,
+SHA remoto conferido e CI concluída com sucesso. Deploys `SUCCESS`:
+
+| Serviço | Deployment |
+| --- | --- |
+| web | `3a39d0f4-0c90-4bd0-a6c2-f5ba8373861a` |
+| functions | `68a86d72-741c-4e80-8cd6-acd2920d2e0a` |
+| scheduler | `8bf6f793-a958-4c52-9300-22e976623c4c` |
+
+Migrations 2300, 2350 e 2400 aplicadas na mesma transação. Comparação dos dados
+antes/depois confirmou preservação das 88 tabelas existentes verificadas. Ledger
+relido; nenhuma tabela judicial/IR sem RLS; papel do portal continuou sem acesso
+ao schema público. Nenhuma fonte/regra/calendário real foi aprovado pela migration.
+
+SHA-256, na mesma ordem: `1ee5ba92ef8a0bfbfb6a793f70d52b07997238bd0ae7a0fc485b8425b44adba0`,
+`c4f31ef7277204d9abc3c30f24d559c5c8048e430d7b937b568bce2407341fde`,
+`8ff83670ae42b70db6ebe0640ca0f8ab38ac05659811e3d879490c5dc80f4f7d`.
+
+API autenticada com caso sintético: upload/download com bytes e hash idênticos,
+original auditado, recusa para usuário sem concessão médica e outro tenant,
+triagem/aceite internos, cálculo independente de três dias, revisão e tarefa
+persistida. Alterar a data pelo CRUD genérico retornou 403. Unidade em horas
+gerou proposta incompleta, sem vencimento nem submissão autorizada.
+
+Mudança sintética de calendário preservou 17/09 como data histórica, sinalizou
+reconferência em Meu dia e produziu versão separada com 18/09. No navegador de
+produção, essa nova versão foi submetida e revisada pela interface; recarregar
+confirmou estado, nota e tarefa. As duas memórias foram baixadas e reabertas como
+HTML estático, com CSP e sem scripts. Cinco subabas em 375 px, sem overflow e sem
+erros de página. O 403 de `operation-admin` corresponde à ausência esperada de
+permissão de administração global no usuário sintético, fora do módulo jurídico.
+
+Dispatcher sem segredo e callback inválido retornaram 401; com segredo interno,
+o estado foi não configurado e zero jobs processados. DataJud informou exigência
+de permissão. Nenhuma consulta, mensagem, ciência ou protocolo real foi efetuado.
+
+Evidências: `/tmp/advocachat-f6/live-*.log`, `migration-production.log` e
+`/tmp/advocachat-f6-live-ui/result.json`, imagens e relatórios. Registros sintéticos
+permanecem isolados para as fases seguintes e entram na limpeza final.

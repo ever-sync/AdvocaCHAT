@@ -1,6 +1,6 @@
 # Plano de evolução do AdvocaCHAT: plataforma jurídica e isenção de IR
 
-Data de referência: **11/09/2026** · Versão: **1.5** · Situação: **F1–F5 com entregas técnicas verificadas; F6 em implementação**.
+Data de referência: **11/09/2026** · Versão: **1.6** · Situação: **F1–F6 com entregas técnicas verificadas; F7 em implementação**.
 
 Este é o roteiro de execução do produto. Reúne as 30 ideias de plataforma jurídica
 aprovadas na conversa e 25 funcionalidades específicas para escritórios que atuam
@@ -379,14 +379,19 @@ canal, não somente HTTP 200. Cobertura: J06, J17, J25–J27, IR10 e IR20–IR23
 ### F6 — Conectar monitoramento e prazos com confiabilidade
 
 - [ ] F6.01 Homologar fonte judicial com contrato/permissão e cobertura do piloto definidos.
-- [ ] F6.02 Implementar fila durável, limite por provedor/escritório, reprocessamento e deduplicação.
+- [x] F6.02 Implementar fila durável, limite por provedor/escritório, reprocessamento e deduplicação.
 - [ ] F6.03 Importar por número CNJ e monitorar processos/publicações por OAB.
-- [ ] F6.04 Guardar fonte original, instante de captura e atualização; detectar falha e atraso.
-- [ ] F6.05 Associar publicação ao processo com revisão de ambiguidades e homônimos.
-- [ ] F6.06 Criar triagem, distribuição e substituição de responsável por intimação.
-- [ ] F6.07 Implementar cálculo assistido de prazo com calendário e memória de contagem versionados.
-- [ ] F6.08 Disponibilizar cobertura por tribunal e ação manual de conferência quando a fonte falhar.
-- [ ] F6.09 Ensaiar queda de provedor, timeout, evento fora de ordem e retomada sem efeitos duplicados.
+- [x] F6.04 Guardar fonte original, instante de captura e atualização; detectar falha e atraso.
+- [x] F6.05 Associar publicação ao processo com revisão de ambiguidades e homônimos.
+- [x] F6.06 Criar triagem, distribuição e substituição de responsável por intimação.
+- [x] F6.07 Implementar cálculo assistido de prazo com calendário e memória de contagem versionados.
+- [x] F6.08 Disponibilizar cobertura por tribunal e ação manual de conferência quando a fonte falhar.
+- [x] F6.09 Ensaiar queda de provedor, timeout, evento fora de ordem e retomada sem efeitos duplicados.
+
+Entrega técnica `e6af248`, com [verificação SQL, API e navegador](FASE_6_MONITORAMENTO_E_PRAZOS.md).
+F6.01 e consumo real F6.03 permanecem P04. O adaptador CNJ/OAB/monitoramento
+foi integrado a SQL e transportes simulados; não houve ativação de fonte externa.
+Regras e calendários reais dependem de homologação P03.
 
 Saída: evento externo → persistência → conferência → tarefa/prazo funciona com
 rastreabilidade. Após F5, homologar também a comunicação autorizada ao cliente.
