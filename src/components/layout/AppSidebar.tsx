@@ -273,7 +273,7 @@ export function AppSidebar() {
           </button>
         </SidebarTooltip>
       </div>
-      <div id="app-sidebar-navigation" className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto px-2 group-data-[expanded=true]/sidebar:items-stretch">
+      <div id="app-sidebar-navigation" className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto scrollbar-hide px-2 group-data-[expanded=true]/sidebar:items-stretch">
         {!permissionsLoading
           ? primaryItems
               .filter((item) => !item.permission || can(item.permission, "view"))
