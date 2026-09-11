@@ -1070,7 +1070,7 @@ export default function Inbox() {
           )}
         >
           {isNarrowViewport ? (
-            <div className="flex min-h-[52px] shrink-0 items-center justify-between border-b border-border bg-wchat-50 px-3 py-2">
+            <div className="flex min-h-[52px] shrink-0 items-center justify-between border-b border-border bg-card px-3 py-2">
               <Button
                 type="button"
                 variant="ghost"
@@ -1109,7 +1109,7 @@ export default function Inbox() {
               className="flex min-h-0 flex-1 flex-col items-center justify-center bg-background p-6"
               data-testid="inbox-claim-required"
             >
-              <div className="w-full max-w-md rounded-2xl border border-border bg-card px-8 py-10 text-center shadow-lg">
+              <div className="w-full max-w-md rounded-lg border border-border bg-card px-8 py-10 text-center">
                 <div
                   className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary"
                   aria-hidden
@@ -1178,7 +1178,7 @@ export default function Inbox() {
             </div>
           ) : (
             <>
-          <div className="relative z-10 flex min-h-[59px] shrink-0 items-center justify-between gap-2 border-b border-border bg-wchat-50 px-4 py-2 md:px-5">
+          <div className="relative z-10 flex min-h-[59px] shrink-0 items-center justify-between gap-2 border-b border-border bg-card px-4 py-2 md:px-5">
             {activeChat ? (
               <>
                 <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -1311,7 +1311,7 @@ export default function Inbox() {
             ) : (
               <div className="px-1">
                 <p className="text-xl font-semibold tracking-[-0.04em] text-foreground md:text-2xl">
-                  CaleoCRM
+                  AdvocaCHAT
                 </p>
                 <p className="mt-1 max-w-md text-sm font-medium text-muted-foreground">
                   Selecione uma conversa para exibir as mensagens ou comece uma nova pela lista ao lado.
@@ -1350,7 +1350,7 @@ export default function Inbox() {
                       {chatAssignedToOtherAttendantMessage()}
                     </p>
                   ) : null}
-                  <p className="text-2xl font-light text-wchat-900">converse. entenda. resolva.</p>
+                  <p className="text-2xl font-semibold tracking-tight text-foreground">converse. entenda. resolva.</p>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                     {blockedRequestedChatId
                       ? "Esta conversa não está disponível para o seu usuário. Escolha outra na lista ao lado."

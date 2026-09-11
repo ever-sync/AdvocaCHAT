@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import type ReCAPTCHA from "react-google-recaptcha";
-import { ChevronDown, Eye, EyeOff } from "lucide-react";
+import { ChevronDown, Eye, EyeOff, Scale } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LoginRecaptcha } from "@/components/auth/LoginRecaptcha";
 import { useToast } from "@/hooks/use-toast";
@@ -124,7 +124,7 @@ export default function Login() {
   };
 
   const inputClass =
-    "h-10 w-full rounded-md border border-input bg-wchat-50 px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary sm:h-11";
+    "h-10 w-full rounded-md border border-input bg-card px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary sm:h-11";
 
   return (
     <div className="flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-background">
@@ -132,13 +132,13 @@ export default function Login() {
         <main className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
           <div className="flex shrink-0 items-center justify-between px-6 py-4 sm:px-8 lg:px-10 xl:px-12">
             <Link to="/" className="inline-block">
-              <span className="text-2xl font-semibold tracking-tight">AdvocaCHAT</span>
+              <span className="flex items-center gap-2.5 text-xl font-semibold tracking-tight"><span className="flex h-9 w-9 items-center justify-center rounded-md bg-sidebar text-sidebar-primary"><Scale className="h-5 w-5" aria-hidden /></span>AdvocaCHAT</span>
             </Link>
             <div className="hidden shrink-0 items-center gap-3 lg:flex">
               <span className="text-sm text-muted-foreground">Ainda não tem uma conta?</span>
               <Link
                 to="/cadastro"
-                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-wchat-700"
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 Comece o teste grátis
               </Link>
@@ -147,8 +147,8 @@ export default function Login() {
 
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
             <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto overscroll-y-contain px-4 py-3 sm:px-6 lg:px-10 lg:py-2 xl:px-12">
-              <div className="my-auto w-full max-w-[400px] shrink-0 rounded-xl bg-card px-5 py-5 border border-border shadow-[0_1px_8px_hsl(var(--wchat-brand-600)/0.1),0_4px_24px_hsl(var(--wchat-brand-600)/0.06)] sm:px-7 sm:py-6 lg:px-8 lg:py-7">
-                <h1 className="text-2xl font-bold text-wchat-900 sm:text-[28px]">Olá!</h1>
+              <div className="my-auto w-full max-w-[400px] shrink-0 rounded-xl bg-card px-5 py-5 border border-border  sm:px-7 sm:py-6 lg:px-8 lg:py-7">
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[28px]">Bem-vindo ao seu escritório.</h1>
                 <p className="mt-0.5 text-sm text-muted-foreground">
                   Atendimento e relacionamento com os clientes do seu escritório.
                 </p>
@@ -164,6 +164,7 @@ export default function Login() {
                       Verificação em duas etapas. Digite o código de 6 dígitos do seu aplicativo autenticador.
                     </p>
                     <input
+                      aria-label="Código de verificação em duas etapas"
                       autoFocus
                       inputMode="numeric"
                       autoComplete="one-time-code"
@@ -176,7 +177,7 @@ export default function Login() {
                     <button
                       type="submit"
                       disabled={loading || mfaCode.length < 6}
-                      className="h-11 w-full rounded-md bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-wchat-700 disabled:opacity-60 sm:h-12 sm:text-[15px]"
+                      className="h-11 w-full rounded-md bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60 sm:h-12 sm:text-[15px]"
                     >
                       {loading ? "Verificando..." : "Confirmar código"}
                     </button>
@@ -262,7 +263,7 @@ export default function Login() {
                   <button
                     type="submit"
                     disabled={loading || (recaptchaRequired && !captchaToken)}
-                    className="h-11 w-full rounded-md bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-wchat-700 disabled:opacity-60 sm:h-12 sm:text-[15px]"
+                    className="h-11 w-full rounded-md bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60 sm:h-12 sm:text-[15px]"
                   >
                     {loading ? "Entrando..." : "Avançar"}
                   </button>

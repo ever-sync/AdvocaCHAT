@@ -91,7 +91,7 @@ export function TrialActivationGate() {
           </div>
           <DialogTitle className="text-center text-2xl">Seu periodo gratuito terminou</DialogTitle>
           <DialogDescription className="text-center">
-            Ative o Sistema para continuar usando o CaleoCRM. A IA e um modulo separado e nao esta inclusa nesta assinatura.
+            Ative o Sistema para continuar usando o AdvocaCHAT. A IA e um modulo separado e nao esta inclusa nesta assinatura.
           </DialogDescription>
         </DialogHeader>
 

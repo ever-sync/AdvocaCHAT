@@ -83,7 +83,7 @@ export function UazapiChannelWizardDialog({
                 disabled={!canEdit || createChannel.isPending}
               />
               <p className="text-xs text-muted-foreground">
-                Este será o nome usado no painel da Uazapi e no CaleoCRM.
+                Este será o nome usado no painel da Uazapi e no AdvocaCHAT.
               </p>
             </div>
             <div className="flex items-center justify-between rounded-xl border border-border/60 bg-card/60 px-4 py-3">

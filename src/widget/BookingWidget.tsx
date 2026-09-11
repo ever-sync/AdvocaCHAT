@@ -544,7 +544,7 @@ export function BookingWidget({ slug }: { slug: string }) {
           ) : null}
         </div>
       )}
-      <p className="text-center text-[11px] text-slate-300">Agendamento via CaleoCRM</p>
+      <p className="text-center text-[11px] text-slate-300">Agendamento via AdvocaCHAT</p>
     </div>
   );
 }

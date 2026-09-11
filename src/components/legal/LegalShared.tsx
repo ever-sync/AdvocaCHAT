@@ -10,7 +10,7 @@ export function LegalField({ label, children, hint }: { label: string; children:
 }
 
 export function LegalEmpty({ title, children }: { title: string; children?: ReactNode }) {
-  return <div className="rounded-xl border border-dashed px-5 py-10 text-center"><FolderOpen className="mx-auto mb-3 h-7 w-7 text-muted-foreground" aria-hidden /><p className="font-medium">{title}</p>{children ? <div className="mt-2 text-sm text-muted-foreground">{children}</div> : null}</div>;
+  return <div className="rounded-lg border border-dashed bg-card px-5 py-10 text-center"><FolderOpen className="mx-auto mb-3 h-7 w-7 text-muted-foreground" aria-hidden /><p className="font-medium">{title}</p>{children ? <div className="mt-2 text-sm text-muted-foreground">{children}</div> : null}</div>;
 }
 
 export function LegalError({ error, retry }: { error: unknown; retry?: () => void }) {

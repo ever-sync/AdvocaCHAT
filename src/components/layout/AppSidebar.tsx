@@ -19,6 +19,7 @@ import {
   FileText,
   Hourglass,
   Scale,
+  FolderOpen,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -102,7 +103,7 @@ type MenuItem = {
 
 const primaryItems: MenuItem[] = [
   { title: "Chat", url: "/inbox", icon: MessageCircle, permission: "inbox" },
-  { title: "Casos jurídicos", url: "/casos", icon: Scale },
+  { title: "Casos jurídicos", url: "/casos", icon: FolderOpen },
   { title: "Meu dia jurídico", url: "/juridico/meu-dia", icon: CalendarDays },
   { title: "CRM", url: "/crm", icon: Briefcase, permission: "crm" },
   { title: "Agenda", url: "/agenda", icon: CalendarDays, permission: "agenda" },
@@ -153,14 +154,14 @@ function RailNavLink({ item, pathname }: { item: MenuItem; pathname: string }) {
         aria-label={item.title}
         end={item.url === "/crm"}
         className={cn(
-          "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-150",
+          "flex h-10 w-10 shrink-0 items-center justify-center gap-3 rounded-md transition-colors duration-150 xl:w-full xl:justify-start xl:px-3",
           isActive
-            ? "bg-primary text-primary-foreground shadow-sm"
-            : "text-muted-foreground hover:bg-wchat-100 hover:text-primary",
+            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         )}
         activeClassName=""
       >
-        <item.icon className="h-5 w-5" aria-hidden />
+        <item.icon className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden truncate text-sm font-medium xl:block">{item.title}</span>
       </NavLink>
     </SidebarTooltip>
   );
@@ -242,12 +243,12 @@ export function AppSidebar() {
 
   return (
     <aside
-      className="relative z-50 hidden h-[100dvh] w-[60px] shrink-0 flex-col border-r border-border bg-card py-3 md:flex"
+      className="relative z-40 hidden h-[100dvh] w-[64px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar py-3 text-sidebar-foreground md:flex xl:w-[208px]"
       aria-label="Navegacao principal"
     >
-      <div className="pt-2" />
+      <NavLink to="/inbox" aria-label="AdvocaCHAT, início" className="mx-2 mb-4 flex h-11 shrink-0 items-center justify-center gap-2 rounded-md text-sidebar-foreground xl:justify-start xl:px-3"><Scale className="h-6 w-6 shrink-0 text-sidebar-primary" aria-hidden /><span className="hidden text-base font-semibold tracking-tight xl:block">AdvocaCHAT</span></NavLink>
 
-      <div className="flex flex-col items-center gap-1 px-2">
+      <div className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto px-2 xl:items-stretch">
         {!permissionsLoading
           ? primaryItems
               .filter((item) => !item.permission || can(item.permission, "view"))
@@ -255,16 +256,15 @@ export function AppSidebar() {
           : null}
       </div>
 
-      <div className="min-h-0 flex-1" aria-hidden />
 
-      <div className="flex flex-col items-center gap-2 px-2 pb-1">
+      <div className="flex shrink-0 flex-col items-center gap-2 border-t border-sidebar-border px-2 pb-1 pt-3 xl:items-stretch">
         <DropdownMenu>
           <Tooltip delayDuration={200}>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="relative flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-wchat-100 hover:text-primary"
+                  className="relative flex h-10 w-10 items-center justify-center gap-3 rounded-md xl:w-full xl:justify-start xl:px-3 text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   aria-label="Minha conta"
                 >
                   <Avatar className="h-8 w-8 border border-border">
@@ -273,10 +273,11 @@ export function AppSidebar() {
                       {initials}
                     </AvatarFallback>
                   </Avatar>
+                  <span className="hidden min-w-0 flex-1 truncate text-left text-sm xl:block">{profile?.nome ?? "Minha conta"}</span>
                   {showAvailabilityToggle ? (
                     <span
                       className={cn(
-                        "absolute bottom-1 right-1 h-3 w-3 rounded-full border-2 border-card",
+                        "absolute bottom-1 right-1 h-3 w-3 rounded-full border-2 border-sidebar xl:static xl:shrink-0",
                         currentAvailability.dotClass,
                       )}
                       aria-label={`Status: ${currentAvailability.label}`}
@@ -415,14 +416,14 @@ export function AppSidebar() {
               title="Configuracoes"
               aria-label="Configuracoes"
               className={cn(
-                "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-150",
+                "flex h-10 w-10 shrink-0 items-center justify-center gap-3 rounded-md transition-colors duration-150 xl:w-full xl:justify-start xl:px-3",
                 isSettingsActive
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:bg-wchat-100 hover:text-primary",
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
               )}
               activeClassName=""
             >
-              <Settings2 className="h-5 w-5" aria-hidden />
+              <Settings2 className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden text-sm xl:block">Configurações</span>
             </NavLink>
           </SidebarTooltip>
         ) : null}
@@ -434,13 +435,14 @@ export function AppSidebar() {
             aria-label={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
             aria-pressed={isDark}
             onClick={() => setTheme(isDark ? "light" : "dark")}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-wchat-100 hover:text-primary"
+            className="flex h-10 w-10 items-center justify-center gap-3 rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground xl:w-full xl:justify-start xl:px-3"
           >
             {isDark ? (
               <Sun className="h-[18px] w-[18px]" aria-hidden />
             ) : (
               <Moon className="h-[18px] w-[18px]" aria-hidden />
             )}
+            <span className="hidden text-sm xl:block">{isDark ? "Tema claro" : "Tema escuro"}</span>
           </button>
         </SidebarTooltip>
 
@@ -453,9 +455,9 @@ export function AppSidebar() {
               await signOut();
               navigate("/login");
             }}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-destructive/10 hover:text-destructive"
+            className="flex h-10 w-10 items-center justify-center gap-3 rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground xl:w-full xl:justify-start xl:px-3"
           >
-            <LogOut className="h-[18px] w-[18px]" aria-hidden />
+            <LogOut className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden text-sm xl:block">Sair</span>
           </button>
         </SidebarTooltip>
       </div>

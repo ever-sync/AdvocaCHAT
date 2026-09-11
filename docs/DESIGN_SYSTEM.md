@@ -105,3 +105,21 @@ Executar `npm run typecheck`, ESLint nos arquivos alterados e o build com as
 variáveis públicas de ambiente do projeto. No catálogo, verificar temas claro e
 escuro, viewport móvel, abas por teclado, modal (erro, envio e Escape), filtro com
 resultado e filtro vazio. Dados fictícios devem permanecer apenas em memória.
+
+## Aplicação nas telas operacionais
+
+A navegação desktop usa a superfície institucional: 208 px com rótulos em telas
+largas e 64 px com ícones em tablets. A lista de áreas tem rolagem independente,
+preservando conta, tema e saída. O menu móvel inclui Meu dia jurídico e mantém o
+mesmo filtro de permissões existente.
+
+Login, cabeçalhos do atendimento e PageShell usam superfícies e espaçamentos
+semânticos. Casos jurídicos usam `CASE_STATUS_VARIANTS`: andamento em azul,
+aguardando em âmbar e encerrado neutro. Referências visíveis ao produto anterior
+foram corrigidas no atendimento, IA, ativação, configuração de canal e widget.
+Cabeçalhos de integrações e identificadores persistidos não foram renomeados.
+
+Validação: TypeScript, lint dos arquivos alterados, build principal e widget;
+navegação com fixtures locais em desktop, temas claro/escuro, menu móvel e
+larguras 320/390/1024 px. No teste visual, o bloqueio de assinatura foi isolado
+apenas no navegador de teste, sem alteração da regra de cobrança do aplicativo.

@@ -3,10 +3,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 export const CASE_STATUSES = { ativo: "Em andamento", aguardando: "Aguardando", encerrado: "Encerrado" } as const;
+export const CASE_STATUS_VARIANTS = { ativo: "info", aguardando: "warning", encerrado: "neutral" } as const;
 export const CASE_TYPES = { consultivo: "Consultivo", extrajudicial: "Extrajudicial", judicial: "Judicial" } as const;
 export const DOCUMENT_CATEGORIES = { general: "Geral", medical: "Saúde", fiscal: "Fiscal" } as const;
 export const OAB_STATES = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"];
-export const selectClassName = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+export const selectClassName = "flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
 export function legalDate(value?: string | null, withTime = false) {
   if (!value) return "Sem data";

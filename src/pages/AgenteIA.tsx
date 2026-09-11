@@ -77,7 +77,7 @@ import type { InboxChat, WhatsappMessage } from "@/types/domain";
 
 const PROVIDER_LABELS: Record<AiProvider, string> = {
   off: "Desligada",
-  native: "Nativa (orquestrador CaleoCRM)",
+  native: "Nativa (orquestrador AdvocaCHAT)",
   n8n: "Externa (N8N)",
 };
 
@@ -1835,7 +1835,7 @@ function ConfiguracaoTab() {
                 <SelectItem value="n8n">{PROVIDER_LABELS.n8n}</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-[10px] text-muted-foreground leading-normal"><strong>Nativa</strong> processa no CaleoCRM. <strong>Externa</strong> envia para n8n.</p>
+            <p className="text-[10px] text-muted-foreground leading-normal"><strong>Nativa</strong> processa no AdvocaCHAT. <strong>Externa</strong> envia para n8n.</p>
           </div>
         </CardContent>
       </Card>

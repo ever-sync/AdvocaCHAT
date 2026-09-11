@@ -11,7 +11,7 @@ import {
   UserRound,
   Users2,
   FileText,
-  Scale,
+  FolderOpen,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
@@ -41,7 +41,8 @@ type NavIcon = typeof MessageSquare;
 
 const linkItems: { title: string; url: string; icon: NavIcon; permission?: "inbox" | "crm" | "agenda" | "clientes" | "produtos" | "marketing" | "configuracoes" }[] = [
   { title: "Chat", url: "/inbox", icon: MessageSquare, permission: "inbox" },
-  { title: "Casos jurídicos", url: "/casos", icon: Scale },
+  { title: "Casos jurídicos", url: "/casos", icon: FolderOpen },
+  { title: "Meu dia jurídico", url: "/juridico/meu-dia", icon: CalendarDays },
   { title: "CRM", url: "/crm", icon: Briefcase, permission: "crm" },
   { title: "Agenda", url: "/agenda", icon: CalendarDays, permission: "agenda" },
   { title: "Clientes", url: "/clientes", icon: Users2, permission: "clientes" },
@@ -74,10 +75,10 @@ function MobileNavLink({
         end={item.url === "/crm"}
         onClick={onNavigate}
         className={cn(
-          "flex items-center gap-3 rounded-xl border px-3 py-3 text-sm font-medium transition-colors",
+          "flex items-center gap-3 rounded-md border px-3 py-3 text-sm font-medium transition-colors",
           isActive
             ? "border-primary/30 bg-primary text-primary-foreground shadow-sm"
-            : "border-border bg-card text-foreground hover:bg-wchat-100 hover:text-primary",
+            : "border-border bg-card text-foreground hover:bg-accent hover:text-accent-foreground",
         )}
         activeClassName=""
       >
@@ -104,7 +105,7 @@ export function MobileNav() {
 
   return (
     <header
-      className="border-b border-border bg-card/95 shadow-sm backdrop-blur-md md:hidden"
+      className="border-b border-sidebar-border bg-sidebar text-sidebar-foreground md:hidden"
       aria-label="Navegação principal"
     >
       <div className="flex items-center gap-2 px-3 py-3">
@@ -114,7 +115,7 @@ export function MobileNav() {
               type="button"
               variant="ghost"
               size="icon"
-              className="h-10 w-10 shrink-0 rounded-xl text-muted-foreground hover:bg-wchat-100 hover:text-primary"
+              className="h-10 w-10 shrink-0 rounded-md text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               aria-label="Abrir menu"
             >
               <Menu className="h-5 w-5" aria-hidden />
@@ -149,7 +150,7 @@ export function MobileNav() {
                       await signOut();
                       navigate("/login");
                     }}
-                    className="flex w-full items-center gap-3 rounded-xl border border-destructive/20 bg-destructive/5 px-3 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                    className="flex w-full items-center gap-3 rounded-md border border-destructive/20 bg-destructive/5 px-3 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
                   >
                     <LogOut className="h-5 w-5 shrink-0" aria-hidden />
                     Sair
@@ -161,11 +162,11 @@ export function MobileNav() {
         </Sheet>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-foreground">
+          <p className="truncate text-sm font-semibold text-sidebar-foreground">
             {activeItem?.title ?? "AdvocaCHAT"}
           </p>
-          <p className="truncate text-xs text-muted-foreground">
-            {activeItem ? "Acesso rápido às áreas" : "Navegação principal"}
+          <p className="truncate text-xs text-sidebar-foreground/75">
+            {activeItem ? "AdvocaCHAT" : "Navegação principal"}
           </p>
         </div>
 
@@ -175,7 +176,7 @@ export function MobileNav() {
               type="button"
               variant="ghost"
               size="icon"
-              className="relative h-10 w-10 shrink-0 rounded-xl text-muted-foreground hover:bg-wchat-100 hover:text-primary"
+              className="relative h-10 w-10 shrink-0 rounded-md text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               aria-label="Minha conta"
             >
               <Avatar className="h-8 w-8 border border-border">
