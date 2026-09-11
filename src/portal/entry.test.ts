@@ -3,6 +3,16 @@ import { capturePortalEntry } from "./entry";
 import { startApplication } from "../entrypoint";
 const invite = "a".repeat(64),
   auth = "b".repeat(64);
+it("captures a diligence invitation separately and clears it before loading auth", async () => {
+  const history = { replaceState: vi.fn() }, internal = vi.fn();
+  const portal = vi.fn(async (entry) => {
+    expect(history.replaceState).toHaveBeenCalledWith(null, "", "/portal/diligencias/ativar");
+    expect(entry.activation).toEqual({ invite, kind: "diligence" });
+  });
+  await startApplication({ location: { pathname: "/portal/diligencias/ativar", search: "", hash: `#invite=${invite}` }, history, internal, portal });
+  expect(internal).not.toHaveBeenCalled(); expect(portal).toHaveBeenCalledOnce();
+  expect(capturePortalEntry({ pathname: "/portal/diligencias/ativar", search: `?invite=${invite}`, hash: "" }, history)?.invalidActivation).toBe(true);
+});
 it.each([
   "/portal/ativar",
   "/PORTAL/ativar/",

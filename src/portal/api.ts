@@ -16,16 +16,20 @@ function failure(status: number) {
     status === 401
       ? "Sua sessão expirou. Entre novamente."
       : status === 403 || status === 404
-        ? "Este acesso não está disponível. O escritório pode ter alterado a autorização."
-        : status === 409
-          ? "A situação mudou. Atualize a página antes de continuar."
-          : status === 400 || status === 422
-            ? "Não foi possível confirmar os dados. Confira os campos e a validade do acesso."
-            : "Não foi possível consultar o portal agora. Tente novamente.",
+      ? "Este acesso não está disponível. O escritório pode ter alterado a autorização."
+      : status === 409
+      ? "A situação mudou. Atualize a página antes de continuar."
+      : status === 400 || status === 422
+      ? "Não foi possível confirmar os dados. Confira os campos e a validade do acesso."
+      : "Não foi possível consultar o portal agora. Tente novamente.",
   );
 }
 async function request(
-  endpoint: "legal-portal-access" | "legal-portal-documents",
+  endpoint:
+    | "legal-portal-access"
+    | "legal-portal-documents"
+    | "legal-diligence-access"
+    | "legal-diligence-documents",
   body: object | FormData,
   options: { signal?: AbortSignal; anonymous?: boolean; binary?: boolean } = {},
 ) {
@@ -35,16 +39,19 @@ async function request(
     let token = "";
     if (!options.anonymous) {
       const { data, error } = await getPortalClient().auth.getSession();
-      if (error || !data.session || data.session.user.role !== "legal_portal")
+      if (error || !data.session || data.session.user.role !== "legal_portal") {
         throw failure(401);
+      }
       token = data.session.access_token;
     }
-    if (!scope.current() || scope.signal.aborted)
+    if (!scope.current() || scope.signal.aborted) {
       throw new DOMException("Request cancelled", "AbortError");
+    }
     const headers: Record<string, string> = { apikey: config.anonKey };
     if (token) headers.Authorization = `Bearer ${token}`;
-    if (!(body instanceof FormData))
+    if (!(body instanceof FormData)) {
       headers["Content-Type"] = "application/json";
+    }
     const response = await fetch(`${config.url}/functions/v1/${endpoint}`, {
       method: "POST",
       headers,
@@ -57,21 +64,23 @@ async function request(
     if (!response.ok) throw failure(response.status);
     const result = options.binary
       ? {
-          blob: await response.blob(),
-          filename: downloadFilename(
-            response.headers.get("content-disposition"),
-          ),
-        }
+        blob: await response.blob(),
+        filename: downloadFilename(
+          response.headers.get("content-disposition"),
+        ),
+      }
       : await response.json();
-    if (!scope.current() || scope.signal.aborted)
+    if (!scope.current() || scope.signal.aborted) {
       throw new DOMException("Request cancelled", "AbortError");
+    }
     return result;
   } catch (error) {
     if (
       error instanceof PortalApiError ||
       (error instanceof DOMException && error.name === "AbortError")
-    )
+    ) {
       throw error;
+    }
     throw new PortalApiError(
       0,
       "Não foi possível conectar ao portal. Confira sua conexão e tente novamente.",
@@ -91,7 +100,7 @@ function downloadFilename(header: string | null) {
   }
   return (
     header?.match(/filename="([^"\r\n]+)"/i)?.[1].replace(/[\\/]/g, "_") ??
-    "documento"
+      "documento"
   );
 }
 export async function portalAccess<T>(
@@ -112,6 +121,49 @@ export async function inspectPortalInvite(
 }
 export async function acceptPortalInvite(token: string) {
   return portalAccess<{ status: string }>({ action: "accept", token });
+}
+export async function diligenceAccess<T>(
+  body: object,
+  signal?: AbortSignal,
+): Promise<T> {
+  return (await request("legal-diligence-access", body, { signal })) as T;
+}
+export async function acceptDiligenceInvite(token: string) {
+  return diligenceAccess<{ status: string; grant_id: string }>({
+    action: "accept",
+    token,
+  });
+}
+export async function downloadDiligenceDocument(
+  grantId: string,
+  documentId: string,
+  signal?: AbortSignal,
+): Promise<{ blob: Blob; filename: string }> {
+  return (await request("legal-diligence-documents", {
+    action: "download",
+    grant_id: grantId,
+    document_id: documentId,
+  }, { signal, binary: true })) as { blob: Blob; filename: string };
+}
+export async function uploadDiligenceDocument(
+  grantId: string,
+  file: File,
+  description: string,
+  idempotencyKey: string,
+  category?: "medical" | "fiscal",
+  signal?: AbortSignal,
+): Promise<{ delivery_id: string; document_id: string; state: string }> {
+  const body = new FormData();
+  body.set("grant_id", grantId);
+  body.set("file", file);
+  body.set("description", description);
+  body.set("idempotency_key", idempotencyKey);
+  if (category) body.set("category", category);
+  return (await request("legal-diligence-documents", body, { signal })) as {
+    delivery_id: string;
+    document_id: string;
+    state: string;
+  };
 }
 export async function uploadPortalDocument(
   requestId: string,

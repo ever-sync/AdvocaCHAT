@@ -215,3 +215,11 @@ verify_jwt = false
 # Binding de IA interno por Auth.getUser; fila somente por x-cron-secret.
 [functions.legal-assistance-dispatch]
 verify_jwt = false
+
+# Correspondentes: inspect não expõe identidade; demais ações conferem Auth real
+# e grants por diligência. Nenhuma operação judicial externa é executada.
+[functions.legal-diligence-access]
+verify_jwt = false
+
+[functions.legal-diligence-documents]
+verify_jwt = true

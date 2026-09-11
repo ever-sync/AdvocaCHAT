@@ -1,5 +1,5 @@
 /** This module must remain free of auth clients, application providers and telemetry. */
-export type PortalActivation = { invite: string };
+export type PortalActivation = { invite: string; kind?: "diligence" };
 export type PortalEntry = {
   path: string;
   activation: PortalActivation | null;
@@ -30,8 +30,9 @@ export function capturePortalEntry(
   const path = normalizedPath(location.pathname);
   const values = new URLSearchParams(location.hash.replace(/^#/, ""));
   const invite = values.get("invite") ?? "";
-  const valid =
-    path === "/portal/ativar" &&
+  const activating = path === "/portal/ativar" ||
+    path === "/portal/diligencias/ativar";
+  const valid = activating &&
     !location.search &&
     values.getAll("invite").length === 1 &&
     [...values.keys()].every((key) => key === "invite") &&
@@ -40,7 +41,14 @@ export function capturePortalEntry(
   history.replaceState(null, "", path);
   return {
     path,
-    activation: valid ? { invite } : null,
-    invalidActivation: path === "/portal/ativar" && !valid,
+    activation: valid
+      ? {
+        invite,
+        ...(path === "/portal/diligencias/ativar"
+          ? { kind: "diligence" as const }
+          : {}),
+      }
+      : null,
+    invalidActivation: activating && !valid,
   };
 }

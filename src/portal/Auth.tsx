@@ -1,14 +1,14 @@
 import {
+  type ReactNode,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
-import { acceptPortalInvite } from "./api";
+import { acceptDiligenceInvite, acceptPortalInvite } from "./api";
 import {
   getPortalClient,
   isPortalSessionClosed,
@@ -72,8 +72,9 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
         const { data, error: verificationError } = await auth.getUser(
           next.access_token,
         );
-        if (!active || run !== sequence.current || isPortalSessionClosed())
+        if (!active || run !== sequence.current || isPortalSessionClosed()) {
           return;
+        }
         if (
           verificationError ||
           !data.user ||
@@ -148,10 +149,11 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
         password,
       });
       stillCurrent();
-      if (loginError || !data.session)
+      if (loginError || !data.session) {
         throw new Error(
           "Não foi possível entrar. Confira o e-mail e a senha do portal.",
         );
+      }
       const verified = await auth.getUser(data.session.access_token);
       stillCurrent();
       if (verified.error || verified.data.user?.role !== "legal_portal") {
@@ -170,19 +172,24 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
   const requestCode = useCallback(async (email: string) => {
     const result = await getPortalClient().auth.signInWithOtp({
       email: email.trim(),
-      options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/portal` },
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: `${window.location.origin}/portal`,
+      },
     });
-    if (result.error)
+    if (result.error) {
       throw new Error(
         "Não foi possível solicitar o código. Confira o contato informado ao escritório e tente novamente.",
       );
+    }
   }, []);
   const confirmCode = useCallback(
     async (email: string, code: string, password: string) => {
-      if (!/^[0-9]{6,10}$/.test(code.trim()) || password.length < 12)
+      if (!/^[0-9]{6,10}$/.test(code.trim()) || password.length < 12) {
         throw new Error(
           "Informe o código recebido e uma senha com pelo menos 12 caracteres.",
         );
+      }
       const run = ++operation.current;
       const stillCurrent = () => {
         if (operation.current !== run || isPortalSessionClosed()) {
@@ -222,10 +229,11 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
         }
         const saved = await auth.updateUser({ password });
         stillCurrent();
-        if (saved.error)
+        if (saved.error) {
           throw new Error(
             "O acesso foi confirmado, mas não foi possível salvar a senha. Solicite outro código para redefini-la.",
           );
+        }
         identity.current = current.data.user.id;
         setSession({ ...verified.data.session, user: current.data.user });
         setLoading(false);
@@ -240,18 +248,22 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
     async (invite: PortalActivation) => {
       const run = ++operation.current;
       const stillCurrent = () => {
-        if (operation.current !== run || isPortalSessionClosed())
+        if (operation.current !== run || isPortalSessionClosed()) {
           throw new Error(
             "Sua sessão foi encerrada. Entre novamente para aceitar o convite.",
           );
+        }
       };
       const current = await getPortalClient().auth.getUser();
       stillCurrent();
-      if (current.error || current.data.user?.role !== "legal_portal")
+      if (current.error || current.data.user?.role !== "legal_portal") {
         throw new Error(
           "Entre com sua conta do portal antes de aceitar este acesso.",
         );
-      await acceptPortalInvite(invite.invite);
+      }
+      if (invite.kind === "diligence") {
+        await acceptDiligenceInvite(invite.invite);
+      } else await acceptPortalInvite(invite.invite);
       stillCurrent();
       clearData();
     },
