@@ -101,3 +101,16 @@ F3 inicia o dossiê assistido de isenção de IR. F9 deve ampliar a paginação 
 listas jurídicas, hoje limitadas a 200 registros por consulta, e ensaiar recuperação
 integral, carga e tratamento de uploads interrompidos. A homologação jurídica,
 fiscal e dos provedores não é substituída pelos testes sintéticos acima.
+
+### Complemento de privacidade
+
+`ede3c9cbe68d07b7251495d875efb91b4343dfde` amplia a limpeza do fragmento
+para caminhos com codificação percentual, acompanhando a normalização do roteador.
+Sete testes desse controle passaram. No navegador publicado, a rota codificada
+foi substituída por `/enviar-documento`, sem fragmento, e o token fictício foi
+rejeitado sem exibir formulário de upload.
+
+Deployments SUCCESS desse complemento: web
+`4348978a-d447-4640-910b-21ae0711ac13`, functions
+`51dd8fae-ab29-403c-8ae1-82276a679365` e scheduler
+`cebb06c9-138f-48f3-855b-8e0a7bcf3585`. SHA de `origin/main` conferido.

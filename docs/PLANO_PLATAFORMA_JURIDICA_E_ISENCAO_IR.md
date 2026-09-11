@@ -1,6 +1,6 @@
 # Plano de evolução do AdvocaCHAT: plataforma jurídica e isenção de IR
 
-Data de referência: **11/09/2026** · Versão: **1.1** · Situação: **F1 entregue; próximas fases planejadas**.
+Data de referência: **11/09/2026** · Versão: **1.2** · Situação: **F1/F2 com entregas técnicas verificadas; F3 em validação e F4 em implementação**.
 
 Este é o roteiro de execução do produto. Reúne as 30 ideias de plataforma jurídica
 aprovadas na conversa e 25 funcionalidades específicas para escritórios que atuam
@@ -646,7 +646,10 @@ Em 11/09/2026, o usuário direcionou a execução para **F1, a primeira fase de
 implementação**. O núcleo jurídico foi construído e publicado; o detalhamento e
 as evidências estão em [Entrega da fase 1](FASE_1_NUCLEO_JURIDICO.md). F0 continua
 pendente nas decisões de negócio, validação jurídica e recuperação integral.
-A próxima implementação é F2; a especialidade de IR permanece a partir de F3.
+O usuário autorizou continuar automaticamente até F9 e reunir as dependências
+externas ao final. F2 tem entrega técnica verificada; F3 está em validação e F4
+em implementação. O [registro contínuo](EXECUCAO_CONTINUA.md) acompanha as
+pendências sem confundir publicação técnica com homologação profissional.
 Mudanças de escopo entram aqui com justificativa e efeito em dependências/custo.
 
 Estados de acompanhamento: `planejado`, `pronto_para_execucao`, `em_execucao`,
@@ -657,9 +660,9 @@ o critério; implementação local, deploy e homologação são evidências dist
 | --- | --- | --- | --- |
 | F0 | planejado | A definir | Validar recorte IR, piloto e ambiente |
 | F1 | concluido | Codex (implementação técnica) | [Entrega, testes e implantação](FASE_1_NUCLEO_JURIDICO.md); validação de negócio/jurídica dos pilotos permanece em F0 |
-| F2 | planejado | A definir | Depende de F1 |
-| F3 | planejado | A definir | Depende de F1/F2 e revisão jurídica |
-| F4 | planejado | A definir | Depende de F3 e referência fiscal |
+| F2 | em_validacao | Codex (implementação técnica) | [Entrega técnica verificada](FASE_2_OPERACAO_JURIDICA.md); assinatura P01 e calendário externo P02 pendentes |
+| F3 | em_validacao | Codex (implementação técnica) | [Dossiê, SQL e API real](FASE_3_DOSSIE_ASSISTIDO_IR.md); publicação visual em validação, homologação P03 pendente |
+| F4 | em_execucao | Codex (implementação técnica) | [Fontes e cenários independentes](FASE_4_FONTES_E_CALCULOS.md); cálculos, pedidos e conciliação em implementação |
 | F5 | planejado | A definir | Depende de F2/F3/F4 conforme módulo |
 | F6 | planejado | A definir | Fonte habilitada e cobertura definida |
 | F7 | planejado | A definir | Dados autorizados e conjunto de avaliações |
