@@ -139,32 +139,45 @@ Tabelas propostas:
 | `legal_portal_membership_events` | Histórico append-only de emissão, ativação, concessão, redução e revogação; sem token ou cópia de documentos |
 
 Fluxo concreto: responsável prepara convite → revisor confirma parte, identidade,
-poderes e escopos → provisionamento externo → geração de link sem envio automático
-→ destinatário ativa, define senha e aceita o acesso → servidor verifica identidade
-e grant atuais → portal apresenta apenas conteúdo liberado.
+poderes e escopos → provisionamento externo → geração de convite sem envio automático
+→ destinatário entra com sua senha ou solicita código ao próprio Auth → código
+entregue ao email é verificado no portal → destinatário aceita o acesso → servidor
+verifica identidade e grant atuais → portal apresenta apenas conteúdo liberado.
 
-`generateLink` gera link/OTP para distribuição pelo canal escolhido e pode criar
-usuários em alguns tipos. Usá-lo **somente depois do provisionamento seguro**, com
-UUID retornado conferido e tipo apropriado à conta existente; nunca como caminho
-alternativo de signup. O tipo devolvido em `verification_type` precisa ser validado
-e usado no `verifyOtp`; não presumir que `invite`, `signup` e `recovery` são
-intercambiáveis. Confirmar primeiro o comportamento de `magiclink` para conta já
-provisionada/não confirmada na versão instalada. A API de verificação aceita
-`token_hash`. [Supabase: generateLink](https://supabase.com/docs/reference/javascript/auth-admin-generatelink),
-[Supabase: verifyOtp](https://supabase.com/docs/reference/javascript/auth-verifyotp).
+**Decisão final de segurança:** nenhum fluxo do escritório pode chamar
+`generateLink` nem receber OTP, token de login, sessão, recovery ou refresh token
+do destinatário, inclusive na primeira ativação. O link copiável contém somente
+`/portal/ativar#invite=<token>` e não autentica ninguém. Permitir credencial inicial
+ao escritório permitiria reter uma sessão e alcançar futuros casos vinculados à
+mesma identidade, inclusive de outros escritórios.
 
-O link copiável pelo escritório é uma credencial bearer. Seu consumo e até
-`email_confirmed_at` no Auth, quando obtido desse link administrativo, **não provam
-que o destinatário recebeu o email**. Guardar separadamente `activation_method`,
-`identity_reviewed_at`, `contact_verification_method` e evidência/recibo. A liberação
-depende da verificação individual aprovada, por canal verificado ou conferência
-documentada; endereço apenas digitado não satisfaz isso. Sem evidência, manter
-acesso pendente, sem documentos. O responsável não conhece a senha definida.
+O destinatário usa o cliente Auth separado, `signInWithOtp` com
+`shouldCreateUser: false` e, após receber o código, `verifyOtp` por email/código.
+Somente o Auth entrega o segredo ao endereço; nenhuma resposta da Edge retorna
+credenciais. Senha existente continua válida, e uma senha inicial pode ser definida
+após autenticação do destinatário. Não afirmar entrega por uma resposta HTTP:
+mostrar mensagem condicional e respeitar limites de tentativas. [Supabase: OTP](https://supabase.com/docs/reference/javascript/auth-signinwithotp),
+[Supabase: verificação](https://supabase.com/docs/reference/javascript/auth-verifyotp).
 
-Rotação/revogação invalida o convite no banco. Um token Auth antigo ainda
-consumível não reativa membership nem libera dados. Suspensão de identidade e
-revogação por caso são verificadas a cada operação. Alteração de email exige
-reverificação do contato, sem relincar automaticamente outras partes.
+Na tag GoTrue `v2.189.0`, `/otp` de email existente não confirmado chama o fluxo de confirmação;
+para usuário confirmado chama o template de magic link. Ambos os templates precisam
+exibir `{{ .Token }}` para código digitável. `verifyOtp` com `type: 'email'` verifica
+ambos os tipos. O pedido do portal informa `emailRedirectTo` para `/portal` sem
+tokens; eventual link do template não deve redirecionar para o Auth interno.
+Confirmar a allowlist e os templates no ambiente antes da liberação técnica.
+[GoTrue v2.189.0: OTP](https://github.com/supabase/auth/blob/v2.189.0/internal/api/otp.go),
+[GoTrue v2.189.0: magic link](https://github.com/supabase/auth/blob/v2.189.0/internal/api/magic_link.go),
+[GoTrue v2.189.0: verificação](https://github.com/supabase/auth/blob/v2.189.0/internal/api/verify.go),
+[Supabase: templates](https://supabase.com/docs/guides/auth/auth-email-templates).
+
+OTP comprova o acesso ao canal naquele momento, não substitui revisão de identidade,
+parte, poderes ou documentos. Guardar separadamente método de autenticação,
+`identity_reviewed_at`, `contact_verification_method` e evidência/recibo. Endereço
+apenas digitado não satisfaz essa revisão; sem evidência, manter acesso pendente.
+
+Rotação/revogação invalida somente o convite no banco, sem resetar senha ou sessão
+da identidade. Suspensão de identidade e revogação por caso são verificadas a cada
+operação. Alteração de email exige reverificação, sem relincar outras partes.
 
 ### 3.4 Sessão e entrypoint próprios
 
@@ -378,7 +391,7 @@ contadores não contam casos ou categorias ocultos.
 
 | Bloco | Backend SQL | Edge/worker | UI |
 | --- | --- | --- | --- |
-| F5-A identidade | Role sem USAGE, grants internos explícitos, reserva privada, guard bootstrap, identity/invite/membership, histórico, testes negativos no legado | `legal-portal-access`: provisionar/gerar/rotacionar sem enviar; confirmar identidade e ativação idempotente | Shell/login/ativação/senha próprios; gerenciador interno de convites, revisões e revogação |
+| F5-A identidade | Role sem USAGE, grants internos explícitos, reserva privada, guard bootstrap, identity/invite/membership, histórico, testes negativos no legado | `legal-portal-access`: provisionar e gerar/rotacionar somente convite; nenhuma credencial Auth retornada ao escritório | Shell/login/OTP do destinatário/senha próprios; gerenciador interno de convites, revisões e revogação |
 | F5-B conteúdo | Publicações/releases, requests ligados à identidade, agenda/export versões | `legal-portal-documents`: upload/download/export com revalidação e auditoria | Resumo, pendências, documentos, agenda; contador vê pacote fiscal autorizado |
 | F5-C comunicação | Versões/aprovações/outbox/receipts e fila de respostas | Dispatcher e callback por adapter; segredo obrigatório | Preparar/aprovar/estado de canal/recibos/responder no portal |
 | F5-D financeiro | Contratos/bases/obrigações/livro/conciliação/prestação, numeric e idempotência | Adapter cobrança e callbacks, inicialmente estado não configurado | Honorários, custas/adiantamentos/repasses e prestação de contas |
@@ -420,7 +433,7 @@ internos, snapshots conjuntos e seus caches não podem ser importados no portal.
 | P5-T02 | Forjar raw_user_meta_data, UUID/email da reserva, expirar reserva, falhar após create: sem promoção, vínculo indevido ou acesso parcial |
 | P5-T03 | Role externa chama PostgREST/tabelas/RPCs internas, RPCs service-only, storage, convite e billing: negação; Edge rejeita p_actor_id forjado, token interno e JWT sem identidade externa; inventário inclui grants PUBLIC |
 | P5-T04 | Dois casos, tenants, familiares e contador: trocar IDs, mesmo telefone/email, listar/exportar: nenhum acesso herdado |
-| P5-T05 | Link copiado/consumido por pessoa sem verificação, link rotacionado e JWT antigo após revogação: não libera conteúdo |
+| P5-T05 | Link de convite não gera sessão nem troca senha; staff do caso A nunca recebe credencial da pessoa com caso B, inclusive primeira ativação; link rotacionado e JWT após revogação não liberam conteúdo |
 | P5-T06 | Mandato expira/revoga durante upload/export/download: revalidar e negar publicação/entrega ainda não iniciada; cleanup auditado |
 | P5-T07 | Cliente modifica grants/categoria/autor via payload; médico substituído ou release revogado: acesso negado |
 | P5-T08 | Advogado e cliente no mesmo navegador: ativação/login/logout/refresh do portal não troca sessão/cache interno; URL limpa antes de imports/telemetria |
@@ -434,8 +447,11 @@ internos, snapshots conjuntos e seus caches não podem ser importados no portal.
 
 Executar SQL com roles reais e duas sessões para concorrência; complementar com
 Auth/PostgREST/Edge da versão instalada, navegador e providers simulados. Testar
-troca de role, `generateLink → verifyOtp → definir senha → login` em conta sintética
-sem envio a pessoas reais. Testes simulados não homologam email, WhatsApp ou gateway.
+troca de role, convite sem credencial, verificação de OTP e login em conta sintética
+sem envio a pessoas reais. O harness isolado pode obter OTP com chave service do
+operador técnico para a fixture previamente reservada; esse caminho não existe na
+API do escritório e não prova entrega. Testes simulados não homologam email,
+WhatsApp ou gateway.
 
 ## 10. Dependências reais e ordem de liberação
 

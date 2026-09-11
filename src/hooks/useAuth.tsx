@@ -13,6 +13,7 @@ import { invokeAuthedFunction } from "@/lib/api/functions";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { recordAuditEventSafe } from "@/lib/api/audit-logs";
 import { useAppStore } from "@/store/useAppStore";
+import { internalProfileFromRow, isPortalAuthUser } from "./internal-profile";
 import type { AppUserProfile, AuthCredentials, SignUpPayload, UserRole } from "@/types/domain";
 
 async function fetchProfileFromDb(userId: string): Promise<Partial<AppUserProfile> | null> {
@@ -60,24 +61,8 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-function mapUserToProfile(user: User): AppUserProfile {
-  const metadata = user.user_metadata ?? {};
-  const fallbackName = user.email?.split("@")[0] ?? "Usuário";
-
-  return {
-    id: user.id,
-    nome: metadata.nome ?? metadata.name ?? fallbackName,
-    email: user.email ?? "",
-    empresa: metadata.empresa ?? metadata.company ?? "DistribuiBot",
-    plano: metadata.plano ?? "starter",
-    role: metadata.role ?? "atendimento",
-    status: metadata.status ?? "active",
-    avatar: metadata.avatar_url,
-  };
-}
-
 async function resolveValidSession(nextSession: Session | null) {
-  if (!supabase || !nextSession?.access_token) {
+  if (!supabase || !nextSession?.access_token || isPortalAuthUser(nextSession.user)) {
     return null;
   }
 
@@ -93,10 +78,10 @@ async function resolveValidSession(nextSession: Session | null) {
         setTimeout(() => reject(new Error("auth-getUser-timeout")), timeoutMs),
       ),
     ]);
-    if (userResult.error || !userResult.data.user) {
+    if (userResult.error || !userResult.data.user || isPortalAuthUser(userResult.data.user)) {
       return null;
     }
-    return nextSession;
+    return { ...nextSession, user: userResult.data.user };
   } catch {
     // Timeout ou erro de rede: não derruba o login eterno; segue com a sessão local.
     return nextSession;
@@ -138,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isMountedRef = useRef(true);
 
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
     };
@@ -166,31 +152,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // dentro dos closures async abaixo (hydrateProfile), então usamos `sb`.
       const sb = supabase;
       let isMounted = true;
+      let hydrationSequence = 0;
       let profileChannel: ReturnType<typeof sb.channel> | null = null;
 
-      const applyDbProfile = (dbProfile: Partial<AppUserProfile>) => {
+      const applyDbProfile = (dbProfile: Partial<AppUserProfile>, userId: string) => {
         if (!isMounted) return;
-        setProfile((prev) => (prev ? { ...prev, ...dbProfile } : prev));
+        setProfile((prev) => (prev?.id === userId ? { ...prev, ...dbProfile } : prev));
       };
 
-      const hydrateProfile = async (user: User | null) => {
+      const hydrateProfile = async (user: User | null, sequence: number) => {
         if (profileChannel) {
           await sb.removeChannel(profileChannel).catch(() => undefined);
           profileChannel = null;
         }
-        if (!user) {
+        if (sequence !== hydrationSequence || !isMounted) return;
+        if (!user || isPortalAuthUser(user)) {
           setProfile(null);
           return;
         }
-        const base = mapUserToProfile(user);
-        // Re-hidratação (token refresh / foco da janela): preserva o profile já conhecido
-        // — inclusive o `role` real (que vem da tabela profiles, não do metadata) — até o
-        // fetch do DB confirmar. Sem isso, o role piscava para o fallback "atendimento" e
-        // o PermissionRoute expulsava o admin para /inbox.
-        setProfile((prev) => (prev && prev.id === user.id ? { ...base, ...prev } : base));
+        // Preserve only an already verified row for the same identity while it refreshes.
+        setProfile(prev => prev?.id === user.id ? prev : null);
         const dbProfile = await fetchProfileFromDb(user.id);
-        if (!isMounted) return;
-        if (dbProfile) applyDbProfile(dbProfile);
+        if (!isMounted || sequence !== hydrationSequence) return;
+        const resolved = internalProfileFromRow(user, dbProfile);
+        setProfile(resolved);
+        if (!resolved) return;
 
         profileChannel = sb
           .channel(`profile:${user.id}`)
@@ -208,20 +194,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               if (typeof next.status === "string" && next.status) update.status = next.status as AppUserProfile["status"];
               if (typeof next.availability === "string" && next.availability)
                 update.availability = next.availability as AppUserProfile["availability"];
-              applyDbProfile(update);
+              applyDbProfile(update, user.id);
             },
           )
           .subscribe();
       };
 
       const hydrateAuthState = async (nextSession: Session | null) => {
+        hydrationSequence++;
         pendingSessionRef.current = nextSession;
+        if (!nextSession || isPortalAuthUser(nextSession.user)) {
+          pendingSessionRef.current = null;
+          setSession(null); setProfile(null); setMfaPending(false); setIsLoading(false);
+          if (profileChannel) { void sb.removeChannel(profileChannel).catch(() => undefined); profileChannel = null; }
+          return;
+        }
         if (authHydrationInFlightRef.current) {
           return authHydrationInFlightRef.current;
         }
 
         authHydrationInFlightRef.current = (async () => {
           while (pendingSessionRef.current) {
+            const sequence = hydrationSequence;
             const sessionToHydrate = pendingSessionRef.current;
             pendingSessionRef.current = null;
 
@@ -230,10 +224,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               break;
             }
 
+            if (sequence !== hydrationSequence) continue;
             setSession(validSession);
-            await hydrateProfile(validSession?.user ?? null);
+            await hydrateProfile(validSession?.user ?? null, sequence);
+            if (sequence !== hydrationSequence) continue;
             const pending = validSession ? await isMfaVerificationPending() : false;
-            if (isMountedRef.current && isMounted) setMfaPending(pending);
+            if (isMountedRef.current && isMounted && sequence === hydrationSequence) setMfaPending(pending);
           }
 
           if (isMountedRef.current && isMounted) {
@@ -296,6 +292,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const {
           data: { session: nextSession },
         } = await supabase.auth.getSession();
+        if (isPortalAuthUser(nextSession?.user)) {
+          await supabase.auth.signOut({ scope: "local" });
+          setSession(null); setProfile(null);
+          return { error: "Esta conta acessa o portal do cliente. Entre pela página /portal." };
+        }
         const validSession = await resolveValidSession(nextSession);
 
         if (!validSession) {
@@ -303,6 +304,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             error:
               "A sessao foi criada, mas nao ficou valida neste navegador. Tente entrar novamente.",
           };
+        }
+
+        const actualProfile = internalProfileFromRow(validSession.user, await fetchProfileFromDb(validSession.user.id));
+        if (!actualProfile) {
+          await supabase.auth.signOut({ scope: "local" });
+          setSession(null); setProfile(null);
+          return { error: "Não foi encontrado um perfil interno autorizado para esta conta. Se você é cliente, use /portal." };
         }
 
         // 2FA: se a conta tem TOTP, a sessão fica em aal1 até verificar o código.

@@ -175,3 +175,27 @@ verify_jwt = false
 # Single-use upload token is validated server-side; issuing links requires user JWT.
 [functions.legal-document-requests]
 verify_jwt = false
+
+# Portal externo: inspeção/ativação públicas; demais ações autenticam a identidade
+# real no handler e cada RPC revalida a permissão individual do destinatário.
+[functions.legal-portal-access]
+verify_jwt = false
+
+[functions.legal-portal-documents]
+verify_jwt = true
+
+# Comunicação jurídica: cron compartilhado apenas transporta o segredo; a
+# conexão e o vínculo de tenant/conta são próprios e falham sem configuração.
+[functions.legal-communication-dispatch]
+verify_jwt = false
+
+[functions.legal-communication-webhook]
+verify_jwt = false
+
+# Honorários separados do billing SaaS. Dispatch exige x-cron-secret; callback
+# exige o token específico do webhook Asaas e vínculo de conta do servidor.
+[functions.legal-payment-dispatch]
+verify_jwt = false
+
+[functions.legal-payment-webhook]
+verify_jwt = false

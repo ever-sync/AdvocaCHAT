@@ -356,6 +356,8 @@ reconhecido. Controles de cálculo detalhados na seção 10. Cobertura: IR11–I
 
 ### F5 — Cuidar do cliente e do financeiro do caso
 
+Registro de execução: [Fase 5 — portal e financeiro](FASE_5_PORTAL_E_FINANCEIRO.md).
+
 - [ ] F5.01 Publicar portal com autorização por caso e acesso individual do representante.
 - [ ] F5.02 Disponibilizar status compreensível, pendências, documentos liberados e agenda.
 - [ ] F5.03 Criar comunicações por evento com aprovação e comprovante de entrega/falha.

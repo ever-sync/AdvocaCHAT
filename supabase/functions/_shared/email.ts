@@ -600,13 +600,15 @@ export async function sendCollaboratorInviteEmail(
   const { data, error } = await admin.auth.admin.generateLink({
     type: "invite",
     email: input.email,
-    options: { redirectTo },
-    data: {
-      nome: input.nome,
-      empresa: input.empresa,
-      tenant_id: input.tenantId,
-      role: input.role,
-      plano: "colaborador",
+    options: {
+      redirectTo,
+      data: {
+        nome: input.nome,
+        empresa: input.empresa,
+        tenant_id: input.tenantId,
+        role: input.role,
+        plano: "colaborador",
+      },
     },
   });
 

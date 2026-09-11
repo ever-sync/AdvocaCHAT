@@ -103,6 +103,7 @@ type MenuItem = {
 const primaryItems: MenuItem[] = [
   { title: "Chat", url: "/inbox", icon: MessageCircle, permission: "inbox" },
   { title: "Casos jurídicos", url: "/casos", icon: Scale },
+  { title: "Meu dia jurídico", url: "/juridico/meu-dia", icon: CalendarDays },
   { title: "CRM", url: "/crm", icon: Briefcase, permission: "crm" },
   { title: "Agenda", url: "/agenda", icon: CalendarDays, permission: "agenda" },
   { title: "Clientes", url: "/clientes", icon: Users2, permission: "clientes" },

@@ -1,0 +1,18 @@
+import { useState, type FormEvent, type ReactNode } from "react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { LegalField } from "../LegalShared";
+import { selectClassName, useLegalAction } from "../legal-ui";
+import { STATES, type FinanceField, type FormValues } from "./finance-ui";
+export function FinanceForm({ title, description, fields, onSave, button = "Salvar rascunho" }: { title: string; description?: string; fields: FinanceField[]; onSave: (values: FormValues, context: { idempotencyKey: string }) => Promise<unknown>; button?: string }) {
+  const [open, setOpen] = useState(false);
+  const initial = () => Object.fromEntries(fields.map((field) => [field.key, field.initial ?? ""]));
+  const [values, setValues] = useState<FormValues>(initial);
+  const action = useLegalAction();
+  const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
+  async function submit(event: FormEvent) { event.preventDefault(); if (await action.run(() => onSave(values, { idempotencyKey }), "Registro financeiro salvo")) { setValues(initial()); setIdempotencyKey(crypto.randomUUID()); setOpen(false); } }
+  return <div className="rounded-lg border p-3"><Button type="button" variant="outline" size="sm" aria-expanded={open} onClick={() => setOpen(!open)}>{title}</Button>{open ? <form className="mt-4 space-y-4" onSubmit={(event) => void submit(event)}>{description ? <p className="text-sm text-muted-foreground">{description}</p> : null}<fieldset disabled={action.pending} className="grid min-w-0 gap-4 sm:grid-cols-2">{fields.filter((field) => !field.when || field.when(values)).map((field) => <LegalField key={field.key} label={field.label} hint={field.hint}>{(id) => field.kind === "select" ? <select id={id} className={selectClassName} value={values[field.key] ?? ""} required={field.required !== false} onChange={(event) => setValues({ ...values, [field.key]: event.target.value })}><option value="">Selecione</option>{(typeof field.options === "function" ? field.options(values) : field.options ?? []).map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> : field.kind === "textarea" ? <Textarea id={id} rows={3} maxLength={4000} value={values[field.key] ?? ""} required={field.required !== false} onChange={(event) => setValues({ ...values, [field.key]: event.target.value })} /> : field.kind === "checkbox" ? <input id={id} type="checkbox" checked={values[field.key] === "true"} required={field.required !== false} onChange={(event) => setValues({ ...values, [field.key]: String(event.target.checked) })} className="h-5 w-5" /> : <Input id={id} type={field.kind === "date" ? "date" : "text"} inputMode={field.kind === "money" ? "decimal" : undefined} maxLength={field.kind === "money" ? 24 : 180} value={values[field.key] ?? ""} required={field.required !== false} onChange={(event) => setValues({ ...values, [field.key]: event.target.value })} />}</LegalField>)}</fieldset><Button type="submit" disabled={action.pending}>{action.pending ? "Salvando…" : button}</Button></form> : null}</div>;
+}
+export function FinanceRecord({ title, status, children }: { title: string; status?: string; children?: ReactNode }) { return <article className="min-w-0 space-y-3 rounded-lg border p-4"><div className="flex flex-wrap items-center gap-2"><h4 className="min-w-0 break-words font-medium">{title}</h4>{status ? <Badge variant="secondary">{STATES[status] ?? status}</Badge> : null}</div>{children}</article>; }

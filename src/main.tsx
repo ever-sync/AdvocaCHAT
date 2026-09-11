@@ -1,26 +1,24 @@
-import { createRoot } from "react-dom/client";
-import * as Sentry from "@sentry/react";
-import App from "./App.tsx";
-import "./index.css";
-import { installChunkLoadRecovery } from "@/lib/chunk-load-recovery";
+import { startApplication } from "./entrypoint";
 
-import { captureLegalUploadToken, normalizeLegalPublicPath } from "@/lib/legal-upload-token";
-
-const publicPath = normalizeLegalPublicPath(window.location.pathname);
-captureLegalUploadToken(window.location, window.history);
-if (["/anamnese/preencher", "/orcamento/aprovar"].includes(publicPath)) {
-  window.history.replaceState(null, "", publicPath);
-}
-
-const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
-if (sentryDsn && publicPath !== "/enviar-documento") {
-  Sentry.init({
-    dsn: sentryDsn,
-    environment: import.meta.env.MODE,
-    sendDefaultPii: false,
-  });
-}
-
-installChunkLoadRecovery();
-
-createRoot(document.getElementById("root")!).render(<App />);
+// Only side-effect-free credential capture is imported statically here.
+void startApplication({
+  location: window.location,
+  history: window.history,
+  portal: async (entry) => {
+    const referrer = document.createElement("meta");
+    referrer.name = "referrer";
+    referrer.content = "no-referrer";
+    document.head.appendChild(referrer);
+    const { mountPortal } = await import("./portal/mount");
+    mountPortal(entry);
+  },
+  internal: async (path) => {
+    const { mountInternalApp } = await import("./internal-main");
+    mountInternalApp(path);
+  },
+}).catch(() => {
+  const root = document.getElementById("root");
+  if (root)
+    root.textContent =
+      "Não foi possível abrir esta página. Atualize para tentar novamente. Se estava ativando um acesso, reabra o convite original.";
+});

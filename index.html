@@ -2,6 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
+    <meta name="referrer" content="no-referrer" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <script>
       // Aplica o tema salvo antes da pintura, evitando flash branco no modo escuro.
@@ -9,10 +10,10 @@
       // públicas (login, cadastro, site) ficam sempre no tema claro.
       (function () {
         try {
-          var p = window.location.pathname;
+          var p = decodeURIComponent(window.location.pathname).toLowerCase();
           var isPublic =
             p === "/" ||
-            /^\/(login|cadastro|recuperar-senha|ativar-acesso|redefinir-senha|embed|agendar)(\/|$)/.test(p);
+            /^\/(portal|login|cadastro|recuperar-senha|ativar-acesso|redefinir-senha|embed|agendar)(\/|$)/.test(p);
           if (!isPublic && localStorage.getItem("theme") === "dark") {
             document.documentElement.classList.add("dark");
           }

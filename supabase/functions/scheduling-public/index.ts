@@ -152,7 +152,7 @@ Deno.serve(async (request) => {
       const tenantId = String(config.tenant_id);
 
       const providerId = String(body.providerId ?? "");
-      const serviceIds = Array.isArray(body.serviceIds)
+      const serviceIds: string[] = Array.isArray(body.serviceIds)
         ? body.serviceIds.map(String)
         : body.serviceId
         ? [String(body.serviceId)]
@@ -234,7 +234,7 @@ Deno.serve(async (request) => {
 
         if (svcs && svcs.length > 0) {
           const svcMap = new Map(svcs.map((s) => [String(s.id), s]));
-          const orderedSvcs = serviceIds.map((id) => svcMap.get(id)).filter(Boolean);
+          const orderedSvcs = serviceIds.map((id) => svcMap.get(id)).filter((service) => service !== undefined);
 
           serviceNome = orderedSvcs.map((s) => s.nome).join(" + ");
           preco = orderedSvcs.reduce((acc, s) => acc + Number(s.preco_venda ?? 0), 0);
