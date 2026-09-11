@@ -297,14 +297,18 @@ comparação da migração. Cobertura: J01, J07, J09 e J29.
 
 ### F2 — Transformar atendimento em contratação e trabalho jurídico
 
-- [ ] F2.01 Adaptar funil, serviços jurídicos e motivos de encerramento.
-- [ ] F2.02 Criar entrevistas versionadas por especialidade e verificação de conflitos.
-- [ ] F2.03 Implementar solicitação/upload seguro e revisão de documentos.
-- [ ] F2.04 Criar contratos, procurações e propostas com versões e aprovador.
+- [x] F2.01 Adaptar funil, serviços jurídicos e motivos de encerramento.
+- [x] F2.02 Criar entrevistas versionadas por especialidade e verificação de conflitos.
+- [x] F2.03 Implementar solicitação/upload seguro e revisão de documentos.
+- [x] F2.04 Criar contratos, procurações e propostas com versões e aprovador.
 - [ ] F2.05 Integrar assinatura: convite autorizado, callback idempotente, evidências e original assinado.
-- [ ] F2.06 Adaptar agenda para consultas, audiências e diligências; homologar Google Calendar se contratado.
-- [ ] F2.07 Criar modelos de tarefas e distribuição por responsável/substituto.
-- [ ] F2.08 Validar mensagens e formulários públicos; remover campos e dados pessoais de URLs públicas.
+- [x] F2.06 Adaptar agenda para consultas, audiências e diligências; homologar Google Calendar se contratado.
+- [x] F2.07 Criar modelos de tarefas e distribuição por responsável/substituto.
+- [x] F2.08 Validar mensagens e formulários públicos; remover campos e dados pessoais de URLs públicas.
+
+Entrega técnica em 11/09/2026: [operação, coleta segura e evidências](FASE_2_OPERACAO_JURIDICA.md).
+F2.05 depende de provedor; F2.06 entrega agenda interna, com calendário externo
+condicionado à contratação/habilitação. Pendências reunidas em EXECUCAO_CONTINUA.md.
 
 Saída: contato → contratação → documentos → caso aberto funciona de ponta a ponta.
 Callbacks repetidos não duplicam caso/assinatura. Link expirado não abre documento.

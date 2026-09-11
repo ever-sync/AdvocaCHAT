@@ -9,8 +9,10 @@ concluída porque um adaptador ou teste simulado passou.
 ## Estado de execução
 
 - F1: implementada, publicada e verificada. Código `accbdda`, evidências `8e946e2`.
-- F2: em execução — contratação, entrevistas, coleta, instrumentos, agenda e tarefas.
-- Próxima etapa após validar a parte técnica de F2: F3, triagem e dossiê de IR.
+- F2: entrega técnica publicada e verificada (`0f66242`); assinatura contratada pendente P01.
+  Evidências: [Fase 2](FASE_2_OPERACAO_JURIDICA.md).
+- F3: em execução — rendimentos/fontes, dossiê reservado, catálogo revisável e representação.
+- Próxima etapa após validar F3: F4, cálculos, pedidos e resultados de IR.
 - F3–F9: continuar pela ordem do plano, respeitando dependências técnicas reais.
 - Continuação vinculada à mesma tarefa por automação `continuar-fases-do-advocachat`.
 
@@ -36,3 +38,9 @@ encerrar a execução disponível com relatório consolidado e pausar a continua
 
 Não reutilizar credenciais, clientes ou base de dados de outros produtos.
 Não contratar serviços nem enviar mensagens a terceiros sem autorização específica.
+
+## Acompanhamento técnico para as fases seguintes
+
+- F3: preservar natureza de renda e fontes separadas; avaliação conjunta exige acesso médico e fiscal.
+- F5: revisar tipos herdados do envio de convite e scheduling-public, sem testar envio a pessoas reais.
+- F9: paginação das listas jurídicas (limite atual 200), tratamento auditado de uploads interrompidos, carga e recuperação integral.
