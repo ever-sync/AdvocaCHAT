@@ -247,7 +247,6 @@ export function AppSidebar() {
       ? formatTrialTimeLeft(new Date(trialEndsAt).getTime() - countdownNow)
       : null;
 
-  const isSettingsActive = pathname === "/configuracoes" || pathname.startsWith("/configuracoes/");
   const initials =
     profile?.nome
       ?.split(/\s+/)
@@ -432,60 +431,27 @@ export function AppSidebar() {
               <UserCog strokeWidth={1.5} className="mr-2 h-4 w-4" />
               Minha conta
             </DropdownMenuItem>
+            {can("configuracoes", "view") ? (
+              <DropdownMenuItem onSelect={() => navigate("/configuracoes")}>
+                <Settings2 strokeWidth={1.5} className="mr-2 h-4 w-4" aria-hidden />
+                Configurações
+              </DropdownMenuItem>
+            ) : null}
+            <DropdownMenuItem onSelect={() => setTheme(isDark ? "light" : "dark")}>
+              {isDark ? <Sun strokeWidth={1.5} className="mr-2 h-4 w-4" aria-hidden /> : <Moon strokeWidth={1.5} className="mr-2 h-4 w-4" aria-hidden />}
+              {isDark ? "Tema claro" : "Tema escuro"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={async () => {
+              await signOut();
+              navigate("/login");
+            }}>
+              <LogOut strokeWidth={1.5} className="mr-2 h-4 w-4" aria-hidden />
+              Sair
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {can("configuracoes", "view") ? (
-          <SidebarTooltip label="Configuracoes">
-            <NavLink
-              to="/configuracoes"
-              title="Configuracoes"
-              aria-label="Configuracoes"
-              className={cn(
-                "flex h-10 w-10 shrink-0 items-center justify-center gap-3 rounded-md transition-colors duration-150 group-data-[expanded=true]/sidebar:w-full group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3",
-                isSettingsActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              )}
-              activeClassName=""
-            >
-              <Settings2 strokeWidth={1.5} className="h-4 w-4 shrink-0" aria-hidden /><span className="hidden text-sm group-data-[expanded=true]/sidebar:block">Configurações</span>
-            </NavLink>
-          </SidebarTooltip>
-        ) : null}
-
-        <SidebarTooltip label={isDark ? "Modo claro" : "Modo escuro"}>
-          <button
-            type="button"
-            title={isDark ? "Modo claro" : "Modo escuro"}
-            aria-label={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
-            aria-pressed={isDark}
-            onClick={() => setTheme(isDark ? "light" : "dark")}
-            className="flex h-10 w-10 items-center justify-center gap-3 rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[expanded=true]/sidebar:w-full group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3"
-          >
-            {isDark ? (
-              <Sun strokeWidth={1.5} className="h-4 w-4" aria-hidden />
-            ) : (
-              <Moon strokeWidth={1.5} className="h-4 w-4" aria-hidden />
-            )}
-            <span className="hidden text-sm group-data-[expanded=true]/sidebar:block">{isDark ? "Tema claro" : "Tema escuro"}</span>
-          </button>
-        </SidebarTooltip>
-
-        <SidebarTooltip label="Sair">
-          <button
-            type="button"
-            title="Sair"
-            aria-label="Sair"
-            onClick={async () => {
-              await signOut();
-              navigate("/login");
-            }}
-            className="flex h-10 w-10 items-center justify-center gap-3 rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[expanded=true]/sidebar:w-full group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3"
-          >
-            <LogOut strokeWidth={1.5} className="h-4 w-4 shrink-0" aria-hidden /><span className="hidden text-sm group-data-[expanded=true]/sidebar:block">Sair</span>
-          </button>
-        </SidebarTooltip>
       </div>
     </aside>
   );
