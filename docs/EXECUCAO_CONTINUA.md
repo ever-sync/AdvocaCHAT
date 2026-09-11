@@ -13,8 +13,10 @@ concluída porque um adaptador ou teste simulado passou.
   Evidências: [Fase 2](FASE_2_OPERACAO_JURIDICA.md).
 - F3: entrega técnica publicada e verificada (`3105f4d`), com dossiê, revisão e representação.
   Evidências: [Fase 3](FASE_3_DOSSIE_ASSISTIDO_IR.md). Homologação profissional permanece P03.
-- F4: em execução — importações revisáveis, motor decimal, pedidos e conciliação.
-- F5–F9: continuar pela ordem do plano, respeitando dependências técnicas reais.
+- F4: entrega técnica publicada e verificada (`8825197`), incluindo SQL, API e navegador.
+  Evidências: [Fase 4](FASE_4_CALCULOS_PEDIDOS_E_RESULTADOS.md). Homologação profissional permanece P03.
+- F5: em execução — [arquitetura](FASE_5_ARQUITETURA.md), portal individual, comunicação, honorários, prestação de contas e rotina.
+- F6–F9: continuar pela ordem do plano, respeitando dependências técnicas reais.
 - Continuação vinculada à mesma tarefa por automação `continuar-fases-do-advocachat`.
 
 Em cada etapa: conferir estado Git, preservar trabalho alheio, implementar,
@@ -36,6 +38,8 @@ encerrar a execução disponível com relatório consolidado e pausar a continua
 | P03 | Advogado responsável, profissionais fiscais e casos de referência dos pilotos | Modelos revisáveis, campos estruturados, controles, exemplos sintéticos e cenários determinísticos | Aprovação jurídica/fiscal e homologação com os escritórios (F0, F3, F4) |
 | P04 | Pagadores, tribunais, fontes e contratos de monitoramento definidos | Modelo de fontes, integração desacoplada, fila e acompanhamento manual | Cobertura e homologação real de conectores (F6/F8) |
 | P05 | Política de retenção por finalidade, orçamento e metas de recuperação | Preservação sem descarte automático, controles e medição em testes | Prazos/obrigações contratuais e aceite das metas de operação |
+| P06 | Canal de comunicação autorizado do escritório e destinatários verificados | Portal, conteúdo aprovado, fila, adapters e recibos verificáveis | Homologação real de entrega pelo canal contratado |
+| P07 | Gateway de honorários e conta recebedora do escritório, sandbox e regras de estorno | Obrigações, conciliação, reversões e adapter isolado do billing SaaS | Cobrança e callback reais com provedor contratado |
 
 Não reutilizar credenciais, clientes ou base de dados de outros produtos.
 Não contratar serviços nem enviar mensagens a terceiros sem autorização específica.
@@ -43,6 +47,6 @@ Não contratar serviços nem enviar mensagens a terceiros sem autorização espe
 ## Acompanhamento técnico para as fases seguintes
 
 - F3: preservar natureza de renda e fontes separadas; avaliação conjunta exige acesso médico e fiscal.
-- Fixtures F3 mantidas isoladamente para validar F4; remover blobs, registros e usuários sintéticos e conferir estado original antes do encerramento disponível.
+- Fixtures F3/F4 mantidas isoladamente para validar F5; remover blobs, registros e usuários sintéticos e conferir estado original antes do encerramento disponível.
 - F5: revisar tipos herdados do envio de convite e scheduling-public, sem testar envio a pessoas reais.
 - F9: paginação das listas jurídicas (limite atual 200), tratamento auditado de uploads interrompidos, carga e recuperação integral. Medir também volume de snapshots F4 e custo de conferir atualidade de todas as versões; consultas fiscais recusam silenciosa truncagem acima de 25.000 linhas, mas ainda precisam de filtros/paginação apropriados para grandes casos.

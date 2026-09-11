@@ -1,6 +1,6 @@
 # Plano de evolução do AdvocaCHAT: plataforma jurídica e isenção de IR
 
-Data de referência: **11/09/2026** · Versão: **1.3** · Situação: **F1/F2/F3 com entregas técnicas verificadas; F4 em implementação**.
+Data de referência: **11/09/2026** · Versão: **1.4** · Situação: **F1–F4 com entregas técnicas verificadas; F5 em implementação**.
 
 Este é o roteiro de execução do produto. Reúne as 30 ideias de plataforma jurídica
 aprovadas na conversa e 25 funcionalidades específicas para escritórios que atuam
@@ -339,15 +339,15 @@ Cobertura: IR01–IR10. Cálculo automático e promessa de restituição ficam f
 
 ### F4 — Estruturar cálculos, pedidos e resultados de IR
 
-- [ ] F4.01 Importar planilha/informe revisável e organizar competências, anos-calendário e exercícios.
-- [ ] F4.02 Implementar motor decimal versionado, parâmetros por exercício e memória de cálculo.
-- [ ] F4.03 Registrar marcos e análise de períodos recuperáveis, com alertas revisados pelo advogado.
-- [ ] F4.04 Gerir declarações originais/retificadoras, recibos, situações e evidências, sem transmissão automática presumida.
-- [ ] F4.05 Criar pedidos por fonte pagadora com protocolos e decisões independentes.
-- [ ] F4.06 Criar fluxo judicial independente e avaliação registrada de competência, legitimidade e estratégia.
-- [ ] F4.07 Distribuir exigências e recursos; prazos informados manualmente são marcados como tais.
-- [ ] F4.08 Acompanhar cessação real em folha/benefício e conciliar restituições por período.
-- [ ] F4.09 Registrar vínculo entre pedidos sobrepostos e bloquear dupla apropriação de valores.
+- [x] F4.01 Importar planilha/informe revisável e organizar competências, anos-calendário e exercícios.
+- [x] F4.02 Implementar motor decimal versionado, parâmetros por exercício e memória de cálculo.
+- [x] F4.03 Registrar marcos e análise de períodos recuperáveis, com alertas revisados pelo advogado.
+- [x] F4.04 Gerir declarações originais/retificadoras, recibos, situações e evidências, sem transmissão automática presumida.
+- [x] F4.05 Criar pedidos por fonte pagadora com protocolos e decisões independentes.
+- [x] F4.06 Criar fluxo judicial independente e avaliação registrada de competência, legitimidade e estratégia.
+- [x] F4.07 Distribuir exigências e recursos; prazos informados manualmente são marcados como tais.
+- [x] F4.08 Acompanhar cessação real em folha/benefício e conciliar restituições por período.
+- [x] F4.09 Registrar vínculo entre pedidos sobrepostos e bloquear dupla apropriação de valores.
 - [ ] F4.10 Homologar cálculos com advogado e profissional fiscal responsável, usando valores esperados independentes.
 
 Saída: cálculo reproduzível, decisões por pagador, pacote de documentos revisado e
@@ -651,7 +651,7 @@ implementação**. O núcleo jurídico foi construído e publicado; o detalhamen
 as evidências estão em [Entrega da fase 1](FASE_1_NUCLEO_JURIDICO.md). F0 continua
 pendente nas decisões de negócio, validação jurídica e recuperação integral.
 O usuário autorizou continuar automaticamente até F9 e reunir as dependências
-externas ao final. F2/F3 têm entregas técnicas verificadas; F4 está
+externas ao final. F2–F4 têm entregas técnicas verificadas; F5 está
 em implementação. O [registro contínuo](EXECUCAO_CONTINUA.md) acompanha as
 pendências sem confundir publicação técnica com homologação profissional.
 Mudanças de escopo entram aqui com justificativa e efeito em dependências/custo.
@@ -666,8 +666,8 @@ o critério; implementação local, deploy e homologação são evidências dist
 | F1 | concluido | Codex (implementação técnica) | [Entrega, testes e implantação](FASE_1_NUCLEO_JURIDICO.md); validação de negócio/jurídica dos pilotos permanece em F0 |
 | F2 | em_validacao | Codex (implementação técnica) | [Entrega técnica verificada](FASE_2_OPERACAO_JURIDICA.md); assinatura P01 e calendário externo P02 pendentes |
 | F3 | em_validacao | Codex (implementação técnica) | [Dossiê, SQL, API e navegador publicado verificados](FASE_3_DOSSIE_ASSISTIDO_IR.md); cenários fiscais seguem em F4, homologação P03 pendente |
-| F4 | em_execucao | Codex (implementação técnica) | [Fontes e cenários independentes](FASE_4_FONTES_E_CALCULOS.md); cálculos, pedidos e conciliação em implementação |
-| F5 | planejado | A definir | Depende de F2/F3/F4 conforme módulo |
+| F4 | em_validacao | Codex (implementação técnica) | [Cálculos, pedidos, SQL, API e navegador verificados](FASE_4_CALCULOS_PEDIDOS_E_RESULTADOS.md); homologação profissional F4.10 permanece P03 |
+| F5 | em_execucao | Codex (implementação técnica) | [Arquitetura e contratos](FASE_5_ARQUITETURA.md); portal, comunicação, financeiro e rotina em implementação |
 | F6 | planejado | A definir | Fonte habilitada e cobertura definida |
 | F7 | planejado | A definir | Dados autorizados e conjunto de avaliações |
 | F8 | planejado | A definir | Habilitações e demanda dos pilotos |
@@ -732,3 +732,7 @@ não evidência de que a integração já está ativa.
 | --- | --- | --- |
 | 11/09/2026 | 1.0 | Plano inicial: 30 funcionalidades jurídicas, 25 da especialidade IR, fases F0–F9, critérios e dependências |
 | 11/09/2026 | 1.1 | Execução de F1 a pedido do usuário: núcleo jurídico, cofre por categoria, proteção dos perfis e migração aditiva; F0 não encerrada |
+
+| 11/09/2026 | 1.2 | Entrega técnica F2: instrumentos, coleta privada, tarefas e agenda; provedores externos pendentes |
+| 11/09/2026 | 1.3 | Entrega técnica F3: dossiê IR, fontes e rendas distintas, análise humana e representação |
+| 11/09/2026 | 1.4 | F4 publicada e verificada com cálculos decimais, pedidos e conciliação; avanço automático para F5 |

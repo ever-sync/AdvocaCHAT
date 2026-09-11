@@ -1,7 +1,7 @@
 # F4 — Cálculos, pedidos e resultados de IR
 
-Estado em 11/09/2026: implementação validada localmente; migração aplicada em
-produção. Publicação da aplicação e verificação funcional ao vivo ainda pendentes.
+Estado em 11/09/2026: implementação publicada, migração aplicada e fluxos validados
+em produção pela API e pelo navegador.
 Homologação jurídica/fiscal permanece P03.
 
 ## Entrega
@@ -87,7 +87,50 @@ em uma transação com registro no ledger. Hashes antes/depois comprovaram a
 preservação integral das linhas de 40 tabelas existentes: núcleo, Auth e tabelas
 jurídicas/F3. As 29 tabelas `ir_` resultantes têm RLS habilitada. O módulo permanece
 ligado somente no escritório sintético de teste; o escritório original não foi
-habilitado automaticamente. A aplicação ao vivo ainda será validada após deploy.
+habilitado automaticamente.
+
+## Publicação e verificação em produção
+
+Código `88251972db31174166a3753e85d7949664d5f8d4`, publicado e SHA de `origin/main`
+conferido. CI aprovado: [execução 34640427392](https://github.com/ever-sync/AdvocaCHAT/actions/runs/34640427392).
+Railway finalizou os três serviços com `SUCCESS` no mesmo commit:
+
+- web: `fe3595a5-59c2-4428-810a-01636b061e67`;
+- functions: `2b9339dc-fe8f-45d6-8232-7f156d9c763a`;
+- scheduler: `7a7917aa-122b-4875-87e5-104b0fe45c07`.
+
+Web e health das funções responderam HTTP 200. A validação autenticada usou caso
+fictício isolado e comprovou persistência de CSV, correção antes da revisão,
+imutabilidade depois dela, esperado independente **382,88**, recusa sem residência
+confirmada, exigência de completude e isolamento por escritório/categoria.
+
+Os testes de operações pela API comprovaram: rotas administrativa/judicial,
+estratégias independentes, decisão posterior preservada ao cadastrar protocolo
+antigo, prazo manual com substituto, relatório auditado para leitor autorizado e
+bloqueio após revogação, situação da mesma declaração original com histórico e
+retificadora vinculada. Reservas concorrentes respeitaram o principal **382,88**;
+recebimento idempotente de **150,00** e liberação parcial deixaram **182,88**
+reservados e **50,00** disponíveis. Cessação/reabertura documentadas e recusa de
+fato futuro também passaram. O snapshot anterior permaneceu idêntico e foi marcado
+desatualizado quando chegaram novos registros.
+
+Na primeira leitura imediata de um CSV houve HTTP 503; a releitura do mesmo objeto,
+sem reenviar, confirmou bytes e hash. Os quatro uploads seguintes foram lidos com
+sucesso imediato. A causa dessa resposta isolada não foi determinada; registrar
+telemetria operacional e reavaliar no ensaio de falhas da F9.
+
+O navegador em produção executou **30 mutações sintéticas**, seis chamadas de
+boas-vindas foram bloqueadas e não houve erro de página. Conferiu CSV original,
+valor ausente corrigido antes da revisão, parâmetro/exemplo independente, período
+manual, recusa sem total, cálculo **100,00 → 0,00**, abrangência na aprovação,
+relatório auditado baixado e reaberto, principal/reserva/recebimento/liberação,
+declaração/recibo/histórico e retenção positiva sem falsa cessação. Reload confirmou
+persistência; oito abas em 375 px ficaram sem overflow. Não houve repetição do
+503 nos uploads desse roteiro. O relatório estático reabriu sem requisições externas.
+
+Após a revisão final, a interface distingue pedido sem decisão de uma decisão que
+reconhece valor zero. Essa alteração é de apresentação; os registros de decisões
+continuam sendo a origem do valor reconhecido. A continuação avança para F5.
 
 ## Dependências
 
