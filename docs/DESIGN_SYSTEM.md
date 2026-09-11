@@ -56,11 +56,11 @@ identificadores usam `font-mono`; métricas usam `tabular-nums`.
 
 ## Ícones
 
-Lucide, 20 px e traço 1.75 na navegação; 16 px dentro dos botões. Ícones decorativos
+Lucide, 20 px e traço 1.5 na navegação; 16 px dentro dos botões. Ícones decorativos
 recebem `aria-hidden`. Ações com ícone isolado precisam de `aria-label` e, quando
-necessário, tooltip. Use uma única família e rótulos claros: Pasta para processos,
+necessário, tooltip. Use uma única família e rótulos claros: Balança para casos jurídicos,
 Calendário para prazos, Arquivo para documentos, Pessoas para clientes e Balão
-para conversas. A balança pertence principalmente à identidade.
+para conversas. Use a lista de tarefas para Meu dia jurídico, distinguindo-o da Agenda.
 
 ## Componentes
 
@@ -123,3 +123,8 @@ Validação: TypeScript, lint dos arquivos alterados, build principal e widget;
 navegação com fixtures locais em desktop, temas claro/escuro, menu móvel e
 larguras 320/390/1024 px. No teste visual, o bloqueio de assinatura foi isolado
 apenas no navegador de teste, sem alteração da regra de cobrança do aplicativo.
+
+Os menus desktop e móvel compartilham a mesma associação visual: balança para
+casos jurídicos, lista de tarefas para Meu dia jurídico, quadro Kanban para CRM,
+calendário para Agenda, pessoas para Clientes e arquivo para Documentos. Painel
+usa uma grade de dashboard; Agente IA usa um assistente com balão de conversa.

@@ -1,17 +1,18 @@
 import {
-  Briefcase,
+  SquareKanban,
   CalendarDays,
+  ListTodo,
   LogOut,
   Menu,
   Megaphone,
-  MessageSquare,
+  MessageCircle,
   Package,
   Settings2,
   UserCog,
   UserRound,
-  Users2,
+  UsersRound,
   FileText,
-  FolderOpen,
+  Scale,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
@@ -37,15 +38,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRolePermissions } from "@/hooks/useRolePermissions";
 import { cn } from "@/lib/utils";
 
-type NavIcon = typeof MessageSquare;
+type NavIcon = typeof MessageCircle;
 
 const linkItems: { title: string; url: string; icon: NavIcon; permission?: "inbox" | "crm" | "agenda" | "clientes" | "produtos" | "marketing" | "configuracoes" }[] = [
-  { title: "Chat", url: "/inbox", icon: MessageSquare, permission: "inbox" },
-  { title: "Casos jurídicos", url: "/casos", icon: FolderOpen },
-  { title: "Meu dia jurídico", url: "/juridico/meu-dia", icon: CalendarDays },
-  { title: "CRM", url: "/crm", icon: Briefcase, permission: "crm" },
+  { title: "Chat", url: "/inbox", icon: MessageCircle, permission: "inbox" },
+  { title: "Casos jurídicos", url: "/casos", icon: Scale },
+  { title: "Meu dia jurídico", url: "/juridico/meu-dia", icon: ListTodo },
+  { title: "CRM", url: "/crm", icon: SquareKanban, permission: "crm" },
   { title: "Agenda", url: "/agenda", icon: CalendarDays, permission: "agenda" },
-  { title: "Clientes", url: "/clientes", icon: Users2, permission: "clientes" },
+  { title: "Clientes", url: "/clientes", icon: UsersRound, permission: "clientes" },
   { title: "Produtos", url: "/produtos", icon: Package, permission: "produtos" },
   { title: "Documentos", url: "/documentos", icon: FileText, permission: "crm" },
   { title: "Marketing", url: "/marketing", icon: Megaphone, permission: "marketing" },
@@ -82,7 +83,7 @@ function MobileNavLink({
         )}
         activeClassName=""
       >
-        <item.icon className="h-5 w-5 shrink-0" aria-hidden />
+        <item.icon strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden />
         <span>{item.title}</span>
       </NavLink>
     </SheetClose>
@@ -118,7 +119,7 @@ export function MobileNav() {
               className="h-10 w-10 shrink-0 rounded-md text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               aria-label="Abrir menu"
             >
-              <Menu className="h-5 w-5" aria-hidden />
+              <Menu strokeWidth={1.5} className="h-5 w-5" aria-hidden />
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-[min(88vw,20rem)] gap-0 p-0" disableInnerScroll>
@@ -152,7 +153,7 @@ export function MobileNav() {
                     }}
                     className="flex w-full items-center gap-3 rounded-md border border-destructive/20 bg-destructive/5 px-3 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
                   >
-                    <LogOut className="h-5 w-5 shrink-0" aria-hidden />
+                    <LogOut strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden />
                     Sair
                   </button>
                 </SheetClose>
@@ -193,7 +194,7 @@ export function MobileNav() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={() => navigate("/configuracoes?aba=perfil")}>
-              <UserCog className="mr-2 h-4 w-4" />
+              <UserCog strokeWidth={1.5} className="mr-2 h-4 w-4" />
               Minha conta
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -203,7 +204,7 @@ export function MobileNav() {
                 navigate("/login");
               }}
             >
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut strokeWidth={1.5} className="mr-2 h-4 w-4" />
               Sair
             </DropdownMenuItem>
           </DropdownMenuContent>

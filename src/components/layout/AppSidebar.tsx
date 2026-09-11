@@ -1,10 +1,11 @@
 import {
-  Bot,
-  Briefcase,
+  BotMessageSquare,
+  SquareKanban,
   CalendarDays,
+  ListTodo,
   Check,
   Building2,
-  Gauge,
+  LayoutDashboard,
   LogOut,
   Megaphone,
   MessageCircle,
@@ -15,11 +16,10 @@ import {
   RotateCcw,
   ShieldCheck,
   UserCog,
-  Users2,
+  UsersRound,
   FileText,
   Hourglass,
   Scale,
-  FolderOpen,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -97,22 +97,22 @@ function formatTrialTimeLeft(milliseconds: number) {
 type MenuItem = {
   title: string;
   url: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: typeof MessageCircle;
   permission?: "inbox" | "crm" | "agenda" | "clientes" | "produtos" | "relatorios" | "marketing" | "ia" | "configuracoes";
 };
 
 const primaryItems: MenuItem[] = [
   { title: "Chat", url: "/inbox", icon: MessageCircle, permission: "inbox" },
-  { title: "Casos jurídicos", url: "/casos", icon: FolderOpen },
-  { title: "Meu dia jurídico", url: "/juridico/meu-dia", icon: CalendarDays },
-  { title: "CRM", url: "/crm", icon: Briefcase, permission: "crm" },
+  { title: "Casos jurídicos", url: "/casos", icon: Scale },
+  { title: "Meu dia jurídico", url: "/juridico/meu-dia", icon: ListTodo },
+  { title: "CRM", url: "/crm", icon: SquareKanban, permission: "crm" },
   { title: "Agenda", url: "/agenda", icon: CalendarDays, permission: "agenda" },
-  { title: "Clientes", url: "/clientes", icon: Users2, permission: "clientes" },
+  { title: "Clientes", url: "/clientes", icon: UsersRound, permission: "clientes" },
   { title: "Produtos", url: "/produtos", icon: Package, permission: "produtos" },
   { title: "Documentos", url: "/documentos", icon: FileText, permission: "crm" },
-  { title: "Painel", url: "/painel", icon: Gauge, permission: "relatorios" },
+  { title: "Painel", url: "/painel", icon: LayoutDashboard, permission: "relatorios" },
   { title: "Marketing", url: "/marketing", icon: Megaphone, permission: "marketing" },
-  { title: "Agente IA", url: "/agente-ia", icon: Bot, permission: "ia" },
+  { title: "Agente IA", url: "/agente-ia", icon: BotMessageSquare, permission: "ia" },
 ];
 
 function SidebarTooltip({
@@ -161,7 +161,7 @@ function RailNavLink({ item, pathname }: { item: MenuItem; pathname: string }) {
         )}
         activeClassName=""
       >
-        <item.icon className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden truncate text-sm font-medium xl:block">{item.title}</span>
+        <item.icon strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden truncate text-sm font-medium xl:block">{item.title}</span>
       </NavLink>
     </SidebarTooltip>
   );
@@ -246,7 +246,7 @@ export function AppSidebar() {
       className="relative z-40 hidden h-[100dvh] w-[64px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar py-3 text-sidebar-foreground md:flex xl:w-[208px]"
       aria-label="Navegacao principal"
     >
-      <NavLink to="/inbox" aria-label="AdvocaCHAT, início" className="mx-2 mb-4 flex h-11 shrink-0 items-center justify-center gap-2 rounded-md text-sidebar-foreground xl:justify-start xl:px-3"><Scale className="h-6 w-6 shrink-0 text-sidebar-primary" aria-hidden /><span className="hidden text-base font-semibold tracking-tight xl:block">AdvocaCHAT</span></NavLink>
+      <NavLink to="/inbox" aria-label="AdvocaCHAT, início" className="mx-2 mb-4 flex h-11 shrink-0 items-center justify-center gap-2 rounded-md text-sidebar-foreground xl:justify-start xl:px-3"><Scale strokeWidth={1.5} className="h-6 w-6 shrink-0 text-sidebar-primary" aria-hidden /><span className="hidden text-base font-semibold tracking-tight xl:block">AdvocaCHAT</span></NavLink>
 
       <div className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto px-2 xl:items-stretch">
         {!permissionsLoading
@@ -403,7 +403,7 @@ export function AppSidebar() {
               </>
             ) : null}
             <DropdownMenuItem onSelect={() => navigate("/configuracoes?aba=perfil")}>
-              <UserCog className="mr-2 h-4 w-4" />
+              <UserCog strokeWidth={1.5} className="mr-2 h-4 w-4" />
               Minha conta
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -423,7 +423,7 @@ export function AppSidebar() {
               )}
               activeClassName=""
             >
-              <Settings2 className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden text-sm xl:block">Configurações</span>
+              <Settings2 strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden text-sm xl:block">Configurações</span>
             </NavLink>
           </SidebarTooltip>
         ) : null}
@@ -438,9 +438,9 @@ export function AppSidebar() {
             className="flex h-10 w-10 items-center justify-center gap-3 rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground xl:w-full xl:justify-start xl:px-3"
           >
             {isDark ? (
-              <Sun className="h-[18px] w-[18px]" aria-hidden />
+              <Sun strokeWidth={1.5} className="h-[18px] w-[18px]" aria-hidden />
             ) : (
-              <Moon className="h-[18px] w-[18px]" aria-hidden />
+              <Moon strokeWidth={1.5} className="h-[18px] w-[18px]" aria-hidden />
             )}
             <span className="hidden text-sm xl:block">{isDark ? "Tema claro" : "Tema escuro"}</span>
           </button>
@@ -457,7 +457,7 @@ export function AppSidebar() {
             }}
             className="flex h-10 w-10 items-center justify-center gap-3 rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground xl:w-full xl:justify-start xl:px-3"
           >
-            <LogOut className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden text-sm xl:block">Sair</span>
+            <LogOut strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden text-sm xl:block">Sair</span>
           </button>
         </SidebarTooltip>
       </div>
