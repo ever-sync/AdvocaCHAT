@@ -21,6 +21,7 @@ import PublicBooking from "./pages/PublicBooking";
 import PublicAnamnese from "./pages/PublicAnamnese";
 import PublicOrcamento from "./pages/PublicOrcamento";
 
+const DesignSystem = lazyWithReload(() => import("./pages/DesignSystem"));
 const Inbox = lazyWithReload(() => import("./pages/Inbox"));
 const Clientes = lazyWithReload(() => import("./pages/Clientes"));
 const Configuracoes = lazyWithReload(() => import("./pages/Configuracoes"));
@@ -126,6 +127,8 @@ const App = () => (
             <Suspense fallback={<PageFallback />}>
               <RoutedErrorBoundary>
                 <Routes>
+                  {/* Public visual reference: fictional data only. */}
+                  <Route path="/design-system" element={<DesignSystem />} />
                   {/* Public */}
                   <Route path="/" element={<RootRedirect />} />
                   <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />

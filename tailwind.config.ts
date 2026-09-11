@@ -20,11 +20,14 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Poppins", "sans-serif"],
+        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
         poppins: ["Poppins", "sans-serif"],
-        mono: ["Poppins", "sans-serif"],
+        mono: ["ui-monospace", "SFMono-Regular", "monospace"],
       },
       colors: {
+        brand: "hsl(var(--brand))",
+        gold: "hsl(var(--gold))",
+        info: { DEFAULT: "hsl(var(--info))", foreground: "hsl(var(--info-foreground))" },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -95,9 +98,10 @@ export default {
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "var(--radius-control)",
+        sm: "0.375rem",
         badge: "99px",
+        dialog: "var(--radius-dialog)",
       },
       keyframes: {
         "accordion-down": {

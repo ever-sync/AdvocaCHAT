@@ -1,0 +1,73 @@
+.ds-page {
+  @apply min-h-screen bg-background text-foreground;
+}
+.ds-topbar {
+  @apply sticky top-0 z-30 flex h-[72px] items-center justify-between gap-3 border-b bg-card/95 px-5 backdrop-blur-md sm:px-8;
+}
+.ds-brand-mark {
+  @apply flex h-9 w-9 items-center justify-center rounded-md bg-sidebar text-sidebar-primary;
+}
+.ds-header-divider {
+  @apply mx-2 hidden h-5 w-px bg-border sm:block;
+}
+.ds-layout {
+  @apply mx-auto flex max-w-[1680px];
+}
+.ds-sidebar {
+  @apply sticky top-[72px] hidden h-[calc(100dvh-72px)] w-[230px] shrink-0 flex-col justify-between bg-sidebar px-5 py-10 text-sidebar-foreground lg:flex;
+}
+.ds-sidebar .ds-eyebrow {
+  @apply text-sidebar-foreground/60;
+}
+.ds-sidebar-note {
+  @apply rounded-lg border border-sidebar-border p-4;
+}
+.ds-nav-link {
+  @apply flex items-center gap-3 rounded-md px-3 py-3 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground;
+}
+.ds-main {
+  @apply min-w-0 flex-1 px-5 sm:px-9 xl:px-14;
+}
+.ds-hero {
+  @apply flex items-center justify-between gap-8 pb-12 pt-12 sm:pt-16;
+}
+.ds-eyebrow {
+  @apply text-[10px] font-semibold tracking-[0.16em];
+}
+.ds-hero-seal {
+  @apply hidden h-52 w-44 shrink-0 flex-col items-center justify-center gap-3 rounded-t-full border border-gold/40 text-brand 2xl:flex;
+  background: linear-gradient(150deg, hsl(var(--gold) / 0.08), transparent);
+}
+.ds-hero-seal span {
+  @apply text-center text-xs tracking-[0.3em];
+}
+.ds-hero-seal small {
+  @apply text-[8px] tracking-[0.12em] text-muted-foreground;
+}
+.ds-principles {
+  @apply flex flex-wrap gap-x-8 gap-y-4 border-y py-5;
+}
+.ds-principles span {
+  @apply flex items-center gap-2 text-xs text-muted-foreground;
+}
+.ds-principles svg {
+  @apply h-4 w-4 text-primary;
+}
+.ds-section {
+  @apply py-10 sm:py-12;
+}
+.ds-section + .ds-section {
+  @apply border-t;
+}
+.ds-section-number {
+  @apply mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border bg-card font-mono text-[11px] text-muted-foreground;
+}
+.ds-demo-header {
+  @apply flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6;
+}
+.ds-footer {
+  @apply flex flex-wrap justify-between gap-3 border-t py-7 text-xs text-muted-foreground;
+}
+.ds-skip {
+  @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:p-3 focus:text-primary-foreground;
+}
