@@ -45,4 +45,4 @@ Não contratar serviços nem enviar mensagens a terceiros sem autorização espe
 - F3: preservar natureza de renda e fontes separadas; avaliação conjunta exige acesso médico e fiscal.
 - Fixtures F3 mantidas isoladamente para validar F4; remover blobs, registros e usuários sintéticos e conferir estado original antes do encerramento disponível.
 - F5: revisar tipos herdados do envio de convite e scheduling-public, sem testar envio a pessoas reais.
-- F9: paginação das listas jurídicas (limite atual 200), tratamento auditado de uploads interrompidos, carga e recuperação integral.
+- F9: paginação das listas jurídicas (limite atual 200), tratamento auditado de uploads interrompidos, carga e recuperação integral. Medir também volume de snapshots F4 e custo de conferir atualidade de todas as versões; consultas fiscais recusam silenciosa truncagem acima de 25.000 linhas, mas ainda precisam de filtros/paginação apropriados para grandes casos.

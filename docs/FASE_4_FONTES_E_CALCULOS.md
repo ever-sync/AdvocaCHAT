@@ -1,8 +1,8 @@
 # F4 — Fontes e cenários de cálculo para homologação
 
-**Conferência em 11/09/2026. Estado: preparação técnica; parâmetros e resultados ainda dependem de homologação jurídica/fiscal P03.**
+**Conferência em 11/09/2026. Estado: implementação técnica em validação; parâmetros e resultados de casos reais ainda dependem de homologação jurídica/fiscal P03.**
 
-Este documento prepara F4.01–F4.10 do [plano](PLANO_PLATAFORMA_JURIDICA_E_ISENCAO_IR.md). Não implementa um motor fiscal, não reconhece crédito e não autoriza transmissão de declarações ou pedidos. O enquadramento e seus documentos permanecem no [dossiê F3](FASE_3_FONTES_E_CENARIOS.md); aqui se acrescentam critérios para cálculos verificáveis e acompanhamento por pedido.
+Este documento reúne fontes, cenários independentes e contratos de F4.01–F4.10 do [plano](PLANO_PLATAFORMA_JURIDICA_E_ISENCAO_IR.md). O texto não reconhece crédito nem autoriza transmissão de declarações ou pedidos. O enquadramento e seus documentos permanecem no [dossiê F3](FASE_3_FONTES_E_CENARIOS.md); aqui se acrescentam critérios para cálculos verificáveis e acompanhamento por pedido. A implementação em curso é descrita na seção 8; testes técnicos não substituem o aceite profissional P03.
 
 ## 1. Fontes primárias e alcance
 
@@ -80,7 +80,7 @@ O art. 168 estabelece cinco anos com marcos próprios das hipóteses do art. 165
 
 Atualização monetária depende da natureza do crédito e do marco adotado: pagamento indevido e restituição apurada em declaração possuem termos iniciais diferentes na IN. Não aplicar a mesma data de início de juros a todas as retenções mensais. Índices, termo inicial/final e eventual parcela do mês final precisam de versão e homologação próprias. [F4-S09](https://normas.receita.fazenda.gov.br/sijut2consulta/link.action?idAto=122002&visao=anotado)
 
-## 5. Contrato técnico proposto, ainda não implementado
+## 5. Contrato técnico e limites de cobertura
 
 As decisões abaixo são requisitos de engenharia propostos para homologação, não interpretações normativas adicionais:
 
@@ -171,3 +171,16 @@ Uma alteração em valor, documento, natureza, marco F3, parâmetro aprovado, de
 | Sobreposição de rotas | Pedido administrativo e judicial podem coexistir com vínculo e análise de sobreposição, mas não apropriam o mesmo principal duas vezes. Devolução pela fonte é conciliada com a mesma identidade de principal. |
 
 O registro de homologação deve distinguir revisão **jurídica**, revisão **fiscal** e teste **técnico**. A interface não deve atribuir a um colaborador uma habilitação profissional somente porque ele tem o papel de proprietário do caso. O responsável registra sua função e identificação; o aceite de engenharia não substitui esse registro.
+
+## 8. Implementação técnica em validação
+
+Contratos TypeScript e APIs estão em `src/types/legal-ir-calculations.ts` e `src/lib/api/legal-ir-calculations.ts`. A migração `20260911190000_ir_calculations_and_requests.sql` contém o motor `numeric` e as operações autenticadas. Nesta etapa o SQL e a integração continuam em validação; esta seção não afirma implantação ou homologação externa concluídas.
+
+- **Importação:** `parseIrTaxCsv` em `src/lib/legal-ir-import.ts` recebe delimitador e formato decimal escolhidos expressamente. Até 500 linhas e 1 MiB; cabeçalhos conhecidos; aspas, separadores e linhas originais preservados. Valores ausentes são `null`, natureza desconhecida é `unknown`; erros bloqueiam o envio do lote inteiro. Campos monetários canônicos limitam-se a 14 dígitos inteiros e duas casas; não há aritmética financeira em `Number`. O CSV original fica no fluxo de documento fiscal privado; o parser conserva também os textos originais de cada célula.
+- **Parâmetros:** `ordinary_resident` declara cobertura restrita. Residência fiscal é campo explícito do cenário (`resident`, `non_resident`, `unknown`), sem presumir residência brasileira. A validação técnica registra o esperado independente, sua origem, resultado do motor, divergência e autor. Aprovar uma versão exige exemplo conferido e ausência de divergências registradas nessa versão; esse controle não declara que toda a apuração fiscal foi homologada.
+- **Cenários:** a memória separa proposta tributável e proposta de deduções por linha, valores anteriores/propostos e retenção informada. Resultados incompletos possuem motivos estruturados e totais nulos. Crédito reconhecido, recebimento e atualização monetária não são inferidos do resultado. O demonstrativo histórico é lido por operação autenticada auditada com acesso médico e fiscal; sua impressão não gera ato externo.
+- **Pedidos:** o escritório cria preparação por pagador/rota e pode completar os vínculos de avaliação/cálculo enquanto ela continua rascunho. Alterar a preparação exige nova revisão da estratégia. Protocolo, recurso e decisão são registros de fatos externos com comprovante; registrá-los não transmite ato nem equivale a um novo parecer. O histórico conserva a data do fato e a data do registro para distinguir eventos antigos recebidos depois.
+- **Declarações:** a situação da mesma declaração pode avançar mediante recibo e justificativa; os valores e o arquivo original permanecem preservados. O histórico registra estado anterior/posterior, recibo, nota e ator. Uma retificadora possui vínculo próprio à declaração anterior; atualizar uma situação não exige inventar retificadora.
+- **Cessação e conciliação:** comparar folhas distintas registra ausência de retenção, retenção mantida ou reaberta conforme os valores conferidos. Principal, alocação e recebimento têm identidades e comprovantes próprios; referência da linha e hash do documento ajudam a impedir reaproveitamento de uma mesma prova sob outro identificador. Liberação de alocação conserva a justificativa e a parcela já recebida.
+
+Evidência técnica já executada neste bloco: **28 regressões do parser** em `src/lib/legal-ir-import.test.ts` e **5 regressões de interface** em `src/components/legal/ir/financial/IrFiscalOperations.test.tsx`, cobrindo centavos além da precisão segura de `Number`, valores desconhecidos, entradas malformadas, limites de lote incluindo textos originais, perda de permissões com cache/diálogo aberto, retenção positiva, revisão jurídica desatualizada e atualização da mesma declaração sem inventar retificadora. A validação SQL independente e a jornada completa permanecem sob a integração da fase; resultados devem ser registrados quando concluídos, sem antecipá-los.

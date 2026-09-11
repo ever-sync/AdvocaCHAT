@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +13,10 @@ import { IrCatalog } from "./IrCatalog";
 import { IrChecklists } from "./IrChecklists";
 import { IrAssessments } from "./IrAssessments";
 import { IrRepresentations } from "./IrRepresentations";
+
+const IrFinancialWorkspace = lazy(
+  () => import("./financial/IrFinancialWorkspace"),
+);
 
 export default function LegalIrWorkspace(props: LegalOperationsProps) {
   const context = useQuery({
@@ -66,6 +71,7 @@ export default function LegalIrWorkspace(props: LegalOperationsProps) {
             <TabsTrigger value="assessment">Análise do advogado</TabsTrigger>
             <TabsTrigger value="catalog">Catálogo</TabsTrigger>
             <TabsTrigger value="representation">Representação</TabsTrigger>
+            <TabsTrigger value="financial">Cálculos e pedidos</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="income">
@@ -85,6 +91,11 @@ export default function LegalIrWorkspace(props: LegalOperationsProps) {
         </TabsContent>
         <TabsContent value="representation">
           <IrRepresentations {...shared} />
+        </TabsContent>
+        <TabsContent value="financial">
+          <Suspense fallback={<LegalLoading />}>
+            <IrFinancialWorkspace {...shared} />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>

@@ -331,7 +331,7 @@ function IncomeDialog({
             {(id) => (
               <Input
                 id={id}
-                maxLength={100}
+                maxLength={80}
                 value={form.benefit_number}
                 onChange={(event) =>
                   setForm({ ...form, benefit_number: event.target.value })

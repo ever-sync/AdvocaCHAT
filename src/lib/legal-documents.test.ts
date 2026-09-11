@@ -21,4 +21,14 @@ describe("legal vault file boundaries", () => {
     expect(headers["Cache-Control"]).toContain("no-store");
     expect(headers["X-Content-Type-Options"]).toBe("nosniff");
   });
+  it("preserves CSV source bytes as an attachment and rejects binary or invalid UTF-8 disguised as CSV", () => {
+    const original = new TextEncoder().encode('\uFEFFcompetencia;valor;origem\r\n2026-01;6000,00;"Informe sintético"\r\n');
+    const copy = original.slice();
+    expect(validateLegalDocument(original, "text/csv")).toBeNull();
+    expect(original).toEqual(copy);
+    expect(validateLegalDocument(new Uint8Array([0x50, 0x4b, 0, 4]), "text/csv")).toBeTruthy();
+    expect(validateLegalDocument(new Uint8Array([0xc3, 0x28]), "text/csv")).toBeTruthy();
+    expect(legalDownloadHeaders("informe.csv")["Content-Type"]).toBe("application/octet-stream");
+    expect(legalDownloadHeaders("informe.csv")["Content-Disposition"]).toContain("attachment;");
+  });
 });
