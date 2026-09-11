@@ -67,3 +67,17 @@ do frontend, lint dos arquivos alterados e build passaram. O `deno check` do
 orquestrador continua apontando sete erros de tipos herdados em ai-tools/domain/
 uazapi, reproduzidos também na base sem estas alterações. Os testes do runtime
 foram executados com `--no-check`; não são uma homologação de WhatsApp real.
+
+## Pré Vidas: avaliação opcional e acompanhamento
+
+O SDR registra a falta de laudo sem encerrar a oportunidade. Novas coletas completas com `has_documents=no` abrem acompanhamento `needed`; registros históricos não são migrados automaticamente. O closer explica a empresa parceira e solicita autorização específica antes de registrar `requested`. A autorização da triagem não substitui essa autorização.
+
+Estados: `needed` → `requested` → `scheduled` → `awaiting_report` → `report_received`. `reschedule` identifica falta ou pedido de mudança e limpa a confirmação e horário anteriores; `declined` preserva a oportunidade e permite novo pedido autorizado. Documento existente pode ser vinculado sem passar pela avaliação. Recebimento não significa aprovação do conteúdo.
+
+Em **Agentes de IA → SDR e closer**, o painel mostra os 100 acompanhamentos mais recentes. No detalhe da negociação do **CRM**, o mesmo painel é filtrado pelo cliente vinculado; todas as conversas desse cliente podem aparecer. Cada registro mostra próxima ação, prazo, disponibilidade, consulta, referência de confirmação e os dez eventos mais recentes. A leitura e o registro administrativo são restritos ao administrador real do tenant. O histórico completo permanece no banco.
+
+A ferramenta `record_previdas` registra somente pedido autorizado, recusa ou necessidade de reagendamento, com prazo interno de acompanhamento de 24 horas. O servidor valida consentimento ativo, canal, tenant, revisão e idempotência. Eventos de confirmação são registrados administrativamente com referência externa; vínculo do laudo exige documento médico já recebido naquela conversa. O CRM não move estágios comerciais automaticamente nesta entrega.
+
+**Pendente de integração externa:** API/link de agendamento e autenticação do Pré Vidas, disponibilidade real, confirmação/cancelamento, identificação segura dos eventos, recebimento do laudo e envio de lembretes. O painel registra acompanhamento interno e não realiza chamadas nem envia dados ao parceiro. Prazos exibidos não representam lembretes enviados. Não há confirmação automática baseada na fala do cliente. O registro administrativo é provisório até existir integração verificável com o parceiro.
+
+Validação: `supabase/tests/previdas_operation.sql` após a fixture e as migrações de sales workflow e Pré Vidas; testes de interface `PrevidasPanel.test.tsx`; testes Deno do workflow. A suíte SQL usa transação revertida e dados sintéticos, sem mensagens externas.

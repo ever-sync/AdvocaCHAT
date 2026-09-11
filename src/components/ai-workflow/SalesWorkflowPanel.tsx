@@ -1,3 +1,4 @@
+import { PrevidasPanel } from "./PrevidasPanel";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, Bot, Download, FileText } from "lucide-react";
@@ -287,6 +288,7 @@ export function SalesWorkflowPanel() {
   }
   return (
     <div className="space-y-5">
+      <PrevidasPanel />
       <WorkflowEditor
         key={config.data.revision}
         initial={config.data}

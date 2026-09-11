@@ -182,3 +182,20 @@ Deno.test("personas disclose unavailable integrations", () => {
   assert(prompt.includes("NÃO CONFIGURADA"), "signature status explicit");
   assert(prompt.includes("Não faça diagnóstico"), "non-diagnostic scope");
 });
+
+Deno.test("Pre Vidas request supplies revision and never claims external booking", async () => {
+  const workflow = fixture("closer");
+  workflow.previdas = { status: "needed", revision: 3 };
+  let args: Record<string, unknown> = {};
+  const ctx = { tenantId: "tenant", chat: { id: "chat" }, salesWorkflow: workflow,
+    admin: { rpc: (_: string, input: Record<string, unknown>) => {
+      args = input;
+      return Promise.resolve({ data: { phase: "closer", revision: 1, answers: {}, previdas: { status: "requested", revision: 4 } }, error: null });
+    } },
+  };
+  const result = await executeSalesTool(ctx as never, "record_previdas", { status: "requested", authorized: true });
+  assert((args.p_input as { revision: number }).revision === 3, "uses loaded referral revision");
+  assert(result.content.includes("Nenhum agendamento"), "does not claim booking");
+  assert(workflow.previdas?.revision === 4, "persists returned referral state");
+  assert(salesPersona(workflow).includes("autorização específica"), "separate referral consent");
+});

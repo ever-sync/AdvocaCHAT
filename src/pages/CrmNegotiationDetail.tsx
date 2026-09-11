@@ -1,3 +1,4 @@
+import { PrevidasPanel } from "@/components/ai-workflow/PrevidasPanel";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -651,6 +652,7 @@ function CrmNegotiationDetailContent({
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      {isPersistedRow && negotiation.customerId && <PrevidasPanel customerId={negotiation.customerId} />}
       {negotiation.customerId ? <LegalCustomerCaseLink customerId={negotiation.customerId} negotiationId={isPersistedRow ? negotiation.id : undefined} /> : null}
       <ClienteRdPerfilView
         cliente={displayCustomer}
