@@ -54,20 +54,20 @@ const navigation = [
   ["diretrizes", "Diretrizes"],
 ];
 const swatches = [
-  { name: "Institucional", token: "brand", hex: "#182B49", color: "bg-brand" },
-  { name: "Ação", token: "primary", hex: "#2563EB", color: "bg-primary" },
-  { name: "Acento", token: "gold", hex: "#B39155", color: "bg-gold" },
+  { name: "Institucional", token: "brand", hex: "#183E32", color: "bg-brand" },
+  { name: "Ação", token: "primary", hex: "#285C48", color: "bg-primary" },
+  { name: "Sálvia", token: "gold", hex: "#91B29A", color: "bg-gold" },
   {
     name: "Página",
     token: "background",
-    hex: "#F5F7FA",
+    hex: "#F3F6EF",
     color: "bg-background",
   },
-  { name: "Superfície", token: "card", hex: "#FFFFFF", color: "bg-card" },
+  { name: "Superfície", token: "card", hex: "#FBFCF7", color: "bg-card" },
   {
     name: "Texto",
     token: "foreground",
-    hex: "#202938",
+    hex: "#243C30",
     color: "bg-foreground",
   },
 ];
@@ -294,7 +294,7 @@ export default function DesignSystem() {
             id="fundamentos"
             number="01"
             title="Uma identidade com propósito"
-            description="Azul institucional, superfícies leves e um acento dourado. Cada cor tem uma função; cada detalhe, uma razão."
+            description="Verde-escuro, verde pastel e branco suave. Cada cor tem uma função; cada detalhe, uma razão."
           >
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
               {swatches.map((swatch) => (
@@ -785,7 +785,7 @@ export default function DesignSystem() {
                 [
                   "01",
                   "Hierarquia antes de decoração",
-                  "Use superfícies e bordas para organizar. Reserve sombras para elementos sobrepostos e o dourado para detalhes institucionais.",
+                  "Use superfícies e bordas para organizar. Reserve sombras para elementos sobrepostos e a sálvia para detalhes institucionais.",
                 ],
                 [
                   "02",

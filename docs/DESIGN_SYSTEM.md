@@ -25,18 +25,18 @@ provedores (por exemplo, WhatsApp) nem cores de dados definidas pelos usuários.
 
 | Papel                 | Cor                           | Utilitário                           |
 | --------------------- | ----------------------------- | ------------------------------------ |
-| Institucional         | `#182B49`                     | `text-brand`                         |
-| Ação principal        | `#2563EB`                     | `bg-primary text-primary-foreground` |
-| Detalhe institucional | `#B39155`                     | `text-gold` / `border-gold`          |
-| Fundo da página       | `#F5F7FA`                     | `bg-background`                      |
-| Superfície            | `#FFFFFF`                     | `bg-card text-card-foreground`       |
-| Texto                 | `#202938`                     | `text-foreground`                    |
+| Institucional         | `#183E32`                     | `text-brand`                         |
+| Ação principal        | `#285C48`                     | `bg-primary text-primary-foreground` |
+| Detalhe institucional | `#91B29A`                     | `text-gold` / `border-gold`          |
+| Fundo da página       | `#F3F6EF`                     | `bg-background`                      |
+| Superfície            | `#FBFCF7`                     | `bg-card text-card-foreground`       |
+| Texto                 | `#243C30`                     | `text-foreground`                    |
 | Texto secundário      | Cinza com contraste reforçado | `text-muted-foreground`              |
 | Separação             | Cinza suave                   | `border-border`                      |
 | Limite de campos      | Cinza mais forte              | `border-input`                       |
 
-O tema escuro tem tokens próprios: superfícies azul-escuras e cores de ação/status
-mais claras. Combine sempre o fundo semântico com seu `*-foreground`. Dourado é
+O tema escuro tem tokens próprios: superfícies verde-escuras e cores de ação/status
+mais claras. Combine sempre o fundo semântico com seu `*-foreground`. Sálvia é
 um detalhe decorativo: não usá-lo para textos pequenos, ações ou status.
 
 ## Tipografia, geometria e ritmo
@@ -114,7 +114,7 @@ preservando conta, tema e saída. O menu móvel inclui Meu dia jurídico e mant�
 mesmo filtro de permissões existente.
 
 Login, cabeçalhos do atendimento e PageShell usam superfícies e espaçamentos
-semânticos. Casos jurídicos usam `CASE_STATUS_VARIANTS`: andamento em azul,
+semânticos. Casos jurídicos usam `CASE_STATUS_VARIANTS`: andamento em verde,
 aguardando em âmbar e encerrado neutro. Referências visíveis ao produto anterior
 foram corrigidas no atendimento, IA, ativação, configuração de canal e widget.
 Cabeçalhos de integrações e identificadores persistidos não foram renomeados.
@@ -128,3 +128,8 @@ Os menus desktop e móvel compartilham a mesma associação visual: balança par
 casos jurídicos, lista de tarefas para Meu dia jurídico, quadro Kanban para CRM,
 calendário para Agenda, pessoas para Clientes e arquivo para Documentos. Painel
 usa uma grade de dashboard; Agente IA usa um assistente com balão de conversa.
+
+A paleta pastel usa verde-escuro `#183E32` na navegação, verde `#285C48` nas
+ações, verde pastel `#DCEBDD` nas seleções e branco suave `#FBFCF7` nas
+superfícies. Vermelho e âmbar continuam reservados a erro e atenção. O token
+`gold` permanece como alias compatível para o detalhe sálvia `#91B29A`.
