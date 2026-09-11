@@ -1,0 +1,6 @@
+# Synthetic fixtures only. Runtime imports Python's standard library exclusively.
+# Exact releases checked on PyPI on 2026-09-11; no optional extras are installed.
+Pillow==12.3.0
+pypdf==6.18.1
+reportlab==5.0.1
+charset-normalizer==3.5.1
