@@ -1,6 +1,6 @@
 # Plano de evolução do AdvocaCHAT: plataforma jurídica e isenção de IR
 
-Data de referência: **11/09/2026** · Versão: **1.2** · Situação: **F1/F2 com entregas técnicas verificadas; F3 em validação e F4 em implementação**.
+Data de referência: **11/09/2026** · Versão: **1.3** · Situação: **F1/F2/F3 com entregas técnicas verificadas; F4 em implementação**.
 
 Este é o roteiro de execução do produto. Reúne as 30 ideias de plataforma jurídica
 aprovadas na conversa e 25 funcionalidades específicas para escritórios que atuam
@@ -317,15 +317,19 @@ Cobertura: J02–J05, J15, J16, J19 e J20.
 
 ### F3 — Entregar o piloto assistido de isenção de IR
 
-- [ ] F3.01 Implementar triagem com estados: incompleta, revisão jurídica, enquadramento proposto, decisão registrada.
-- [ ] F3.02 Cadastrar rendimentos, pagadores e benefícios sem agregar todos como isentos.
-- [ ] F3.03 Montar cronologia de doença, laudo, benefício e retenções com documentos de origem.
-- [ ] F3.04 Criar catálogo versionado de hipóteses e checklist por rota/pagador.
-- [ ] F3.05 Implementar dossiê médico/fiscal, revisão de laudos e pendências objetivas.
-- [ ] F3.06 Registrar mandato e representante; revogação remove acesso futuro.
-- [ ] F3.07 Criar resumo do caso e plano de atuação preenchidos/revisados pelo advogado.
-- [ ] F3.08 Oferecer coleta acessível em celular e atendimento humano para quem não conclui sozinho.
+- [x] F3.01 Implementar triagem com estados: incompleta, revisão jurídica, enquadramento proposto, decisão registrada.
+- [x] F3.02 Cadastrar rendimentos, pagadores e benefícios sem agregar todos como isentos.
+- [x] F3.03 Montar cronologia de doença, laudo, benefício e retenções com documentos de origem.
+- [x] F3.04 Criar catálogo versionado de hipóteses e checklist por rota/pagador.
+- [x] F3.05 Implementar dossiê médico/fiscal, revisão de laudos e pendências objetivas.
+- [x] F3.06 Registrar mandato e representante; revogação remove acesso futuro.
+- [x] F3.07 Criar resumo do caso e plano de atuação preenchidos/revisados pelo advogado.
+- [x] F3.08 Oferecer coleta acessível em celular e atendimento humano para quem não conclui sozinho.
 - [ ] F3.09 Executar os cenários da seção 6.1 com dados sintéticos antes do piloto consentido/autorizado.
+
+Entrega técnica: [dossiê, testes e publicação](FASE_3_DOSSIE_ASSISTIDO_IR.md).
+F3.09 tem cenários de dossiê/revisão/acesso executados; cenários de valores,
+declarações, períodos e conciliação seguem em F4, com homologação P03 pendente.
 
 Saída M1: o escritório atende e organiza um caso IR completo, com revisão humana
 e protocolos registrados como evento auditado com comprovante anexado. O acompanhamento
@@ -647,7 +651,7 @@ implementação**. O núcleo jurídico foi construído e publicado; o detalhamen
 as evidências estão em [Entrega da fase 1](FASE_1_NUCLEO_JURIDICO.md). F0 continua
 pendente nas decisões de negócio, validação jurídica e recuperação integral.
 O usuário autorizou continuar automaticamente até F9 e reunir as dependências
-externas ao final. F2 tem entrega técnica verificada; F3 está em validação e F4
+externas ao final. F2/F3 têm entregas técnicas verificadas; F4 está
 em implementação. O [registro contínuo](EXECUCAO_CONTINUA.md) acompanha as
 pendências sem confundir publicação técnica com homologação profissional.
 Mudanças de escopo entram aqui com justificativa e efeito em dependências/custo.
@@ -661,7 +665,7 @@ o critério; implementação local, deploy e homologação são evidências dist
 | F0 | planejado | A definir | Validar recorte IR, piloto e ambiente |
 | F1 | concluido | Codex (implementação técnica) | [Entrega, testes e implantação](FASE_1_NUCLEO_JURIDICO.md); validação de negócio/jurídica dos pilotos permanece em F0 |
 | F2 | em_validacao | Codex (implementação técnica) | [Entrega técnica verificada](FASE_2_OPERACAO_JURIDICA.md); assinatura P01 e calendário externo P02 pendentes |
-| F3 | em_validacao | Codex (implementação técnica) | [Dossiê, SQL e API real](FASE_3_DOSSIE_ASSISTIDO_IR.md); publicação visual em validação, homologação P03 pendente |
+| F3 | em_validacao | Codex (implementação técnica) | [Dossiê, SQL, API e navegador publicado verificados](FASE_3_DOSSIE_ASSISTIDO_IR.md); cenários fiscais seguem em F4, homologação P03 pendente |
 | F4 | em_execucao | Codex (implementação técnica) | [Fontes e cenários independentes](FASE_4_FONTES_E_CALCULOS.md); cálculos, pedidos e conciliação em implementação |
 | F5 | planejado | A definir | Depende de F2/F3/F4 conforme módulo |
 | F6 | planejado | A definir | Fonte habilitada e cobertura definida |

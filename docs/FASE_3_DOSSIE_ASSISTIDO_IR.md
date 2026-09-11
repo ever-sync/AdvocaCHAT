@@ -67,8 +67,26 @@ de auditoria contém identificadores/estados, sem o conteúdo médico ou fiscal.
   sem overflow ou erros de página. Incluiu dados desconhecidos, laudo particular,
   catálogo incompleto, revisão pendente, análise desatualizada e representação.
 
-Publicação da interface, verificação visual e remoção das fixtures serão
-registradas aqui ao concluir a validação desta fase.
+Código publicado: `3105f4d78329ca186355fe61093f9f196cc1fb37`; SHA de
+`origin/main` conferido após o push.
+
+| Serviço Railway | Deployment | Estado terminal |
+| --- | --- | --- |
+| web | `247a1ce4-5ea9-4369-bf6e-5254dbd6fad2` | SUCCESS |
+| functions | `3ed2fe8f-6ab4-40d6-897e-cca756481400` | SUCCESS |
+| scheduler | `6819314f-6500-4d3c-b207-a970929ce280` | SUCCESS |
+
+Navegador publicado: seis abas verificadas, oito mutações rastreadas e leitura
+após reload. Fonte/pensão alimentícia, data desconhecida, protocolo médico,
+conferência do laudo particular, proposta por rendimento, snapshot e nova
+evidência que exige revisão passaram. Proposta incompleta não oferece aprovação.
+Zero erros de página; seis abas em largura de 375 px sem overflow. Seis chamadas
+automáticas de boas-vindas foram bloqueadas; nenhuma mensagem foi enviada.
+
+As três contas/escritórios sintéticos e os documentos privados estão preservados
+temporariamente para os testes encadeados da F4, isolados do escritório original.
+A limpeza final e a conferência do estado original continuam obrigatórias antes
+de encerrar a execução disponível; não foram declaradas como realizadas na F3.
 
 ## Dependências e próxima fase
 

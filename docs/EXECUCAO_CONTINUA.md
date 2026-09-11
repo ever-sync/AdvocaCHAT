@@ -11,9 +11,10 @@ concluída porque um adaptador ou teste simulado passou.
 - F1: implementada, publicada e verificada. Código `accbdda`, evidências `8e946e2`.
 - F2: entrega técnica publicada e verificada (`0f66242`); assinatura contratada pendente P01.
   Evidências: [Fase 2](FASE_2_OPERACAO_JURIDICA.md).
-- F3: em execução — rendimentos/fontes, dossiê reservado, catálogo revisável e representação.
-- Próxima etapa após validar F3: F4, cálculos, pedidos e resultados de IR.
-- F3–F9: continuar pela ordem do plano, respeitando dependências técnicas reais.
+- F3: entrega técnica publicada e verificada (`3105f4d`), com dossiê, revisão e representação.
+  Evidências: [Fase 3](FASE_3_DOSSIE_ASSISTIDO_IR.md). Homologação profissional permanece P03.
+- F4: em execução — importações revisáveis, motor decimal, pedidos e conciliação.
+- F5–F9: continuar pela ordem do plano, respeitando dependências técnicas reais.
 - Continuação vinculada à mesma tarefa por automação `continuar-fases-do-advocachat`.
 
 Em cada etapa: conferir estado Git, preservar trabalho alheio, implementar,
@@ -42,5 +43,6 @@ Não contratar serviços nem enviar mensagens a terceiros sem autorização espe
 ## Acompanhamento técnico para as fases seguintes
 
 - F3: preservar natureza de renda e fontes separadas; avaliação conjunta exige acesso médico e fiscal.
+- Fixtures F3 mantidas isoladamente para validar F4; remover blobs, registros e usuários sintéticos e conferir estado original antes do encerramento disponível.
 - F5: revisar tipos herdados do envio de convite e scheduling-public, sem testar envio a pessoas reais.
 - F9: paginação das listas jurídicas (limite atual 200), tratamento auditado de uploads interrompidos, carga e recuperação integral.
