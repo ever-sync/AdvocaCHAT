@@ -652,7 +652,6 @@ function CrmNegotiationDetailContent({
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-      {isPersistedRow && negotiation.customerId && <PrevidasPanel customerId={negotiation.customerId} />}
       {negotiation.customerId ? <LegalCustomerCaseLink customerId={negotiation.customerId} negotiationId={isPersistedRow ? negotiation.id : undefined} /> : null}
       <ClienteRdPerfilView
         cliente={displayCustomer}
@@ -1003,11 +1002,14 @@ function CrmNegotiationDetailContent({
         releaseNegotiationPending={releaseCrmNegotiation.isPending}
         negotiationDocumentsSlot={
           isPersistedRow && isSupabaseConfigured && isPersistedCrmNegotiationId(negotiation.id) ? (
-            <CrmNegotiationDocumentsSection
-              negotiationId={negotiation.id}
-              enabled={taskIntegration}
-              readOnly={!canManageCrm}
-            />
+            <div className="space-y-4">
+              {negotiation.customerId && <PrevidasPanel customerId={negotiation.customerId} />}
+              <CrmNegotiationDocumentsSection
+                negotiationId={negotiation.id}
+                enabled={taskIntegration}
+                readOnly={!canManageCrm}
+              />
+            </div>
           ) : undefined
         }
         negotiationProductsSlot={
