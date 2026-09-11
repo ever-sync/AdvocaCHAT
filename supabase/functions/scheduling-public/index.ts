@@ -73,22 +73,12 @@ Deno.serve(async (request) => {
         return jsonResponse(result);
       }
 
-      // Modo lookup de cliente por telefone (para pré-preenchimento do formulário).
-      const telefoneParam = url.searchParams.get("telefone");
-      if (telefoneParam) {
-        const phoneDigits = telefoneParam.replace(/\D/g, "");
-        if (phoneDigits.length >= 8) {
-          const suffix = phoneDigits.slice(-8);
-          const { data: clientes } = await admin
-            .from("customers")
-            .select("nome, email")
-            .eq("tenant_id", tenantId)
-            .ilike("telefone", `%${suffix}%`)
-            .limit(1);
-          const cliente = clientes?.[0] ?? null;
-          return jsonResponse({ cliente: cliente ? { nome: cliente.nome, email: cliente.email } : null });
-        }
-        return jsonResponse({ cliente: null });
+      // Retired anonymous lookup: possession of a phone number does not authorize
+      // reading a client's name/email. Older embeds receive an empty result.
+      if (url.searchParams.has("telefone")) {
+        const response = jsonResponse({ cliente: null });
+        response.headers.set("Cache-Control", "no-store");
+        return response;
       }
 
       // Modo config: serviços agendáveis + prestadores que os realizam.

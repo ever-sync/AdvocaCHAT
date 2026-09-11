@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { addDays, format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -103,10 +103,6 @@ export function BookingWidget({ slug }: { slug: string }) {
   const [emailBlurred, setEmailBlurred] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
-  // Lookup de cliente existente
-  const [clienteEncontrado, setClienteEncontrado] = useState(false);
-  const lookupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const [submitting, setSubmitting] = useState(false);
 
   // Carrega config.
@@ -177,36 +173,9 @@ export function BookingWidget({ slug }: { slug: string }) {
     return () => { cancelled = true; };
   }, [step, provider, selectedServices, date, slug]);
 
-  // ── Lookup de cliente por telefone ──────────────────────────
-  const lookupClient = useCallback((phone: string) => {
-    if (!isValidPhone(phone)) return;
-    const e164 = toE164(phone);
-    const params = new URLSearchParams({ slug, telefone: e164 });
-    fetch(`${FUNCTION_URL}?${params.toString()}`)
-      .then(async (r) => {
-        if (!r.ok) return;
-        const json = await r.json();
-        const cliente = json.cliente as { nome?: string; email?: string } | undefined;
-        if (cliente?.nome) {
-          setNome((prev) => prev || (cliente.nome ?? ""));
-          setEmail((prev) => prev || (cliente.email ?? ""));
-          setClienteEncontrado(true);
-        }
-      })
-      .catch(() => null);
-  }, [slug]);
-
-  // ── Handler de mudança no campo telefone ──────────────────
+  // Contact data is submitted only in the booking POST, never in lookup URLs.
   const handlePhoneChange = (raw: string) => {
-    const formatted = formatPhone(raw);
-    setTelefone(formatted);
-    setClienteEncontrado(false);
-
-    // Debounce do lookup
-    if (lookupTimeoutRef.current) clearTimeout(lookupTimeoutRef.current);
-    if (isValidPhone(formatted)) {
-      lookupTimeoutRef.current = setTimeout(() => lookupClient(formatted), 600);
-    }
+    setTelefone(formatPhone(raw));
   };
 
   // Derivados de validação
@@ -461,14 +430,6 @@ export function BookingWidget({ slug }: { slug: string }) {
                 Profissional: <span className="font-semibold text-slate-800">{provider?.name}</span><br />
                 Horário: <span className="font-medium text-slate-800">{format(parseISO(slot.startsAt), "dd/MM 'às' HH:mm")}</span>
               </p>
-
-              {/* Cliente encontrado */}
-              {clienteEncontrado ? (
-                <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
-                  <span>✓</span>
-                  <span>Cliente encontrado — dados preenchidos automaticamente.</span>
-                </div>
-              ) : null}
 
               {/* Nome */}
               <div className="space-y-1">

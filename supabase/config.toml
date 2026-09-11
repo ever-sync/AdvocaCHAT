@@ -171,3 +171,7 @@ verify_jwt = false
 # Agendamento: importa ocupação do Google como bloqueios (cron, x-cron-secret).
 [functions.scheduling-google-pull]
 verify_jwt = false
+
+# Single-use upload token is validated server-side; issuing links requires user JWT.
+[functions.legal-document-requests]
+verify_jwt = false

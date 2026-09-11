@@ -1,30 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.8";
 import { createAdminClient, getRequiredEnv } from "../_shared/supabase.ts";
 import { corsHeaders, handleCors } from "../_shared/http.ts";
+import { limitedBody } from "../_shared/limited-body.ts";
 import { LEGAL_DOCUMENT_MAX_BYTES, legalDownloadHeaders, validateLegalDocument } from "../_shared/legal-document-validation.ts";
 
 const bucket = "legal-case-documents";
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 function reply(error: string, status: number) {
   return new Response(JSON.stringify({ error }), { status, headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "no-store" } });
-}
-
-async function limitedBody(request: Request, maximum: number): Promise<Uint8Array | null> {
-  const reader = request.body?.getReader();
-  if (!reader) return new Uint8Array();
-  const chunks: Uint8Array[] = [];
-  let size = 0;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    size += value.length;
-    if (size > maximum) { await reader.cancel(); return null; }
-    chunks.push(value);
-  }
-  const body = new Uint8Array(size);
-  let offset = 0;
-  for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.length; }
-  return body;
 }
 
 Deno.serve(async (request: Request) => {

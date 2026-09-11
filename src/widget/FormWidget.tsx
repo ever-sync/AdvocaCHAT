@@ -17,6 +17,7 @@ import {
 } from "@/lib/marketing/form-types";
 import { validateFormSubmission } from "@/lib/marketing/form-validation";
 import { formatPhone } from "@/lib/brasil-api";
+import { collectPublicFormMetadata } from "../../supabase/functions/_shared/public-form-privacy";
 
 type PublicForm = {
   id: string;
@@ -38,16 +39,7 @@ function getQueryParam(name: string): string | null {
 }
 
 function collectMeta(): Record<string, unknown> {
-  const params = new URLSearchParams(window.location.search);
-  const meta: Record<string, unknown> = {};
-  for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]) {
-    const v = params.get(key);
-    if (v) meta[key] = v;
-  }
-  const variantId = params.get("variant_id") ?? params.get("_variant_id");
-  if (variantId) meta.variant_id = variantId;
-  if (document.referrer) meta.referrer = document.referrer;
-  return meta;
+  return collectPublicFormMetadata(window.location.search, document.referrer);
 }
 
 function collectHiddenFieldDefaults(fields: FormField[], meta: Record<string, unknown>): Record<string, unknown> {

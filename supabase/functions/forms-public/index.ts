@@ -13,6 +13,7 @@ import {
   pickWeightedVariant,
 } from "../_shared/marketing-forms.ts";
 import { processPendingDispatches } from "../_shared/email.ts";
+import { sanitizePublicFormEventMetadata, sanitizePublicFormMetadata } from "../_shared/public-form-privacy.ts";
 
 type FormFieldLike = {
   name: string;
@@ -148,28 +149,6 @@ function normalizeEventSessionId(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function sanitizeEventMetadata(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== "object") return {};
-  const input = value as Record<string, unknown>;
-  const out: Record<string, unknown> = {};
-  for (const [key, raw] of Object.entries(input)) {
-    if (raw == null) continue;
-    if (typeof raw === "string") {
-      const trimmed = raw.trim();
-      if (trimmed) out[key] = trimmed;
-      continue;
-    }
-    if (typeof raw === "number" || typeof raw === "boolean") {
-      out[key] = raw;
-      continue;
-    }
-    if (Array.isArray(raw)) {
-      out[key] = raw.slice(0, 20).map((item) => (typeof item === "string" || typeof item === "number" || typeof item === "boolean" ? item : String(item)));
-      continue;
-    }
-  }
-  return out;
-}
 
 function coalesceBoolean(
   settings: unknown,
@@ -416,7 +395,7 @@ Deno.serve(async (request) => {
         step_id: typeof body.step_id === "string" ? body.step_id.trim() : typeof body.stepId === "string" ? body.stepId.trim() : null,
         field_name: typeof body.field_name === "string" ? body.field_name.trim() : typeof body.fieldName === "string" ? body.fieldName.trim() : null,
         field_label: typeof body.field_label === "string" ? body.field_label.trim() : typeof body.fieldLabel === "string" ? body.fieldLabel.trim() : null,
-        metadata: sanitizeEventMetadata(body.metadata ?? body.meta),
+        metadata: sanitizePublicFormEventMetadata(body.metadata ?? body.meta),
       });
       if (insertError) {
         console.error("[forms-public] interaction event error:", insertError.message);
@@ -490,8 +469,7 @@ Deno.serve(async (request) => {
       totalFieldsCount: fields.length,
     });
 
-    const meta: Record<string, unknown> = { ...rawMeta };
-    delete meta._hp;
+    const meta = sanitizePublicFormMetadata(rawMeta);
     meta.ip_address = ip;
     meta.user_agent = userAgent;
     meta.score = scoring.score;
@@ -521,7 +499,7 @@ Deno.serve(async (request) => {
     }
 
     // Conta submissão da variante A/B
-    const variantId = typeof rawMeta.variant_id === "string" ? rawMeta.variant_id : null;
+    const variantId = typeof meta.variant_id === "string" ? meta.variant_id : null;
     if (variantId) {
       admin.rpc("increment_marketing_variant_submissions", { p_variant_id: variantId }).then(() => {}, () => {});
     }

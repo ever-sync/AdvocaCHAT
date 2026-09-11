@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { lazy, Suspense, useState, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Download, FileLock2, Link2, Plus, ShieldCheck, UserRound } from "lucide-react";
@@ -18,6 +18,8 @@ import {
 import type { LegalCase, LegalCaseDocument, LegalCaseMember, LegalCasePatch, LegalWorkspaceContext } from "@/types/legal";
 import { LegalEmpty, LegalError, LegalField, LegalLoading } from "./LegalShared";
 import { CASE_STATUSES, CASE_TYPES, DOCUMENT_CATEGORIES, legalDate, localDateTime, selectClassName, useLegalAction } from "./legal-ui";
+
+const LegalCaseOperations = lazy(() => import("./operations/LegalCaseOperations"));
 
 type CasePanelProps = { legalCase: LegalCase; workspace: LegalWorkspaceContext; canEdit: boolean };
 const caseKey = (workspace: LegalWorkspaceContext, caseId: string, section: string) => ["legal", workspace.user_id, workspace.tenant_id, "case", caseId, section];
@@ -115,7 +117,7 @@ function CaseDocuments({ legalCase, workspace, canEdit, member }: CasePanelProps
   </CardContent></Card>;
 }
 
-const EVENT_LABELS: Record<string, string> = { case_created: "Caso criado", case_updated: "Caso atualizado", party_added: "Parte adicionada", proceeding_added: "Processo vinculado", member_granted: "Permissões de acesso atualizadas", member_revoked: "Acesso revogado", document_prepared: "Envio de documento iniciado", document_ready: "Documento guardado", document_abandoned: "Envio de documento interrompido", document_download: "Documento acessado", retention_changed: "Preservação atualizada", manual: "Nota da equipe" };
+const EVENT_LABELS: Record<string, string> = { case_created: "Caso criado", case_updated: "Caso atualizado", party_added: "Parte adicionada", proceeding_added: "Processo vinculado", member_granted: "Permissões de acesso atualizadas", member_revoked: "Acesso revogado", document_prepared: "Envio de documento iniciado", document_ready: "Documento guardado", document_abandoned: "Envio de documento interrompido", document_download: "Documento acessado", retention_changed: "Preservação atualizada", manual: "Nota da equipe", operation_updated: "Etapa jurídica atualizada", interview_submitted: "Entrevista registrada", conflict_reviewed: "Conflito de interesses revisado", document_requested: "Documento solicitado", document_request_updated: "Solicitação de documento atualizada", instrument_created: "Instrumento criado", instrument_version_created: "Versão de instrumento criada", instrument_reviewed: "Instrumento revisado", external_signature_recorded: "Evidência externa registrada", task_updated: "Tarefa atualizada", appointment_updated: "Compromisso atualizado" };
 
 function CaseTimeline({ legalCase, workspace, canEdit }: CasePanelProps) {
   const query = useQuery({ queryKey: caseKey(workspace, legalCase.id, "events"), queryFn: () => listLegalEvents(legalCase.id) });
@@ -142,8 +144,9 @@ export function LegalCaseDetail({ legalCase, workspace }: { legalCase: LegalCase
   return <div className="space-y-5"><Button asChild size="sm" variant="ghost" className="-ml-3"><Link to={legalCase.customer_id ? `/casos?cliente=${legalCase.customer_id}` : "/casos"}><ArrowLeft className="mr-2 h-4 w-4" aria-hidden />Voltar aos casos</Link></Button>
     <header className="space-y-3"><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Caso jurídico</p><h1 className="break-words text-2xl font-semibold tracking-tight">{legalCase.title}</h1></div><Badge variant={legalCase.status === "ativo" ? "default" : "secondary"}>{CASE_STATUSES[legalCase.status]}</Badge></div><div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground"><span>{CASE_TYPES[legalCase.case_type]}</span>{legalCase.area ? <><span>·</span><span>{legalCase.area}</span></> : null}{legalCase.customer_id ? <Button asChild size="sm" variant="outline"><Link to={`/clientes/${legalCase.customer_id}`}><UserRound className="mr-2 h-4 w-4" aria-hidden />Ficha do cliente</Link></Button> : null}{legalCase.negotiation_id ? <Button asChild size="sm" variant="outline"><Link to={`/crm/negociacao/${legalCase.negotiation_id}`}><Link2 className="mr-2 h-4 w-4" aria-hidden />Negociação de origem</Link></Button> : null}</div></header>
     {members.error ? <LegalError error={members.error} retry={() => void members.refetch()} /> : null}
-    <Tabs value={tab} onValueChange={setTab} className="min-w-0"><div className="max-w-full overflow-x-auto pb-1"><TabsList className="w-max justify-start"><TabsTrigger value="overview">Visão geral</TabsTrigger><TabsTrigger value="parties">Partes</TabsTrigger><TabsTrigger value="proceedings">Processos</TabsTrigger><TabsTrigger value="documents">Documentos</TabsTrigger><TabsTrigger value="team">Equipe</TabsTrigger><TabsTrigger value="timeline">Histórico</TabsTrigger></TabsList></div>
+    <Tabs value={tab} onValueChange={setTab} className="min-w-0"><div className="max-w-full overflow-x-auto pb-1"><TabsList className="w-max justify-start"><TabsTrigger value="overview">Visão geral</TabsTrigger><TabsTrigger value="operations">Atendimento e trabalho</TabsTrigger><TabsTrigger value="parties">Partes</TabsTrigger><TabsTrigger value="proceedings">Processos</TabsTrigger><TabsTrigger value="documents">Documentos</TabsTrigger><TabsTrigger value="team">Equipe</TabsTrigger><TabsTrigger value="timeline">Histórico</TabsTrigger></TabsList></div>
       <TabsContent value="overview"><CaseOverview key={legalCase.updated_at} {...shared} /></TabsContent>
+      <TabsContent value="operations"><Suspense fallback={<LegalLoading />}><LegalCaseOperations {...shared} member={myMember} members={members.data ?? []} /></Suspense></TabsContent>
       <TabsContent value="parties"><CaseParties {...shared} /></TabsContent>
       <TabsContent value="proceedings"><CaseProceedings {...shared} /></TabsContent>
       <TabsContent value="documents">{members.isPending && !isOwner ? <LegalLoading /> : <CaseDocuments {...shared} member={myMember} />}</TabsContent>

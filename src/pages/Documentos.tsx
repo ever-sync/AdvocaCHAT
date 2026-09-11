@@ -22,14 +22,12 @@ import {
   Sparkles,
   FileSignature,
   Link as LinkIcon,
-  Share2,
   Edit2,
   Settings,
   X,
   ListPlus,
 } from "lucide-react";
 
-import { getCurrentTenantId } from "@/lib/api/tenant";
 import { listCrmNegotiations } from "@/lib/api/crm-negotiations";
 import {
   useAllCrmDocuments,
@@ -112,7 +110,6 @@ export default function Documentos() {
   // Dialog controls
   const [uploadOpen, setUploadOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
-  const [linkOpen, setLinkOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteNegotiationId, setDeleteNegotiationId] = useState<string | null>(null);
 
@@ -141,32 +138,9 @@ export default function Documentos() {
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [documentContent, setDocumentContent] = useState("");
 
-  // Anamnese Link Generator states
-  const [linkNegotiationId, setLinkNegotiationId] = useState("");
-  const [linkTemplateId, setLinkTemplateId] = useState("default");
-
-  // Orçamento Link Generator states
-  const [orcamentoLinkOpen, setOrcamentoLinkOpen] = useState(false);
-  const [orcamentoLinkNegotiationId, setOrcamentoLinkNegotiationId] = useState("");
-  const [orcamentoTamanho, setOrcamentoTamanho] = useState("");
-  const [orcamentoPeso, setOrcamentoPeso] = useState("");
-  const [orcamentoCabeloCor, setOrcamentoCabeloCor] = useState("");
-  const [orcamentoObs, setOrcamentoObs] = useState("");
-  const [orcamentoValorTotal, setOrcamentoValorTotal] = useState("");
-  const [orcamentoTemplateId, setOrcamentoTemplateId] = useState("default");
-  const [orcamentoAnswers, setOrcamentoAnswers] = useState<Record<string, string>>({});
-  const [generatedAnamneseLink, setGeneratedAnamneseLink] = useState("");
-  const [generatedOrcamentoLink, setGeneratedOrcamentoLink] = useState("");
-
   useEffect(() => {
     document.title = "Documentos | WChat";
   }, []);
-
-  // Fetch tenantId
-  const { data: tenantId } = useQuery({
-    queryKey: ["current-tenant-id"],
-    queryFn: () => getCurrentTenantId(),
-  });
 
   // Fetch all documents
   const { data: allDocuments = [], isLoading: docsLoading, error: docsError } = useAllCrmDocuments();
@@ -462,159 +436,6 @@ export default function Documentos() {
     deleteMutation.mutate({ id: deleteId, negotiationId: deleteNegotiationId });
   };
 
-  // Construct URL for public anamnese form filling
-  useEffect(() => {
-    if (!linkNegotiationId || !tenantId) {
-      setGeneratedAnamneseLink("");
-      return;
-    }
-    const selected = negotiations.find((n) => n.id === linkNegotiationId);
-    if (!selected) {
-      setGeneratedAnamneseLink("");
-      return;
-    }
-
-    const host = window.location.origin;
-    const custId = selected.customerId || "";
-    const nome = selected.customer?.nome || "";
-    const fone = selected.customer?.telefone || "";
-
-    // Link expires in 7 days
-    const exp = String(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-    const signParams = {
-      neg: selected.id,
-      cust: custId,
-      tenant: tenantId,
-      exp,
-      templateId: linkTemplateId || "",
-    };
-
-    import("@/lib/security").then(async ({ signUrlParams }) => {
-      const sig = await signUrlParams(signParams);
-      let link = `${host}/anamnese/preencher?neg=${selected.id}&cust=${custId}&tenant=${tenantId}&nome=${encodeURIComponent(
-        nome,
-      )}&fone=${encodeURIComponent(fone)}&exp=${exp}&sig=${sig}`;
-
-      if (linkTemplateId && linkTemplateId !== "default") {
-        link += `&templateId=${linkTemplateId}`;
-      }
-      setGeneratedAnamneseLink(link);
-    });
-  }, [linkNegotiationId, linkTemplateId, tenantId, negotiations]);
-
-  const handleCopyLink = () => {
-    if (!generatedAnamneseLink) return;
-    navigator.clipboard.writeText(generatedAnamneseLink);
-    toast({
-      title: "Copiado!",
-      description: "O link público da Ficha de Anamnese foi copiado para a área de transferência.",
-    });
-  };
-
-  const handleWhatsAppSend = () => {
-    if (!generatedAnamneseLink || !linkNegotiationId) return;
-    const selected = negotiations.find((n) => n.id === linkNegotiationId);
-    if (!selected) return;
-
-    const nome = selected.customer?.nome || "Cliente";
-    const fone = selected.customer?.telefone || "";
-    const cleanPhone = fone.replace(/\D/g, "");
-
-    const text = `Olá, ${nome}! Por favor, preencha sua Ficha de Anamnese clicando neste link seguro: ${generatedAnamneseLink}`;
-    const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
-    window.open(waUrl, "_blank");
-  };
-
-  // Construct URL for public budget/quote form filling and approval
-  useEffect(() => {
-    if (!orcamentoLinkNegotiationId || !tenantId) {
-      setGeneratedOrcamentoLink("");
-      return;
-    }
-    const selected = negotiations.find((n) => n.id === orcamentoLinkNegotiationId);
-    if (!selected) {
-      setGeneratedOrcamentoLink("");
-      return;
-    }
-
-    const host = window.location.origin;
-    const custId = selected.customerId || "";
-    const nome = selected.customer?.nome || "";
-    const fone = selected.customer?.telefone || "";
-    const cleanValorTotal = orcamentoValorTotal.replace(/\D/g, "");
-
-    // Link expires in 7 days
-    const exp = String(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-    const signParams = {
-      neg: selected.id,
-      cust: custId,
-      tenant: tenantId,
-      exp,
-      valor_total: cleanValorTotal,
-      templateId: orcamentoTemplateId || "",
-    };
-
-    import("@/lib/security").then(async ({ signUrlParams }) => {
-      const sig = await signUrlParams(signParams);
-      let link = `${host}/orcamento/aprovar?neg=${selected.id}&cust=${custId}&tenant=${tenantId}&nome=${encodeURIComponent(
-        nome,
-      )}&fone=${encodeURIComponent(fone)}&valor_total=${encodeURIComponent(cleanValorTotal)}&exp=${exp}&sig=${sig}`;
-
-      if (orcamentoTemplateId && orcamentoTemplateId !== "default") {
-        link += `&templateId=${orcamentoTemplateId}`;
-        Object.entries(orcamentoAnswers).forEach(([fieldId, val]) => {
-          if (val) {
-            link += `&${fieldId}=${encodeURIComponent(val)}`;
-          }
-        });
-      } else {
-        link += `&tamanho=${encodeURIComponent(orcamentoTamanho)}&peso=${encodeURIComponent(
-          orcamentoPeso,
-        )}&cabelo_cor=${encodeURIComponent(orcamentoCabeloCor)}&obs=${encodeURIComponent(
-          orcamentoObs,
-        )}`;
-      }
-
-      setGeneratedOrcamentoLink(link);
-    });
-  }, [
-    orcamentoLinkNegotiationId,
-    tenantId,
-    negotiations,
-    orcamentoTamanho,
-    orcamentoPeso,
-    orcamentoCabeloCor,
-    orcamentoObs,
-    orcamentoValorTotal,
-    orcamentoTemplateId,
-    orcamentoAnswers,
-  ]);
-
-  const handleCopyOrcamentoLink = () => {
-    if (!generatedOrcamentoLink) return;
-    navigator.clipboard.writeText(generatedOrcamentoLink);
-    toast({
-      title: "Copiado!",
-      description: "O link de aprovação do orçamento foi copiado para a área de transferência.",
-    });
-  };
-
-  const handleWhatsAppOrcamentoSend = () => {
-    if (!generatedOrcamentoLink || !orcamentoLinkNegotiationId) return;
-    const selected = negotiations.find((n) => n.id === orcamentoLinkNegotiationId);
-    if (!selected) return;
-
-    const nome = selected.customer?.nome || "Cliente";
-    const fone = selected.customer?.telefone || "";
-    const cleanPhone = fone.replace(/\D/g, "");
-
-    const text = `Olá, ${nome}! Segue a proposta com o orçamento detalhado do seu Mega Hair. Por favor, acesse o link para revisar e aprovar digitalmente: ${generatedOrcamentoLink}`;
-    const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
-    window.open(waUrl, "_blank");
-  };
-
   // Form Builder fields controller
   const addFieldToTemplate = () => {
     if (!newFieldLabel.trim()) return;
@@ -797,29 +618,16 @@ export default function Documentos() {
                     Criar Personalizado
                   </Button>
 
-                  {activeTab === "anamnese" && (
-                    <Button
-                      id="btn-generate-anamnese-link"
-                      onClick={() => setLinkOpen(true)}
-                      variant="outline"
-                      className="flex items-center gap-2 font-semibold border-emerald-500/20 hover:border-emerald-500 hover:bg-emerald-500/5 text-emerald-600 transition-all active:scale-[0.98] shadow-sm shrink-0"
-                    >
-                      <LinkIcon className="h-4 w-4" />
-                      Gerar Link de Envio
-                    </Button>
-                  )}
-
-                  {activeTab === "orcamento" && (
-                    <Button
-                      id="btn-generate-orcamento-link"
-                      onClick={() => setOrcamentoLinkOpen(true)}
-                      variant="outline"
-                      className="flex items-center gap-2 font-semibold border-emerald-500/20 hover:border-emerald-500 hover:bg-emerald-500/5 text-emerald-600 transition-all active:scale-[0.98] shadow-sm shrink-0"
-                    >
-                      <LinkIcon className="h-4 w-4" />
-                      Gerar Link de Orçamento
-                    </Button>
-                  )}
+                  <Button
+                    id="btn-open-legal-collection"
+                    onClick={() => navigate("/casos")}
+                    variant="outline"
+                    className="flex items-center gap-2 font-semibold shrink-0"
+                    title="Abra um caso para solicitar documentos com acesso individual e prazo de validade."
+                  >
+                    <LinkIcon className="h-4 w-4" />
+                    Coleta segura no caso
+                  </Button>
 
                   <Button
                     id="btn-create-new"
@@ -1443,314 +1251,6 @@ export default function Documentos() {
               </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Link Generator Dialog ("Gerar Link de Envio") */}
-      <Dialog open={linkOpen} onOpenChange={setLinkOpen}>
-        <DialogContent className="sm:max-w-[480px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <LinkIcon className="h-5 w-5 text-emerald-600" />
-              Gerar Link de Ficha de Anamnese
-            </DialogTitle>
-            <DialogDescription>
-              Selecione o lead e qual modelo de anamnese deseja enviar para o cliente preencher.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="link-negotiation">1. Selecione o Lead / Negociação</Label>
-              {negotiations.length === 0 ? (
-                <div className="text-xs text-amber-600 bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg">
-                  Nenhuma negociação encontrada no CRM.
-                </div>
-              ) : (
-                <Select value={linkNegotiationId} onValueChange={setLinkNegotiationId}>
-                  <SelectTrigger id="link-negotiation" className="w-full">
-                    <SelectValue placeholder="Selecione o lead..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {negotiations.map((neg) => (
-                      <SelectItem key={neg.id} value={neg.id}>
-                        {neg.title} {neg.customer?.nome ? `(${neg.customer.nome})` : ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="link-template">2. Modelo de Anamnese</Label>
-              <Select value={linkTemplateId} onValueChange={setLinkTemplateId}>
-                <SelectTrigger id="link-template" className="w-full">
-                  <SelectValue placeholder="Selecione o formulário..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">Ficha Capilar Padrão (Aline Ferreira)</SelectItem>
-                  {anamneseTemplates.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {generatedAnamneseLink && (
-              <div className="space-y-3 pt-3 border-t border-border/50">
-                <div className="flex flex-col gap-1.5">
-                  <Label>Link Público Gerado</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="input-generated-link"
-                      value={generatedAnamneseLink}
-                      readOnly
-                      className="bg-muted text-xs font-mono select-all"
-                    />
-                    <Button onClick={handleCopyLink} size="sm" className="shrink-0 font-semibold">
-                      Copiar
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <Button
-                    onClick={handleWhatsAppSend}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center justify-center gap-2"
-                  >
-                    <Share2 className="h-4 w-4" />
-                    Enviar por WhatsApp
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="pt-4 border-t border-border/50">
-            <Button
-              id="btn-link-cancel"
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                setLinkOpen(false);
-                setLinkNegotiationId("");
-                setLinkTemplateId("default");
-              }}
-            >
-              Fechar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Orçamento Link Generator Dialog ("Gerar Link de Orçamento") */}
-      <Dialog open={orcamentoLinkOpen} onOpenChange={setOrcamentoLinkOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <LinkIcon className="h-5 w-5 text-emerald-600" />
-              Gerar Link de Orçamento
-            </DialogTitle>
-            <DialogDescription>
-              Selecione o lead e preencha os detalhes técnicos para gerar a proposta comercial e o link de aprovação.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2 max-h-[60vh] overflow-y-auto pr-1">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="orc-link-negotiation">1. Selecione o Lead / Negociação</Label>
-              {negotiations.length === 0 ? (
-                <div className="text-xs text-amber-600 bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg">
-                  Nenhuma negociação encontrada no CRM.
-                </div>
-              ) : (
-                <Select value={orcamentoLinkNegotiationId} onValueChange={val => {
-                  setOrcamentoLinkNegotiationId(val);
-                  const selected = negotiations.find((n) => n.id === val);
-                  if (selected && selected.totalValue > 0) {
-                    setOrcamentoValorTotal(String(selected.totalValue));
-                  }
-                }}>
-                  <SelectTrigger id="orc-link-negotiation" className="w-full">
-                    <SelectValue placeholder="Selecione o lead..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {negotiations.map((neg) => (
-                      <SelectItem key={neg.id} value={neg.id}>
-                        {neg.title} {neg.customer?.nome ? `(${neg.customer.nome})` : ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="orc-link-template">2. Selecione o Modelo de Orçamento</Label>
-              <Select value={orcamentoTemplateId} onValueChange={(val) => {
-                setOrcamentoTemplateId(val);
-                setOrcamentoAnswers({});
-              }}>
-                <SelectTrigger id="orc-link-template" className="w-full">
-                  <SelectValue placeholder="Selecione o modelo de orçamento..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">Orçamento Capilar Padrão</SelectItem>
-                  {orcamentoTemplates.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {orcamentoTemplateId === "default" ? (
-              <>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="orc-tamanho">Tamanho do Cabelo</Label>
-                    <Input
-                      id="orc-tamanho"
-                      placeholder="Ex: 60cm"
-                      value={orcamentoTamanho}
-                      onChange={(e) => setOrcamentoTamanho(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="orc-peso">Peso (g)</Label>
-                    <Input
-                      id="orc-peso"
-                      placeholder="Ex: 150g"
-                      value={orcamentoPeso}
-                      onChange={(e) => setOrcamentoPeso(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="orc-cor">Cabelo / Cor</Label>
-                  <Input
-                    id="orc-cor"
-                    placeholder="Ex: Loiro Mesclado / Castanho Escuro"
-                    value={orcamentoCabeloCor}
-                    onChange={(e) => setOrcamentoCabeloCor(e.target.value)}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="orc-obs">Observações Adicionais</Label>
-                  <Textarea
-                    id="orc-obs"
-                    placeholder="Ex: Preparação com queratina, aplicação em micropele..."
-                    value={orcamentoObs}
-                    onChange={(e) => setOrcamentoObs(e.target.value)}
-                    rows={3}
-                  />
-                </div>
-              </>
-            ) : (
-              <div className="space-y-3 pt-2 border-t border-border/50">
-                <span className="text-xs font-bold text-zinc-500 uppercase tracking-wide">Campos do Modelo Selecionado</span>
-                {dbTemplates.find(t => t.id === orcamentoTemplateId)?.fields.map((field) => (
-                  <div key={field.id} className="flex flex-col gap-1.5">
-                    <Label htmlFor={`orc-f-${field.id}`}>{field.label}</Label>
-                    {field.type === "textarea" ? (
-                      <Textarea
-                        id={`orc-f-${field.id}`}
-                        value={orcamentoAnswers[field.id] || ""}
-                        onChange={(e) => setOrcamentoAnswers({ ...orcamentoAnswers, [field.id]: e.target.value })}
-                        rows={2}
-                      />
-                    ) : (
-                      <Input
-                        id={`orc-f-${field.id}`}
-                        type={field.type === "number" ? "number" : "text"}
-                        value={orcamentoAnswers[field.id] || ""}
-                        onChange={(e) => setOrcamentoAnswers({ ...orcamentoAnswers, [field.id]: e.target.value })}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="orc-valor">Valor Total do Orçamento (R$)</Label>
-              <Input
-                id="orc-valor"
-                type="text"
-                placeholder="Ex: R$ 2.500"
-                value={orcamentoValorTotal}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  const clean = val.replace(/\D/g, "");
-                  if (!clean) {
-                    setOrcamentoValorTotal("");
-                  } else {
-                    setOrcamentoValorTotal(new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                      maximumFractionDigits: 0,
-                    }).format(Number(clean)));
-                  }
-                }}
-              />
-            </div>
-
-            {generatedOrcamentoLink && (
-              <div className="space-y-3 pt-3 border-t border-border/50">
-                <div className="flex flex-col gap-1.5">
-                  <Label>Link de Aprovação Gerado</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="input-orc-generated-link"
-                      value={generatedOrcamentoLink}
-                      readOnly
-                      className="bg-muted text-xs font-mono select-all"
-                    />
-                    <Button onClick={handleCopyOrcamentoLink} size="sm" className="shrink-0 font-semibold">
-                      Copiar
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <Button
-                    onClick={handleWhatsAppOrcamentoSend}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center justify-center gap-2"
-                  >
-                    <Share2 className="h-4 w-4" />
-                    Enviar por WhatsApp
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="pt-4 border-t border-border/50">
-            <Button
-              id="btn-orc-link-cancel"
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                setOrcamentoLinkOpen(false);
-                setOrcamentoLinkNegotiationId("");
-                setOrcamentoTamanho("");
-                setOrcamentoPeso("");
-                setOrcamentoCabeloCor("");
-                setOrcamentoObs("");
-                setOrcamentoValorTotal("");
-                setOrcamentoTemplateId("default");
-                setOrcamentoAnswers({});
-              }}
-            >
-              Fechar
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 

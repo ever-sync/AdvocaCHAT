@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { formatBRL } from "@/lib/format";
 import { Briefcase, CalendarDays, ChevronLeft, Hand, Instagram, FileText } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,9 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AssignChatDialog } from "@/components/inbox/AssignChatDialog";
 import { ChatHeaderActions } from "@/components/inbox/ChatHeaderActions";
 import { ConversationAvatar } from "@/components/inbox/ConversationAvatar";
@@ -79,12 +76,9 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useRolePermissions } from "@/hooks/useRolePermissions";
 import { useQuickReplies } from "@/lib/api/quick-replies";
-import { useDocumentTemplates } from "@/lib/api/crm-document-templates";
-import { getCurrentTenantId } from "@/lib/api/tenant";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { type InboxChat } from "@/types/domain";
 import { useToast } from "@/hooks/use-toast";
-import { Textarea } from "@/components/ui/textarea";
 import {
   useInboxInboundNotifications,
   useInboxNotificationSettings,
@@ -148,20 +142,8 @@ export default function Inbox() {
     customerNome?: string;
     customerTelefone?: string;
   }>();
-  // Document Link Generator inside Chat states
   const [inboxDocLinkOpen, setInboxDocLinkOpen] = useState(false);
-  const [inboxDocCategory, setInboxDocCategory] = useState<"anamnese" | "orcamento" | "contrato">("anamnese");
-  const [inboxDocTemplateId, setInboxDocTemplateId] = useState("default");
-
-  // Prefills for orçamento
-  const [inboxOrcTamanho, setInboxOrcTamanho] = useState("");
-  const [inboxOrcPeso, setInboxOrcPeso] = useState("");
-  const [inboxOrcCabeloCor, setInboxOrcCabeloCor] = useState("");
-  const [inboxOrcObs, setInboxOrcObs] = useState("");
-  const [inboxOrcValorTotal, setInboxOrcValorTotal] = useState("");
-  const [inboxOrcAnswers, setInboxOrcAnswers] = useState<Record<string, string>>({});
-  const [generatedInboxDocLink, setGeneratedInboxDocLink] = useState("");
-
+  const navigate = useNavigate();
 
   const { data: collaborators = [] } = useTenantCollaborators({ enabled: isSupabaseConfigured });
   const allProviders = useMemo(
@@ -428,121 +410,6 @@ export default function Inbox() {
     [linkedNegotiationProducts],
   );
 
-  const { data: tenantId } = useQuery({
-    queryKey: ["current-tenant-id"],
-    queryFn: () => getCurrentTenantId(),
-    enabled: isSupabaseConfigured,
-  });
-
-  const { data: dbTemplates = [] } = useDocumentTemplates();
-
-  const filteredTemplates = useMemo(() => {
-    return dbTemplates.filter((t) => t.category === inboxDocCategory);
-  }, [dbTemplates, inboxDocCategory]);
-
-  // Generate public document link inside chat view
-  useEffect(() => {
-    if (!activeChat || !tenantId) {
-      setGeneratedInboxDocLink("");
-      return;
-    }
-
-    const host = window.location.origin;
-    const negId = linkedNegotiation?.id || "";
-    const custId = activeChat.customerId || "";
-    const nome = activeChat.displayName || "";
-    const fone = activeChatPhone || "";
-    const cleanValorTotal = inboxOrcValorTotal.replace(/\D/g, "");
-
-    // Link expires in 7 days
-    const exp = String(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-    const signParams: Record<string, string> = {
-      neg: negId,
-      cust: custId,
-      tenant: tenantId,
-      exp,
-      templateId: inboxDocTemplateId || "",
-    };
-
-    if (inboxDocCategory === "orcamento") {
-      signParams.valor_total = cleanValorTotal;
-    }
-
-    import("@/lib/security").then(async ({ signUrlParams }) => {
-      const sig = await signUrlParams(signParams);
-
-      if (inboxDocCategory === "orcamento") {
-        let link = `${host}/orcamento/aprovar?neg=${negId}&cust=${custId}&tenant=${tenantId}&nome=${encodeURIComponent(
-          nome,
-        )}&fone=${encodeURIComponent(fone)}&valor_total=${encodeURIComponent(cleanValorTotal)}&exp=${exp}&sig=${sig}`;
-
-        if (inboxDocTemplateId && inboxDocTemplateId !== "default") {
-          link += `&templateId=${inboxDocTemplateId}`;
-          Object.entries(inboxOrcAnswers).forEach(([fieldId, val]) => {
-            if (val) {
-              link += `&${fieldId}=${encodeURIComponent(val)}`;
-            }
-          });
-        } else {
-          link += `&tamanho=${encodeURIComponent(inboxOrcTamanho)}&peso=${encodeURIComponent(
-            inboxOrcPeso,
-          )}&cabelo_cor=${encodeURIComponent(inboxOrcCabeloCor)}&obs=${encodeURIComponent(
-            inboxOrcObs,
-          )}`;
-        }
-        setGeneratedInboxDocLink(link);
-      } else {
-        let link = `${host}/anamnese/preencher?neg=${negId}&cust=${custId}&tenant=${tenantId}&nome=${encodeURIComponent(
-          nome,
-        )}&fone=${encodeURIComponent(fone)}&exp=${exp}&sig=${sig}`;
-        if (inboxDocTemplateId && inboxDocTemplateId !== "default") {
-          link += `&templateId=${inboxDocTemplateId}`;
-        }
-        setGeneratedInboxDocLink(link);
-      }
-    });
-  }, [
-    activeChat,
-    activeChatPhone,
-    tenantId,
-    linkedNegotiation,
-    inboxDocCategory,
-    inboxDocTemplateId,
-    inboxOrcTamanho,
-    inboxOrcPeso,
-    inboxOrcCabeloCor,
-    inboxOrcObs,
-    inboxOrcValorTotal,
-    inboxOrcAnswers,
-  ]);
-
-  const handleInsertDocLinkToComposer = () => {
-    if (!generatedInboxDocLink) return;
-
-    let text = "";
-    if (inboxDocCategory === "anamnese") {
-      const templateName = inboxDocTemplateId === "default"
-        ? "Ficha de Anamnese"
-        : dbTemplates.find(t => t.id === inboxDocTemplateId)?.name || "Ficha de Anamnese";
-      text = `Olá! Por favor, preencha sua ${templateName} clicando no link a seguir: ${generatedInboxDocLink}`;
-    } else if (inboxDocCategory === "orcamento") {
-      const templateName = inboxDocTemplateId === "default"
-        ? "Orçamento"
-        : dbTemplates.find(t => t.id === inboxDocTemplateId)?.name || "Orçamento";
-      text = `Olá! Segue o link com as especificações e o ${templateName} para aprovação digital: ${generatedInboxDocLink}`;
-    } else {
-      const templateName = dbTemplates.find(t => t.id === inboxDocTemplateId)?.name || "Contrato";
-      text = `Olá! Segue o link para assinatura do seu ${templateName}: ${generatedInboxDocLink}`;
-    }
-
-    composer.setBodyText(text);
-    setInboxDocLinkOpen(false);
-
-    setTimeout(() => {
-      composer.bodyTextareaRef.current?.focus();
-    }, 100);
-  };
   const { followups: chatFollowups } = useFollowupsForChat(activeChat);
 
   const {
@@ -1596,14 +1463,7 @@ export default function Inbox() {
               composer.setBodyText(text);
               requestAnimationFrame(() => composer.bodyTextareaRef.current?.focus());
             }}
-            onSendDocumentLink={(category) => {
-              setInboxDocCategory(category);
-              setInboxDocTemplateId("default");
-              if (linkedNegotiation && linkedNegotiation.totalValue > 0) {
-                setInboxOrcValorTotal(String(linkedNegotiation.totalValue));
-              }
-              setInboxDocLinkOpen(true);
-            }}
+            onSendDocumentLink={() => setInboxDocLinkOpen(true)}
           />
             </>
           )}
@@ -1664,171 +1524,21 @@ export default function Inbox() {
           </Dialog>
 
           <Dialog open={inboxDocLinkOpen} onOpenChange={setInboxDocLinkOpen}>
-            <DialogContent className="sm:max-w-[480px]">
+            <DialogContent>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-emerald-600" />
-                  Gerar Link de {inboxDocCategory === "anamnese" ? "Anamnese" : inboxDocCategory === "orcamento" ? "Orçamento" : "Contrato"}
+                  <FileText className="h-5 w-5" />
+                  Coleta segura no caso
                 </DialogTitle>
                 <DialogDescription>
-                  Gere o link de preenchimento/aceite com os dados do cliente travados e envie diretamente no chat.
+                  Os links antigos de ficha clínica e orçamento foram desativados.
+                  Abra ou crie o caso jurídico para solicitar documentos com acesso individual e prazo de validade.
+                  Os documentos já salvos continuam disponíveis.
                 </DialogDescription>
               </DialogHeader>
-
-              <div className="space-y-4 py-2">
-                <div className="bg-zinc-50 border border-border p-3 rounded-xl text-xs space-y-1">
-                  <div className="text-zinc-500 font-medium">Cliente Vinculado (Informações Fixas):</div>
-                  <div className="font-semibold text-zinc-800">Nome: {activeChat.displayName || "Não informado"}</div>
-                  <div className="font-semibold text-zinc-800">Telefone: {activeChatPhone || "Não informado"}</div>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="inbox-link-template">Selecione o Modelo de {inboxDocCategory === "anamnese" ? "Anamnese" : inboxDocCategory === "orcamento" ? "Orçamento" : "Contrato"}</Label>
-                  <Select value={inboxDocTemplateId} onValueChange={(val) => {
-                    setInboxDocTemplateId(val);
-                    setInboxOrcAnswers({});
-                  }}>
-                    <SelectTrigger id="inbox-link-template" className="w-full">
-                      <SelectValue placeholder="Selecione o modelo..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {inboxDocCategory === "anamnese" && (
-                        <SelectItem value="default">Ficha Capilar Padrão (Aline Ferreira)</SelectItem>
-                      )}
-                      {inboxDocCategory === "orcamento" && (
-                        <SelectItem value="default">Orçamento Capilar Padrão</SelectItem>
-                      )}
-                      {filteredTemplates.map((t) => (
-                        <SelectItem key={t.id} value={t.id}>
-                          {t.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {inboxDocCategory === "orcamento" && (
-                  <div className="space-y-3 pt-2 border-t border-border/50">
-                    {inboxDocTemplateId === "default" ? (
-                      <>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="flex flex-col gap-1.5">
-                            <Label htmlFor="inbox-orc-tamanho">Tamanho do Cabelo</Label>
-                            <Input
-                              id="inbox-orc-tamanho"
-                              placeholder="Ex: 60cm"
-                              value={inboxOrcTamanho}
-                              onChange={(e) => setInboxOrcTamanho(e.target.value)}
-                            />
-                          </div>
-                          <div className="flex flex-col gap-1.5">
-                            <Label htmlFor="inbox-orc-peso">Peso (g)</Label>
-                            <Input
-                              id="inbox-orc-peso"
-                              placeholder="Ex: 150g"
-                              value={inboxOrcPeso}
-                              onChange={(e) => setInboxOrcPeso(e.target.value)}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col gap-1.5">
-                          <Label htmlFor="inbox-orc-cor">Cabelo / Cor</Label>
-                          <Input
-                            id="inbox-orc-cor"
-                            placeholder="Ex: Loiro Mesclado / Castanho Escuro"
-                            value={inboxOrcCabeloCor}
-                            onChange={(e) => setInboxOrcCabeloCor(e.target.value)}
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1.5">
-                          <Label htmlFor="inbox-orc-obs">Observações Adicionais</Label>
-                          <Textarea
-                            id="inbox-orc-obs"
-                            placeholder="Ex: Preparação com queratina, aplicação em micropele..."
-                            value={inboxOrcObs}
-                            onChange={(e) => setInboxOrcObs(e.target.value)}
-                            rows={3}
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      <div className="space-y-3">
-                        <span className="text-xs font-bold text-zinc-500 uppercase tracking-wide">Campos do Modelo Selecionado</span>
-                        {dbTemplates.find(t => t.id === inboxDocTemplateId)?.fields.map((field) => (
-                          <div key={field.id} className="flex flex-col gap-1.5">
-                            <Label htmlFor={`inbox-orc-f-${field.id}`}>{field.label}</Label>
-                            {field.type === "textarea" ? (
-                              <Textarea
-                                id={`inbox-orc-f-${field.id}`}
-                                value={inboxOrcAnswers[field.id] || ""}
-                                onChange={(e) => setInboxOrcAnswers({ ...inboxOrcAnswers, [field.id]: e.target.value })}
-                                rows={2}
-                              />
-                            ) : (
-                              <Input
-                                id={`inbox-orc-f-${field.id}`}
-                                type={field.type === "number" ? "number" : "text"}
-                                value={inboxOrcAnswers[field.id] || ""}
-                                onChange={(e) => setInboxOrcAnswers({ ...inboxOrcAnswers, [field.id]: e.target.value })}
-                              />
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="flex flex-col gap-1.5">
-                      <Label htmlFor="inbox-orc-valor">Valor Total do Orçamento (R$)</Label>
-                      <Input
-                        id="inbox-orc-valor"
-                        type="text"
-                        placeholder="Ex: R$ 2.500"
-                        value={inboxOrcValorTotal}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const clean = val.replace(/\D/g, "");
-                          if (!clean) {
-                            setInboxOrcValorTotal("");
-                          } else {
-                            setInboxOrcValorTotal(new Intl.NumberFormat("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
-                              maximumFractionDigits: 0,
-                            }).format(Number(clean)));
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <DialogFooter className="pt-4 border-t border-border/50 gap-2 flex flex-row justify-end">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => {
-                    setInboxDocLinkOpen(false);
-                    setInboxDocTemplateId("default");
-                    setInboxOrcTamanho("");
-                    setInboxOrcPeso("");
-                    setInboxOrcCabeloCor("");
-                    setInboxOrcObs("");
-                    setInboxOrcValorTotal("");
-                    setInboxOrcAnswers({});
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleInsertDocLinkToComposer}
-                  disabled={!generatedInboxDocLink}
-                  className="bg-primary text-primary-foreground font-semibold"
-                >
-                  Inserir no Chat
-                </Button>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setInboxDocLinkOpen(false)}>Fechar</Button>
+                <Button onClick={() => navigate("/casos")}>Abrir casos</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
