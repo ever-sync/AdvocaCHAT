@@ -10,9 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  addLegalNote, addLegalParty, addLegalProceeding, downloadLegalDocument,
+  addLegalNote, addLegalParty, downloadLegalDocument,
   listLegalDocuments, listLegalEvents, listLegalMembers, listLegalParties,
-  listLegalProceedings, removeLegalMember, setLegalDocumentHold, setLegalMember,
+  removeLegalMember, setLegalDocumentHold, setLegalMember,
   updateLegalCase, uploadLegalDocument,
 } from "@/lib/api/legal";
 import type { LegalCase, LegalCaseDocument, LegalCaseMember, LegalCasePatch, LegalWorkspaceContext } from "@/types/legal";
@@ -23,6 +23,7 @@ const LegalCaseOperations = lazy(() => import("./operations/LegalCaseOperations"
 const LegalClientCare = lazy(() => import("./client-care/LegalClientCare"));
 const LegalIrWorkspace = lazy(() => import("./ir/LegalIrWorkspace"));
 const LegalCaseFinance = lazy(() => import("./finance/LegalCaseFinance"));
+const LegalJudicialWorkspace = lazy(() => import("./judicial/LegalJudicialWorkspace"));
 
 type CasePanelProps = { legalCase: LegalCase; workspace: LegalWorkspaceContext; canEdit: boolean };
 const caseKey = (workspace: LegalWorkspaceContext, caseId: string, section: string) => ["legal", workspace.user_id, workspace.tenant_id, "case", caseId, section];
@@ -61,19 +62,6 @@ function CaseParties({ legalCase, workspace, canEdit }: CasePanelProps) {
   </CardContent></Card></div>;
 }
 
-function CaseProceedings({ legalCase, workspace, canEdit }: CasePanelProps) {
-  const query = useQuery({ queryKey: caseKey(workspace, legalCase.id, "proceedings"), queryFn: () => listLegalProceedings(legalCase.id) });
-  const [form, setForm] = useState({ cnj_number: "", court: "", division: "", description: "" });
-  const action = useLegalAction();
-  async function save(event: FormEvent) {
-    event.preventDefault();
-    if (await action.run(() => addLegalProceeding(legalCase.id, form), "Processo cadastrado")) setForm({ cnj_number: "", court: "", division: "", description: "" });
-  }
-  return <Card><CardHeader><CardTitle className="text-lg">Processos vinculados</CardTitle><CardDescription>Cadastro manual. Os movimentos e as intimações dos tribunais ainda não são sincronizados.</CardDescription></CardHeader><CardContent className="space-y-4">
-    {query.isPending ? <LegalLoading /> : query.error ? <LegalError error={query.error} retry={() => void query.refetch()} /> : query.data?.length ? <ul className="space-y-3">{query.data.map((proceeding) => <li key={proceeding.id} className="rounded-lg border p-4"><p className="break-all font-medium">{proceeding.cnj_number}</p><p className="mt-1 text-sm text-muted-foreground">{[proceeding.court, proceeding.division].filter(Boolean).join(" · ") || "Órgão não informado"}</p>{proceeding.description ? <p className="mt-2 whitespace-pre-wrap break-words text-sm">{proceeding.description}</p> : null}</li>)}</ul> : <LegalEmpty title="Nenhum processo vinculado">Casos consultivos ou extrajudiciais podem seguir sem processo judicial.</LegalEmpty>}
-    {canEdit ? <form onSubmit={(event) => void save(event)} className="space-y-3 rounded-lg border p-4"><LegalField label="Número CNJ">{(id) => <Input id={id} placeholder="0000000-00.0000.0.00.0000" required maxLength={25} value={form.cnj_number} onChange={(event) => setForm({ ...form, cnj_number: event.target.value })} />}</LegalField><div className="grid gap-3 sm:grid-cols-2"><LegalField label="Tribunal">{(id) => <Input id={id} placeholder="Ex.: TJSP" maxLength={120} value={form.court} onChange={(event) => setForm({ ...form, court: event.target.value })} />}</LegalField><LegalField label="Vara ou órgão julgador">{(id) => <Input id={id} maxLength={180} value={form.division} onChange={(event) => setForm({ ...form, division: event.target.value })} />}</LegalField></div><LegalField label="Observação">{(id) => <Textarea id={id} maxLength={1000} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />}</LegalField><Button size="sm" type="submit" disabled={action.pending || !form.cnj_number.trim()}>Vincular processo</Button></form> : null}
-  </CardContent></Card>;
-}
 
 function MemberPermissions({ member, name, canManage, onSave, onRemove, pending }: { member: LegalCaseMember; name: string; canManage: boolean; onSave: (member: LegalCaseMember) => Promise<boolean>; onRemove: () => void; pending: boolean }) {
   const [draft, setDraft] = useState(member);
@@ -154,7 +142,7 @@ export function LegalCaseDetail({ legalCase, workspace }: { legalCase: LegalCase
       <TabsContent value="client-care"><Suspense fallback={<LegalLoading />}><LegalClientCare {...shared} member={myMember} members={members.data ?? []} /></Suspense></TabsContent>
       <TabsContent value="case-finance"><Suspense fallback={<LegalLoading />}><LegalCaseFinance key={legalCase.id} {...shared} member={myMember} /></Suspense></TabsContent>
       <TabsContent value="parties"><CaseParties {...shared} /></TabsContent>
-      <TabsContent value="proceedings"><CaseProceedings {...shared} /></TabsContent>
+      <TabsContent value="proceedings"><Suspense fallback={<LegalLoading />}><LegalJudicialWorkspace {...shared} member={myMember} members={members.data ?? []} /></Suspense></TabsContent>
       <TabsContent value="documents">{members.isPending && !isOwner ? <LegalLoading /> : <CaseDocuments {...shared} member={myMember} />}</TabsContent>
       <TabsContent value="team">{members.isPending ? <LegalLoading /> : <CaseTeam legalCase={legalCase} workspace={workspace} members={members.data ?? []} canManage={isOwner} />}</TabsContent>
       <TabsContent value="timeline"><CaseTimeline {...shared} /></TabsContent>

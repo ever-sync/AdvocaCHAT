@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 const base = process.env.FUNCTIONS_URL?.replace(/\/$/, '');
 const secret = process.env.CRON_SECRET;
 if (!base || !secret) throw new Error('FUNCTIONS_URL and CRON_SECRET are required');
-const tasks = ['ai-orchestrator', 'marketing-flow-worker', 'webhook-dispatcher', 'marketing-email-dispatch', 'welcome-email-dispatch', 'scheduling-reminder-dispatch', 'billing-usage-alerts', 'legal-communication-dispatch', 'legal-payment-dispatch'];
+const tasks = ['ai-orchestrator', 'marketing-flow-worker', 'webhook-dispatcher', 'marketing-email-dispatch', 'welcome-email-dispatch', 'scheduling-reminder-dispatch', 'billing-usage-alerts', 'legal-communication-dispatch', 'legal-payment-dispatch', 'legal-judicial-dispatch'];
 let stopped = false;
 let lastTick = 0;
 let results = {};
@@ -19,7 +19,7 @@ async function tick() {
     if (stopped) break;
     const started = Date.now();
     let status = 0;
-    try { status = await post(name); } catch { /* recorded below, never log provider data */ }
+    try { status = await post(name, name === 'legal-judicial-dispatch' ? { action: 'dispatch', provider: 'escavador' } : {}); } catch { /* recorded below, never log provider data */ }
     results[name] = status;
     console.log(JSON.stringify({ worker: name, status, duration_ms: Date.now() - started }));
     try {

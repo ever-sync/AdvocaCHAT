@@ -199,3 +199,11 @@ verify_jwt = false
 
 [functions.legal-payment-webhook]
 verify_jwt = false
+
+# Monitoramento: Auth.getUser para configuração interna, x-cron-secret no
+# dispatcher e token próprio no callback. Fonte, conta e escopo são revalidados.
+[functions.legal-judicial-dispatch]
+verify_jwt = false
+
+[functions.legal-judicial-webhook]
+verify_jwt = false
