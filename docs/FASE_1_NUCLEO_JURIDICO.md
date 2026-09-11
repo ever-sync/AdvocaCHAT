@@ -78,7 +78,54 @@ reverter uma publicação. Versões anteriores do frontend ignoram as novas tabe
 - Edge de documentos: `deno check` e testes de tipo/assinatura de arquivo,
   tamanho e cabeçalhos de download.
 
-Verificação de implantação, jornada real e comparação de dados: em andamento.
+### Evidências de produção
+
+Código: `accbdda68427a66230d124b46d9f5df7092fe716`, publicado em `origin/main`.
+Railway AdvocaCHAT, ambiente `production`:
+
+| Serviço | Deployment | Resultado |
+| --- | --- | --- |
+| web | `79a6a8cb-ea50-462b-ab1b-cf59a824c1c4` | SUCCESS |
+| functions | `05b5d176-8ab0-4670-ba31-95a7b031a189` | SUCCESS |
+| scheduler | `6c03878a-95c6-4a04-b119-838bd3ddb45d` | SUCCESS |
+
+Migrações aplicadas em transação via conexão SSH ao Postgres. Comparação antes e
+após: hash integral dos perfis preservado; contagens de clientes e negociações
+preservadas. Ledger confirmou as duas versões e a revogação do bootstrap público.
+
+Com contas sintéticas confirmadas administrativamente, sem envio de email:
+
+- Cadastro/Auth real, cliente com dois casos e dois vínculos processuais, notas
+  independentes, conversão repetida sem duplicação e negociação original intacta.
+- Leitura negada a outro escritório e a participante ainda não incluído; participante
+  não consegue autopromoção nem liberar sua própria categoria sensível.
+- Três documentos persistidos, um por categoria. SHA-256 e bytes recuperados iguais
+  ao original; usuário sem autorização não vê metadados médicos/fiscais e recebe
+  bloqueio no download. URLs diretas, públicas e autenticadas, não abrem os arquivos.
+- Concessão explícita permite download médico; revogação volta a bloqueá-lo.
+  Auditoria e justificativa de preservação foram conferidas.
+- Desabilitar a flag oculta os casos e bloqueia download; reabilitar restaura acesso
+  aos mesmos dois casos, sem recriação nem perda.
+- Perfil inativo bloqueado no RPC jurídico e no contexto compartilhado da Edge.
+
+No navegador publicado, sem mock da API jurídica ou da cobrança: dois casos
+abertos; novo caso criado pela interface; título, área e próxima providência
+conferidos após recarregar; documento enviado, listado após recarregar e baixado
+com bytes idênticos. Navegação a 375 px sem transbordamento horizontal e sem erros
+de página. Sete tentativas automáticas de email de boas-vindas do sistema herdado
+foram bloqueadas no navegador de teste; nenhum email foi enviado na validação.
+O web em produção utiliza Node.js 22.23.2.
+
+Ao final, quatro arquivos sintéticos removidos pelo Storage, três escritórios de
+teste removidos com seus registros e três contas sintéticas removidas do Auth.
+Leitura posterior: um escritório e um perfil originais; zero clientes, negociações,
+casos, documentos e eventos jurídicos. A área permanece disponível no menu, com
+habilitação individual em **Casos jurídicos → Escritório**. Não foram convertidos
+registros nem concedidas permissões ao escritório original.
+
+Conclusão: F1 entregue e verificada tecnicamente. A validação com escritórios
+piloto, decisões de retenção por finalidade e ensaio de recuperação integral
+continuam registrados como pendências de F0, sem marcar as demais fases concluídas.
 
 ## Limites e próximas fases
 

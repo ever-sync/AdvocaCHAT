@@ -1,6 +1,6 @@
 # Plano de evolução do AdvocaCHAT: plataforma jurídica e isenção de IR
 
-Data de referência: **11/09/2026** · Versão: **1.0** · Situação: **planejamento**.
+Data de referência: **11/09/2026** · Versão: **1.1** · Situação: **F1 entregue; próximas fases planejadas**.
 
 Este é o roteiro de execução do produto. Reúne as 30 ideias de plataforma jurídica
 aprovadas na conversa e 25 funcionalidades específicas para escritórios que atuam
@@ -276,14 +276,18 @@ Evidências: atas de validação, fluxos, checklist de ambiente e baseline de m�
 
 Responsáveis: engenharia e QA; validação por produto/advogado.
 
-- [ ] F1.01 Criar casos, partes, vínculos com clientes, responsáveis e processos cadastrados manualmente.
-- [ ] F1.02 Manter negociação separada; conversão idempotente cria caso sem perder histórico.
-- [ ] F1.03 Adicionar OAB/UF e papéis jurídicos sem concessão automática de privilégio.
-- [ ] F1.04 Implementar acesso por escritório, caso e categoria documental em backend/storage.
-- [ ] F1.05 Criar linha do tempo manual, próxima providência e auditoria de alterações.
-- [ ] F1.06 Definir retenção, bloqueio de exclusão por necessidade de preservação e acesso de suporte auditado.
-- [ ] F1.07 Migrar de forma aditiva; conferir contagens, relações e reversão de leitura por feature flag.
-- [ ] F1.08 Criar navegação jurídica sem rótulos clínicos e comerciais inadequados.
+- [x] F1.01 Criar casos, partes, vínculos com clientes, responsáveis e processos cadastrados manualmente.
+- [x] F1.02 Manter negociação separada; conversão idempotente cria caso sem perder histórico.
+- [x] F1.03 Adicionar OAB/UF e papéis jurídicos sem concessão automática de privilégio.
+- [x] F1.04 Implementar acesso por escritório, caso e categoria documental em backend/storage.
+- [x] F1.05 Criar linha do tempo manual, próxima providência e auditoria de alterações.
+- [x] F1.06 Definir retenção, bloqueio de exclusão por necessidade de preservação e acesso de suporte auditado.
+- [x] F1.07 Migrar de forma aditiva; conferir contagens, relações e reversão de leitura por feature flag.
+- [x] F1.08 Criar navegação jurídica sem rótulos clínicos e comerciais inadequados.
+
+Entrega técnica em 11/09/2026: [escopo, preservação, suporte e evidências](FASE_1_NUCLEO_JURIDICO.md).
+Retenção sem descarte automático e suporte por participação explícita/revogação
+manual; regras de prazo e contratos dependem da validação de F0.
 
 Saída: um cliente com dois casos e dois processos pode ser acompanhado sem
 misturar históricos. Assistente sem autorização não acessa laudo por URL direta,
@@ -634,18 +638,21 @@ dos honorários cobrados pelo advogado. Não precificar antes de medir custo por
 
 ## 15. Como seguiremos este documento
 
-O planejamento foi solicitado pelo usuário; **a implementação ainda não começou**.
-Próxima etapa recomendada: executar F0 e preparar tickets de F1. Mudanças de escopo
-entram aqui com justificativa e efeito em dependências/custo.
+Em 11/09/2026, o usuário direcionou a execução para **F1, a primeira fase de
+implementação**. O núcleo jurídico foi construído e publicado; o detalhamento e
+as evidências estão em [Entrega da fase 1](FASE_1_NUCLEO_JURIDICO.md). F0 continua
+pendente nas decisões de negócio, validação jurídica e recuperação integral.
+A próxima implementação é F2; a especialidade de IR permanece a partir de F3.
+Mudanças de escopo entram aqui com justificativa e efeito em dependências/custo.
 
 Estados de acompanhamento: `planejado`, `pronto_para_execucao`, `em_execucao`,
 `em_validacao`, `concluido`, `bloqueado`. Marcar um checkbox somente após comprovar
 o critério; implementação local, deploy e homologação são evidências distintas.
 
-| Fase | Estado inicial | Responsável nominal | Evidências/pendências |
+| Fase | Estado atual | Responsável nominal | Evidências/pendências |
 | --- | --- | --- | --- |
 | F0 | planejado | A definir | Validar recorte IR, piloto e ambiente |
-| F1 | planejado | A definir | Depende de F0 |
+| F1 | concluido | Codex (implementação técnica) | [Entrega, testes e implantação](FASE_1_NUCLEO_JURIDICO.md); validação de negócio/jurídica dos pilotos permanece em F0 |
 | F2 | planejado | A definir | Depende de F1 |
 | F3 | planejado | A definir | Depende de F1/F2 e revisão jurídica |
 | F4 | planejado | A definir | Depende de F3 e referência fiscal |
@@ -713,3 +720,4 @@ não evidência de que a integração já está ativa.
 | Data | Versão | Alteração |
 | --- | --- | --- |
 | 11/09/2026 | 1.0 | Plano inicial: 30 funcionalidades jurídicas, 25 da especialidade IR, fases F0–F9, critérios e dependências |
+| 11/09/2026 | 1.1 | Execução de F1 a pedido do usuário: núcleo jurídico, cofre por categoria, proteção dos perfis e migração aditiva; F0 não encerrada |
