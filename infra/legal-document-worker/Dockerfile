@@ -62,8 +62,9 @@ ENV LEGAL_OCR_TEST_TESSDATA=/opt/legal-ocr/tessdata
 USER 10001:10001
 
 # RUN does not inherit ENTRYPOINT. Tini explicitly reaps killed descendants here.
-# No credentials or network are available to the synthetic OCR acceptance suite.
-RUN --network=none /usr/bin/tini -s -g -- python - <<'PY'
+# No credentials are used. Python socket/DNS operations are rejected by the runner.
+# This is not OS network isolation; native tools receive only fixed local inputs.
+RUN /usr/bin/tini -s -g -- python - <<'PY'
 import hashlib
 import json
 import os
@@ -72,6 +73,32 @@ import sys
 import tempfile
 import time
 import unittest
+
+# NETWORK_GUARD_START
+network_attempts = 0
+network_probes = 0
+probing_network_guard = True
+def reject_python_network(event, _args):
+    global network_attempts, network_probes
+    if event.startswith("socket.") and event != "socket.gethostname":
+        if probing_network_guard:
+            network_probes += 1
+        else:
+            network_attempts += 1
+        raise RuntimeError("Python socket and DNS access is disabled in OCR tests")
+sys.addaudithook(reject_python_network)
+import socket
+for probe in (socket.socket, lambda: socket.getaddrinfo("ocr-test.invalid", 443)):
+    try:
+        probe()
+    except RuntimeError:
+        pass
+    else:
+        raise SystemExit("Python network guard self-check failed")
+probing_network_guard = False
+if network_probes != 2:
+    raise SystemExit("Python network guard did not intercept both self-checks")
+# NETWORK_GUARD_END
 
 import ocr_kernel
 import test_ocr_kernel
@@ -113,11 +140,15 @@ with tempfile.TemporaryDirectory(prefix="ocr-linux-limit-") as temporary:
     )
     if int(output.strip()) != ocr_kernel.Limits().memory_bytes:
         raise SystemExit("OCR child address-space limit differs from its policy")
+if network_attempts:
+    raise SystemExit("A test attempted a Python socket or DNS operation")
 
 verified = {
     "status": "verified", "tests": outcome.testsRun, "worker_tests": worker_outcome.testsRun,
     "uid": os.geteuid(),
-    "memory_enforcement": "rlimit_as", "network": "none",
+    "memory_enforcement": "rlimit_as", "external_calls": 0,
+    "network_guard": "python-sockets-blocked", "network_guard_scope": "test-runner-python-process",
+    "network_guard_self_checks": network_probes, "blocked_network_attempts": network_attempts,
     "kernel_sha256": hashlib.sha256(Path("ocr_kernel.py").read_bytes()).hexdigest(),
     "tests_sha256": hashlib.sha256(Path("test_ocr_kernel.py").read_bytes()).hexdigest(),
     "worker_sha256": hashlib.sha256(Path("worker.py").read_bytes()).hexdigest(),
@@ -137,7 +168,7 @@ COPY --from=test --chmod=0444 /tmp/ocr-verified /opt/legal-ocr/ocr-verified
 COPY --chmod=0444 infra/legal-document-worker/worker.py ./worker.py
 ENV PORT=8080
 USER 10001:10001
-RUN --network=none python - <<'PY'
+RUN python - <<'PY'
 import hashlib
 import importlib.util
 import json

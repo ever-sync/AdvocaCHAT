@@ -122,8 +122,12 @@ o endereço ou o hash por argumento de build. Idioma continua explícito no kern
 O estágio `test` acrescenta as versões fixadas em
 `requirements.test.txt` de Pillow, pypdf, ReportLab e sua dependência
 charset-normalizer. Esses pacotes Python e arquivos de teste não entram em
-`runtime`. Os dez testes sintéticos executam como UID/GID 10001, com
-`RUN --network=none`, sem credenciais. O build recusa testes pulados, quantidade
+`runtime`. Os dez testes sintéticos executam como UID/GID 10001, sem credenciais.
+Um audit hook Python recusa criação/operação de sockets e consultas DNS no
+processo de testes, antes de importar as suítes. Duas sondas locais verificam
+que o bloqueio intercepta socket e DNS sem transmitir nada. Qualquer tentativa
+posterior, mesmo que capturada por um teste, impede o marcador de sucesso.
+O build recusa testes pulados, quantidade
 inesperada, execução como root, plataforma diferente de Linux ou resultado com
 modo de memória diferente de `rlimit_as`. Também consulta `RLIMIT_AS` dentro de
 um subprocesso real do kernel e confronta o valor com a política configurada.
@@ -141,7 +145,7 @@ cada publicação, junto do marcador de versões realmente testadas.
 O estágio final também confere o hash do kernel contra o marcador e recusa a
 presença das dependências Python de criação de fixtures.
 
-No mesmo estágio sem rede, a suíte `test_worker.py` verifica transporte e fila
+No mesmo estágio com o bloqueio Python, a suíte `test_worker.py` verifica transporte e fila
 usando somente objetos falsos e bytes sintéticos. Exige pelo menos os dez casos
 iniciais, não aceita testes pulados e registra sua quantidade separada em
 `worker_tests`; `tests=10` continua reservado à suíte do kernel. Os hashes do
@@ -164,17 +168,30 @@ requisições autenticadas e arquivos obtidos de origem autorizada, sem aceitar
 caminho de binário, diretório de modelo ou URL fornecidos pelo cliente.
 HTTP saudável, isoladamente, não comprova OCR nem persistência autorizada.
 
-Esta alteração não executou o container: o Docker CLI local está disponível,
-mas o daemon está desligado. A primeira prova Linux deverá ser o build remoto
-com a etapa de testes realmente executada, seguida do ensaio sintético do
+O primeiro build remoto Railway foi recusado pelo parser antes dos testes,
+porque não aceita a opção `RUN --network=none`. A opção foi removida sem retirar
+os testes obrigatórios. O marcador registra `network_guard="python-sockets-blocked"`,
+seu escopo `test-runner-python-process`, as duas sondas e o contador de tentativas
+bloqueadas; `external_calls=0` refere-se às chamadas de rede do processo Python
+sob esse bloqueio. Isso **não é isolamento de rede do sistema operacional** e
+não se propaga aos executáveis nativos. Poppler/Tesseract e os subprocessos
+sintéticos recebem comandos fixos e arquivos locais, sem URL ou instrução de
+rede extraída de documentos. A verificação do estágio runtime apenas lê arquivos
+e importa módulos locais, sem operação de rede.
+
+O Docker CLI local está disponível, mas o daemon está desligado. A primeira
+prova Linux ainda deverá ser um build remoto com a etapa de testes executada,
+seguida do ensaio sintético do
 wrapper e da revalidação de acesso antes de persistir. Não usar documentos reais
 nem habilitar consumo por clientes nessa verificação inicial. Limites de memória,
 CPU, armazenamento efêmero e isolamento de rede devem ser configurados também
-no serviço; `RUN --network=none` se aplica aos testes, não à rede do runtime.
+no serviço. O bloqueio Python de testes não altera a rede do runtime.
 
 Fontes técnicas primárias conferidas em 11/09/2026:
 [base Python oficial](https://github.com/docker-library/python/blob/master/3.12/slim-bookworm/Dockerfile),
 [instruções Docker/BuildKit](https://docs.docker.com/reference/dockerfile/#run---network),
+[audit hooks Python](https://docs.python.org/3.12/library/sys.html#sys.addaudithook),
+[eventos auditáveis de socket](https://docs.python.org/3.12/library/audit_events.html),
 [Poppler Debian](https://packages.debian.org/bookworm/poppler-utils),
 [Tesseract Debian](https://packages.debian.org/bookworm/tesseract-ocr),
 [Tini Debian](https://packages.debian.org/bookworm/tini),
