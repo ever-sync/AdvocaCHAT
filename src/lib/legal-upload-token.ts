@@ -2,6 +2,11 @@
 // referrer, telemetry event, storage or application session.
 let uploadToken = "";
 export function normalizeLegalPublicPath(pathname: string) {
+  try {
+    pathname = pathname.split("/").map((part) => decodeURIComponent(part).replace(/\//g, "%2F")).join("/");
+  } catch {
+    // Match the router's fallback for malformed percent encoding.
+  }
   return pathname.toLowerCase().replace(/\/+$/, "");
 }
 export function captureLegalUploadToken(location: Pick<Location, "pathname" | "hash">, history: Pick<History, "replaceState">) {

@@ -13,7 +13,7 @@ describe("public upload capability privacy", () => {
     captureLegalUploadToken({ pathname: "/enviar-documento", hash: "#token=<script>" }, { replaceState: (_state, _title, url) => { clean = String(url); } });
     expect(getLegalUploadToken()).toBe(""); expect(clean).toBe("/enviar-documento");
   });
-  it.each(["/enviar-documento/", "/ENVIAR-DOCUMENTO", "/ENVIAR-DOCUMENTO//"])("strips capabilities on router-compatible path %s", (pathname) => {
+  it.each(["/enviar-documento/", "/ENVIAR-DOCUMENTO", "/ENVIAR-DOCUMENTO//", "/%65nviar-documento", "/%45NVIAR-DOCUMENTO/"])("strips capabilities on router-compatible path %s", (pathname) => {
     let clean = "";
     captureLegalUploadToken({ pathname, hash: "#token=" + "b".repeat(64) }, { replaceState: (_state, _title, url) => { clean = String(url); } });
     expect(getLegalUploadToken()).toBe("b".repeat(64));
