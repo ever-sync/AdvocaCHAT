@@ -10,6 +10,8 @@ import {
   Megaphone,
   MessageCircle,
   Moon,
+  PanelLeftClose,
+  PanelLeftOpen,
   Package,
   Settings2,
   Sun,
@@ -154,20 +156,33 @@ function RailNavLink({ item, pathname }: { item: MenuItem; pathname: string }) {
         aria-label={item.title}
         end={item.url === "/crm"}
         className={cn(
-          "flex h-10 w-10 shrink-0 items-center justify-center gap-3 rounded-md transition-colors duration-150 xl:w-full xl:justify-start xl:px-3",
+          "flex h-10 w-10 shrink-0 items-center justify-center gap-3 rounded-md transition-colors duration-150 group-data-[expanded=true]/sidebar:w-full group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3",
           isActive
             ? "bg-sidebar-accent text-sidebar-accent-foreground"
             : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         )}
         activeClassName=""
       >
-        <item.icon strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden truncate text-sm font-medium xl:block">{item.title}</span>
+        <item.icon strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden truncate text-sm font-medium group-data-[expanded=true]/sidebar:block">{item.title}</span>
       </NavLink>
     </SidebarTooltip>
   );
 }
 
 export function AppSidebar() {
+  const [expanded, setExpanded] = useState(() => {
+    try {
+      const saved = localStorage.getItem("advocachat:sidebar-expanded");
+      if (saved !== null) return saved === "true";
+    } catch { /* Storage may be unavailable in private sessions. */ }
+    return window.matchMedia("(min-width: 1280px)").matches;
+  });
+  function toggleSidebar() {
+    const next = !expanded;
+    setExpanded(next);
+    try { localStorage.setItem("advocachat:sidebar-expanded", String(next)); }
+    catch { /* The toggle still works without persistent storage. */ }
+  }
   const pathname = useLocation().pathname;
   const navigate = useNavigate();
   const { signOut, profile } = useAuth();
@@ -243,12 +258,23 @@ export function AppSidebar() {
 
   return (
     <aside
-      className="relative z-40 hidden h-[100dvh] w-[64px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar py-3 text-sidebar-foreground md:flex xl:w-[208px]"
+      data-expanded={expanded}
+      className={cn("group/sidebar relative z-40 hidden h-[100dvh] shrink-0 flex-col border-r border-sidebar-border bg-sidebar py-3 text-sidebar-foreground md:flex", expanded ? "w-[208px]" : "w-[64px]")}
       aria-label="Navegacao principal"
     >
-      <NavLink to="/inbox" aria-label="AdvocaCHAT, início" className="mx-2 mb-4 flex h-11 shrink-0 items-center justify-center gap-2 rounded-md text-sidebar-foreground xl:justify-start xl:px-3"><Scale strokeWidth={1.5} className="h-6 w-6 shrink-0 text-sidebar-primary" aria-hidden /><span className="hidden text-base font-semibold tracking-tight xl:block">AdvocaCHAT</span></NavLink>
+      <NavLink to="/inbox" aria-label="AdvocaCHAT, início" className="mx-2 mb-4 flex h-11 shrink-0 items-center justify-center gap-2 rounded-md text-sidebar-foreground group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3"><Scale strokeWidth={1.5} className="h-6 w-6 shrink-0 text-sidebar-primary" aria-hidden /><span className="hidden text-base font-semibold tracking-tight group-data-[expanded=true]/sidebar:block">AdvocaCHAT</span></NavLink>
 
-      <div className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto px-2 xl:items-stretch">
+      <div className="mb-3 px-2">
+        <SidebarTooltip label={expanded ? "Recolher menu" : "Expandir menu"}>
+          <button type="button" onClick={toggleSidebar} aria-expanded={expanded}
+            aria-controls="app-sidebar-navigation" aria-label={expanded ? "Recolher menu" : "Expandir menu"}
+            className="flex h-9 w-full items-center justify-center gap-3 rounded-md border border-sidebar-border text-sidebar-foreground transition-colors hover:bg-sidebar-accent group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3">
+            {expanded ? <PanelLeftClose className="h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden /> : <PanelLeftOpen className="h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden />}
+            <span className="hidden text-xs group-data-[expanded=true]/sidebar:block">Recolher menu</span>
+          </button>
+        </SidebarTooltip>
+      </div>
+      <div id="app-sidebar-navigation" className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto px-2 group-data-[expanded=true]/sidebar:items-stretch">
         {!permissionsLoading
           ? primaryItems
               .filter((item) => !item.permission || can(item.permission, "view"))
@@ -257,14 +283,14 @@ export function AppSidebar() {
       </div>
 
 
-      <div className="flex shrink-0 flex-col items-center gap-2 border-t border-sidebar-border px-2 pb-1 pt-3 xl:items-stretch">
+      <div className="flex shrink-0 flex-col items-center gap-2 border-t border-sidebar-border px-2 pb-1 pt-3 group-data-[expanded=true]/sidebar:items-stretch">
         <DropdownMenu>
           <Tooltip delayDuration={200}>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="relative flex h-10 w-10 items-center justify-center gap-3 rounded-md xl:w-full xl:justify-start xl:px-3 text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  className="relative flex h-10 w-10 items-center justify-center gap-3 rounded-md group-data-[expanded=true]/sidebar:w-full group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3 text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   aria-label="Minha conta"
                 >
                   <Avatar className="h-8 w-8 border border-border">
@@ -273,11 +299,11 @@ export function AppSidebar() {
                       {initials}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="hidden min-w-0 flex-1 truncate text-left text-sm xl:block">{profile?.nome ?? "Minha conta"}</span>
+                  <span className="hidden min-w-0 flex-1 truncate text-left text-sm group-data-[expanded=true]/sidebar:block">{profile?.nome ?? "Minha conta"}</span>
                   {showAvailabilityToggle ? (
                     <span
                       className={cn(
-                        "absolute bottom-1 right-1 h-3 w-3 rounded-full border-2 border-sidebar xl:static xl:shrink-0",
+                        "absolute bottom-1 right-1 h-3 w-3 rounded-full border-2 border-sidebar group-data-[expanded=true]/sidebar:static group-data-[expanded=true]/sidebar:shrink-0",
                         currentAvailability.dotClass,
                       )}
                       aria-label={`Status: ${currentAvailability.label}`}
@@ -416,14 +442,14 @@ export function AppSidebar() {
               title="Configuracoes"
               aria-label="Configuracoes"
               className={cn(
-                "flex h-10 w-10 shrink-0 items-center justify-center gap-3 rounded-md transition-colors duration-150 xl:w-full xl:justify-start xl:px-3",
+                "flex h-10 w-10 shrink-0 items-center justify-center gap-3 rounded-md transition-colors duration-150 group-data-[expanded=true]/sidebar:w-full group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3",
                 isSettingsActive
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
               )}
               activeClassName=""
             >
-              <Settings2 strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden text-sm xl:block">Configurações</span>
+              <Settings2 strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden text-sm group-data-[expanded=true]/sidebar:block">Configurações</span>
             </NavLink>
           </SidebarTooltip>
         ) : null}
@@ -435,14 +461,14 @@ export function AppSidebar() {
             aria-label={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
             aria-pressed={isDark}
             onClick={() => setTheme(isDark ? "light" : "dark")}
-            className="flex h-10 w-10 items-center justify-center gap-3 rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground xl:w-full xl:justify-start xl:px-3"
+            className="flex h-10 w-10 items-center justify-center gap-3 rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[expanded=true]/sidebar:w-full group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3"
           >
             {isDark ? (
               <Sun strokeWidth={1.5} className="h-[18px] w-[18px]" aria-hidden />
             ) : (
               <Moon strokeWidth={1.5} className="h-[18px] w-[18px]" aria-hidden />
             )}
-            <span className="hidden text-sm xl:block">{isDark ? "Tema claro" : "Tema escuro"}</span>
+            <span className="hidden text-sm group-data-[expanded=true]/sidebar:block">{isDark ? "Tema claro" : "Tema escuro"}</span>
           </button>
         </SidebarTooltip>
 
@@ -455,9 +481,9 @@ export function AppSidebar() {
               await signOut();
               navigate("/login");
             }}
-            className="flex h-10 w-10 items-center justify-center gap-3 rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground xl:w-full xl:justify-start xl:px-3"
+            className="flex h-10 w-10 items-center justify-center gap-3 rounded-md text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[expanded=true]/sidebar:w-full group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3"
           >
-            <LogOut strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden text-sm xl:block">Sair</span>
+            <LogOut strokeWidth={1.5} className="h-5 w-5 shrink-0" aria-hidden /><span className="hidden text-sm group-data-[expanded=true]/sidebar:block">Sair</span>
           </button>
         </SidebarTooltip>
       </div>
