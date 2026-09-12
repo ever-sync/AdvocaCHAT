@@ -1940,18 +1940,84 @@ export async function processMessagePayload(
       await markCustomerOptOut(admin, instance.tenant_id, remoteJid);
     }
 
+    // Evita que dois atendentes automáticos conversem indefinidamente entre si.
+    // O bloqueio é local ao chat: os demais contatos do canal continuam ativos.
+    if (detectAutomatedPeer(bodyText)) {
+      await admin.from("whatsapp_chats").update({ ai_mode: "off" }).eq("id", chat.id);
+      await markAiProcessing(admin, message.id, "ignored", "automated_peer_detected");
+      console.warn("inbound_ai_ignored", {
+        tenant_id: instance.tenant_id,
+        chat_id: chat.id,
+        message_id: message.id,
+        reason: "automated_peer_detected",
+      });
+      return { chat: { ...chat, ai_mode: "off" }, message };
+    }
+
+    // Mensagem textual vazia (por exemplo, evento de protocolo sem conteúdo)
+    // não deve consumir um turno. Anexos continuam elegíveis.
+    if (!bodyText.trim() && !mediaUrl) {
+      await markAiProcessing(admin, message.id, "ignored", "empty_message");
+      return { chat, message };
+    }
+
     // Roteia o inbound conforme o provider de IA do tenant:
     //  - 'native' → enfileira um turno pro orquestrador nativo (ai-orchestrator)
     //  - 'n8n'/'off' → caminho atual (notifyN8nInbound, que no-op se n8n desligado)
     const aiProvider = await getNativeAiProvider(admin, instance.tenant_id);
     if (aiProvider === "native") {
-      await enqueueAiTurn(admin, instance, chat);
+      const result = await enqueueAiTurn(admin, instance, chat);
+      await markAiProcessing(admin, message.id, result.queued ? "queued" : "ignored", result.reason);
     } else {
       await notifyN8nInbound(admin, instance, chat, message, bodyText);
+      await markAiProcessing(
+        admin,
+        message.id,
+        aiProvider === "n8n" ? "forwarded" : "ignored",
+        aiProvider === "n8n" ? "n8n_provider" : "tenant_provider_off",
+      );
     }
   }
 
   return { chat, message };
+}
+
+export function detectAutomatedPeer(text: string): boolean {
+  const normalized = text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!normalized) return false;
+
+  // Comandos dirigidos a outro agente são sinal forte de teste ou automação.
+  if (/\bresponda apenas\s*:/.test(normalized)) return true;
+  // Apresentação explícita em primeira pessoa como bot/assistente.
+  if (/\b(?:sou|aqui e)\s+(?:o |a )?[^.!?]{0,80}\bassistente virtual\b/.test(normalized)) return true;
+
+  const signals = [
+    /\bcredenciamento\b/.test(normalized),
+    /\bvaga (?:esta |ja esta |foi )?garantida\b/.test(normalized),
+    /\bevento\b/.test(normalized),
+    /\breagendar|cancelar sua participacao\b/.test(normalized),
+    /\btodos os dados obrigatorios\b/.test(normalized),
+  ];
+  return signals.filter(Boolean).length >= 3;
+}
+
+async function markAiProcessing(
+  admin: AdminClient,
+  messageId: string,
+  status: "queued" | "forwarded" | "ignored",
+  reason: string,
+) {
+  const { error } = await admin.from("whatsapp_messages").update({
+    ai_processing_status: status,
+    ai_processing_reason: reason,
+    ai_processing_at: new Date().toISOString(),
+  }).eq("id", messageId);
+  if (error) console.error("markAiProcessing:", error);
 }
 
 /** Lê o provider de IA do tenant (default 'off' se não houver config). */
@@ -1983,18 +2049,18 @@ export async function enqueueAiTurn(
   admin: AdminClient,
   instance: InstanceRecord,
   chat: Record<string, unknown>,
-) {
+): Promise<{ queued: boolean; reason: string }> {
   try {
     if (!instance.ai_enabled) {
-      return; // IA desligada neste canal (master switch por instância)
+      return { queued: false, reason: "channel_ai_disabled" };
     }
     const aiMode = normalizeChatAiMode(chat.ai_mode as string | null | undefined);
     if (aiMode === "off" || aiMode === "handoff") {
-      return;
+      return { queued: false, reason: `chat_mode_${aiMode}` };
     }
     const debounceSeconds = 8;
     const runAfter = new Date(Date.now() + debounceSeconds * 1000).toISOString();
-    await admin.from("ai_jobs").upsert(
+    const { error } = await admin.from("ai_jobs").upsert(
       {
         tenant_id: instance.tenant_id,
         chat_id: chat.id,
@@ -2007,8 +2073,11 @@ export async function enqueueAiTurn(
       },
       { onConflict: "chat_id" },
     );
+    if (error) throw error;
+    return { queued: true, reason: "native_ai_queued" };
   } catch (err) {
     console.error("enqueueAiTurn:", err);
+    return { queued: false, reason: "queue_error" };
   }
 }
 
