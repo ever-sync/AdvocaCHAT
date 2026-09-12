@@ -38,4 +38,17 @@ describe("getInboxMessagePreviewText", () => {
     });
     expect(getInboxMessagePreviewText(m)).toContain("Documento");
   });
+
+  it("explica falha de sessao do WhatsApp em vez de mostrar resumo generico", () => {
+    const m = baseMessage({
+      bodyText: "",
+      payloadJson: {
+        messageStubType: 2,
+        messageStubParameters: ["No matching sessions found for message"],
+      },
+    });
+    expect(getInboxMessagePreviewText(m)).toBe(
+      "[Mensagem não pôde ser descriptografada pelo WhatsApp. Peça o reenvio.]",
+    );
+  });
 });

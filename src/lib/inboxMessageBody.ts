@@ -28,6 +28,14 @@ function looksLikeStructuredDump(text: string): boolean {
   return false;
 }
 
+function isWhatsappDecryptFailure(payload: unknown): boolean {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return false;
+  const params = (payload as { messageStubParameters?: unknown }).messageStubParameters;
+  return Array.isArray(params) && params.some((value) =>
+    typeof value === "string" && value.toLowerCase().includes("no matching sessions found for message")
+  );
+}
+
 /**
  * Texto exibido no balao da thread. Preferir corpo legivel; tipos sem texto recebem rotulo amigavel.
  */
@@ -44,6 +52,9 @@ export function getInboxMessagePreviewText(message: WhatsappMessage): string {
   const label = (rawType && typeLabels[rawType]) || rawType || "Mensagem";
 
   const payload = message.payloadJson;
+  if (isWhatsappDecryptFailure(payload)) {
+    return "[Mensagem não pôde ser descriptografada pelo WhatsApp. Peça o reenvio.]";
+  }
   const hasPayload =
     payload &&
     typeof payload === "object" &&

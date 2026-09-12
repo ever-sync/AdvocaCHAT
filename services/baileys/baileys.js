@@ -111,7 +111,13 @@ async function startSession(name) {
   });
 
   socket.ev.on("messages.upsert", async ({ messages }) => {
-    await emitWebhook(runtime, { event: "messages.upsert", messages });
+    const enriched = await Promise.all(messages.map(async (message) => {
+      if (message.key?.fromMe) return message;
+      const sender = message.key?.senderPn || message.key?.remoteJidAlt || message.key?.remoteJid;
+      const imagePreview = sender ? await profilePictureUrl(runtime, sender) : null;
+      return imagePreview ? { ...message, imagePreview } : message;
+    }));
+    await emitWebhook(runtime, { event: "messages.upsert", messages: enriched });
   });
   socket.ev.on("messages.update", async (updates) => {
     for (const item of updates) {
@@ -149,6 +155,14 @@ function jid(number) {
   const digits = String(number || "").replace(/\D/g, "");
   if (!digits) throw new Error("Numero de WhatsApp invalido.");
   return `${digits}@s.whatsapp.net`;
+}
+
+async function profilePictureUrl(runtime, number) {
+  try {
+    return await runtime.socket.profilePictureUrl(jid(number), "image");
+  } catch {
+    return null;
+  }
 }
 
 async function outgoingContent(body) {
@@ -211,6 +225,10 @@ export async function installBaileysRoutes(app) {
     const numbers = Array.isArray(req.body?.numbers) ? req.body.numbers : [];
     const result = await Promise.all(numbers.map(async (number) => ({ number, exists: Boolean((await runtime.socket.onWhatsApp(String(number)))[0]?.exists) })));
     res.json(result);
+  });
+  app.post("/baileys/chat/profile-picture", async (req, res) => {
+    const runtime = await requireSession(req, res); if (!runtime) return;
+    res.json({ url: await profilePictureUrl(runtime, req.body?.number) });
   });
   app.post("/baileys/send/text", async (req, res) => {
     const runtime = await requireSession(req, res); if (!runtime) return;
