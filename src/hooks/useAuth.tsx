@@ -56,6 +56,7 @@ type AuthContextValue = {
   verifyMfa: (factorId: string, code: string) => Promise<{ error: string | null }>;
   signInWithGoogle: () => Promise<{ error: string | null }>;
   signUp: (payload: SignUpPayload) => Promise<{ error: string | null; requiresEmailConfirmation: boolean }>;
+  resendSignUpConfirmation: (email: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 };
 
@@ -368,6 +369,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email,
           password,
           options: {
+            emailRedirectTo: `${window.location.origin}/login?cadastro=confirmado`,
             data: {
               nome,
               telefone,
@@ -382,6 +384,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           error: error?.message ?? null,
           requiresEmailConfirmation: !data.session,
         };
+      },
+      resendSignUpConfirmation: async (email) => {
+        if (!supabase) {
+          return { error: "Supabase não configurado." };
+        }
+        const normalizedEmail = email.trim().toLowerCase();
+        if (!normalizedEmail) {
+          return { error: "Informe o e-mail usado no cadastro." };
+        }
+        const { error } = await supabase.auth.resend({
+          type: "signup",
+          email: normalizedEmail,
+          options: {
+            emailRedirectTo: `${window.location.origin}/login?cadastro=confirmado`,
+          },
+        });
+        return { error: error?.message ?? null };
       },
       signOut: async () => {
         if (supabase) {

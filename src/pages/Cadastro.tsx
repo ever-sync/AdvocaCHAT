@@ -141,6 +141,7 @@ export default function Cadastro() {
     if (!result.requiresEmailConfirmation && isSupabaseConfigured) {
       await signOut();
     }
+    sessionStorage.setItem("advocachat-pending-confirmation-email", email);
     clearSignUpDraft();
     toast({
       title: "Confirme seu e-mail",

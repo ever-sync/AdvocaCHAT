@@ -10,12 +10,15 @@ import { useAppStore } from "@/store/useAppStore";
 import { isRecaptchaEnabled, verifyRecaptchaToken } from "@/lib/recaptcha";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() =>
+    sessionStorage.getItem("advocachat-pending-confirmation-email") ?? "",
+  );
   const [senha, setSenha] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resendingConfirmation, setResendingConfirmation] = useState(false);
   const recaptchaRef = useRef<ReCAPTCHA>(null);
   const recaptchaRequired = isRecaptchaEnabled();
   const [mfaStep, setMfaStep] = useState<{ factorId: string } | null>(null);
@@ -23,7 +26,32 @@ export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const { signIn, verifyMfa } = useAuth();
+  const { signIn, verifyMfa, resendSignUpConfirmation } = useAuth();
+  const confirmationState = searchParams.get("cadastro");
+
+  const handleResendConfirmation = async () => {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      toast({
+        title: "Confira o e-mail",
+        description: "Informe abaixo o mesmo endereço usado no cadastro.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setResendingConfirmation(true);
+    const { error } = await resendSignUpConfirmation(normalizedEmail);
+    setResendingConfirmation(false);
+    if (error) {
+      toast({ title: "Não foi possível reenviar", description: error, variant: "destructive" });
+      return;
+    }
+    sessionStorage.setItem("advocachat-pending-confirmation-email", normalizedEmail);
+    toast({
+      title: "E-mail reenviado",
+      description: `Enviamos um novo link para ${normalizedEmail}. Confira também o spam.`,
+    });
+  };
 
   const finishLogin = () => {
     if (rememberDevice) {
@@ -152,9 +180,23 @@ export default function Login() {
                 <p className="mt-0.5 text-sm text-muted-foreground">
                   Atendimento e relacionamento com os clientes do seu escritório.
                 </p>
-                {searchParams.get("cadastro") === "confirmar-email" ? (
-                  <div className="mt-4 rounded-lg border border-primary/25 bg-primary/5 p-3 text-sm text-foreground">
-                    Conta criada. Abra o link de confirmacao enviado ao seu e-mail e depois entre aqui.
+                {confirmationState === "confirmar-email" ? (
+                  <div className="mt-4 space-y-2 rounded-lg border border-primary/25 bg-primary/5 p-3 text-sm text-foreground">
+                    <p>
+                      Conta criada. Abra o link enviado{email ? ` para ${email}` : " ao seu e-mail"} e depois entre aqui.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => void handleResendConfirmation()}
+                      disabled={resendingConfirmation}
+                      className="font-medium text-primary underline-offset-4 hover:underline disabled:opacity-60"
+                    >
+                      {resendingConfirmation ? "Reenviando..." : "Reenviar e-mail de confirmação"}
+                    </button>
+                  </div>
+                ) : confirmationState === "confirmado" ? (
+                  <div className="mt-4 rounded-lg border border-emerald-500/25 bg-emerald-500/5 p-3 text-sm text-foreground">
+                    E-mail confirmado. Entre para acessar o seu escritório.
                   </div>
                 ) : null}
 
