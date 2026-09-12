@@ -7,20 +7,22 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { PermissionRoute, PlatformAdminRoute, ProtectedRoute, PublicOnlyRoute } from "@/components/ProtectedRoute";
-import Login from "./pages/Login";
-import Cadastro from "./pages/Cadastro";
-import AtivarAcesso from "./pages/AtivarAcesso";
-import RecuperarSenha from "./pages/RecuperarSenha";
-import RedefinirSenha from "./pages/RedefinirSenha";
-import NotFound from "./pages/NotFound";
-import EmbedForm from "./pages/EmbedForm";
-import PublicBooking from "./pages/PublicBooking";
-import PublicAnamnese from "./pages/PublicAnamnese";
-import PublicOrcamento from "./pages/PublicOrcamento";
 
+const AppLayout = lazyWithReload(() =>
+  import("@/components/layout/AppLayout").then(({ AppLayout }) => ({ default: AppLayout })),
+);
+const Login = lazyWithReload(() => import("./pages/Login"));
+const Cadastro = lazyWithReload(() => import("./pages/Cadastro"));
+const AtivarAcesso = lazyWithReload(() => import("./pages/AtivarAcesso"));
+const RecuperarSenha = lazyWithReload(() => import("./pages/RecuperarSenha"));
+const RedefinirSenha = lazyWithReload(() => import("./pages/RedefinirSenha"));
+const NotFound = lazyWithReload(() => import("./pages/NotFound"));
+const EmbedForm = lazyWithReload(() => import("./pages/EmbedForm"));
+const PublicBooking = lazyWithReload(() => import("./pages/PublicBooking"));
+const PublicAnamnese = lazyWithReload(() => import("./pages/PublicAnamnese"));
+const PublicOrcamento = lazyWithReload(() => import("./pages/PublicOrcamento"));
 const DesignSystem = lazyWithReload(() => import("./pages/DesignSystem"));
 const Inbox = lazyWithReload(() => import("./pages/Inbox"));
 const Clientes = lazyWithReload(() => import("./pages/Clientes"));

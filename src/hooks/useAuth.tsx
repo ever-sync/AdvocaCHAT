@@ -161,7 +161,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile((prev) => (prev?.id === userId ? { ...prev, ...dbProfile } : prev));
       };
 
-      const hydrateProfile = async (user: User | null, sequence: number) => {
+      const hydrateProfile = async (
+        user: User | null,
+        sequence: number,
+        prefetchedProfile?: Partial<AppUserProfile> | null,
+      ) => {
         if (profileChannel) {
           await sb.removeChannel(profileChannel).catch(() => undefined);
           profileChannel = null;
@@ -173,7 +177,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         // Preserve only an already verified row for the same identity while it refreshes.
         setProfile(prev => prev?.id === user.id ? prev : null);
-        const dbProfile = await fetchProfileFromDb(user.id);
+        const dbProfile = prefetchedProfile === undefined
+          ? await fetchProfileFromDb(user.id)
+          : prefetchedProfile;
         if (!isMounted || sequence !== hydrationSequence) return;
         const resolved = internalProfileFromRow(user, dbProfile);
         setProfile(resolved);
@@ -220,17 +226,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const sessionToHydrate = pendingSessionRef.current;
             pendingSessionRef.current = null;
 
-            const validSession = await resolveValidSession(sessionToHydrate);
+            // As três verificações são independentes e usam a mesma sessão. Rodá-las
+            // juntas elimina duas esperas de rede no caminho crítico de abertura.
+            const [validSession, prefetchedProfile, pending] = await Promise.all([
+              resolveValidSession(sessionToHydrate),
+              fetchProfileFromDb(sessionToHydrate.user.id),
+              isMfaVerificationPending(),
+            ]);
             if (!isMountedRef.current || !isMounted) {
               break;
             }
 
             if (sequence !== hydrationSequence) continue;
             setSession(validSession);
-            await hydrateProfile(validSession?.user ?? null, sequence);
+            await hydrateProfile(validSession?.user ?? null, sequence, prefetchedProfile);
             if (sequence !== hydrationSequence) continue;
-            const pending = validSession ? await isMfaVerificationPending() : false;
-            if (isMountedRef.current && isMounted && sequence === hydrationSequence) setMfaPending(pending);
+            if (isMountedRef.current && isMounted && sequence === hydrationSequence) {
+              setMfaPending(Boolean(validSession) && pending);
+            }
           }
 
           if (isMountedRef.current && isMounted) {
