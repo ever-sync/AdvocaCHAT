@@ -247,6 +247,34 @@ export function extractRemoteJid(value: Record<string, unknown>) {
   );
 }
 
+/**
+ * Retorna todos os identificadores pessoais presentes no evento. Um mesmo
+ * contato pode aparecer como numero (`@s.whatsapp.net`) e como LID (`@lid`).
+ * Guardar os dois permite reconhecer mensagens enviadas diretamente pelo
+ * celular, que frequentemente chegam apenas com o LID.
+ */
+export function extractRemoteJidCandidates(value: Record<string, unknown>): string[] {
+  const key = value.key as Record<string, unknown> | undefined;
+  const nestedKey = (value as { data?: { key?: Record<string, unknown> } }).data?.key;
+  const candidates = [
+    key?.remoteJid,
+    key?.remoteJidAlt,
+    key?.senderPn,
+    nestedKey?.remoteJid,
+    nestedKey?.remoteJidAlt,
+    nestedKey?.senderPn,
+    value.chatid,
+    value.wa_chatid,
+    value.sender,
+    value.remoteJid,
+  ];
+
+  return [...new Set(candidates
+    .filter((candidate): candidate is string => typeof candidate === "string")
+    .map((candidate) => candidate.trim())
+    .filter((candidate) => isPersonalRemoteJid(candidate)))];
+}
+
 function extractKey(value: Record<string, unknown>) {
   return (
     (value.key as Record<string, unknown> | undefined) ??
@@ -1059,6 +1087,7 @@ export async function ensureChat(
   instance: InstanceRecord,
   params: {
     remoteJid: string;
+    remoteJidAliases?: string[];
     displayName?: string;
     avatarUrl?: string | null;
     lastMessagePreview?: string | null;
@@ -1071,13 +1100,40 @@ export async function ensureChat(
     reopenOnInbound?: boolean;
   },
 ) {
-  const normalized = normalizePhone(params.remoteJid);
-  let customer = await findCustomerByRemoteJid(admin, instance.tenant_id, params.remoteJid);
+  const aliases = [...new Set([params.remoteJid, ...(params.remoteJidAliases ?? [])]
+    .map((jid) => jid.trim())
+    .filter((jid) => isPersonalRemoteJid(jid)))];
+  let resolvedRemoteJid = params.remoteJid;
+
+  if (aliases.length > 0) {
+    const { data: knownAliases, error: aliasLookupError } = await admin
+      .from("whatsapp_chat_jid_aliases")
+      .select("chat_id")
+      .eq("tenant_id", instance.tenant_id)
+      .eq("instance_id", instance.id)
+      .in("jid", aliases)
+      .limit(1);
+
+    if (aliasLookupError) {
+      console.error("ensureChat: falha ao consultar aliases de JID", aliasLookupError);
+    } else if (knownAliases?.[0]?.chat_id) {
+      const { data: aliasedChat } = await admin
+        .from("whatsapp_chats")
+        .select("remote_jid")
+        .eq("id", knownAliases[0].chat_id)
+        .eq("tenant_id", instance.tenant_id)
+        .maybeSingle();
+      if (aliasedChat?.remote_jid) resolvedRemoteJid = aliasedChat.remote_jid;
+    }
+  }
+
+  const normalized = normalizePhone(resolvedRemoteJid);
+  let customer = await findCustomerByRemoteJid(admin, instance.tenant_id, resolvedRemoteJid);
   if (!customer && normalized.digits) {
     customer = await createCustomerFromRemoteJid(
       admin,
       instance.tenant_id,
-      params.remoteJid,
+      resolvedRemoteJid,
       params.displayName,
     );
   } else if (
@@ -1106,7 +1162,7 @@ export async function ensureChat(
     .select("*")
     .eq("tenant_id", instance.tenant_id)
     .eq("instance_id", instance.id)
-    .eq("remote_jid", params.remoteJid)
+    .eq("remote_jid", resolvedRemoteJid)
     .maybeSingle();
 
   // Foto de perfil: as URLs do WhatsApp (pps.whatsapp.net) expiram e dão 403 em
@@ -1123,7 +1179,7 @@ export async function ensureChat(
         mirroredAvatarVersion(existing?.avatar_url) === version;
       resolvedAvatarUrl = alreadyCurrent
         ? existing?.avatar_url ?? null
-        : (await mirrorAvatarToStorage(admin, instance, params.remoteJid, incomingAvatar, version)) ??
+        : (await mirrorAvatarToStorage(admin, instance, resolvedRemoteJid, incomingAvatar, version)) ??
           existing?.avatar_url ??
           null;
     } else {
@@ -1141,7 +1197,7 @@ export async function ensureChat(
     tenant_id: instance.tenant_id,
     instance_id: instance.id,
     customer_id: customer?.id ?? null,
-    remote_jid: params.remoteJid,
+    remote_jid: resolvedRemoteJid,
     remote_phone_digits: normalized.digits,
     remote_phone_e164: normalized.e164,
     // Sem nome real (nem do cliente, nem do inbound, nem o já gravado): cai no
@@ -1175,6 +1231,23 @@ export async function ensureChat(
 
   if (error) {
     throw new Error(error.message);
+  }
+
+  if (data && aliases.length > 0) {
+    const { error: aliasUpsertError } = await admin
+      .from("whatsapp_chat_jid_aliases")
+      .upsert(
+        aliases.map((jid) => ({
+          tenant_id: instance.tenant_id,
+          instance_id: instance.id,
+          jid,
+          chat_id: data.id,
+        })),
+        { onConflict: "tenant_id,instance_id,jid" },
+      );
+    if (aliasUpsertError) {
+      console.error("ensureChat: falha ao registrar aliases de JID", aliasUpsertError);
+    }
   }
 
   // Distribuição por instância (round-robin) só para chats ainda sem dono.
@@ -1832,6 +1905,7 @@ export async function processMessagePayload(
   // gravaria o nome do canal como nome do contato. Só extraímos nome de inbound.
   const chat = await ensureChat(admin, instance, {
     remoteJid,
+    remoteJidAliases: extractRemoteJidCandidates(payload),
     displayName: direction === "inbound" ? extractDisplayName(payload) : undefined,
     avatarUrl: typeof payload.imagePreview === "string" ? payload.imagePreview : null,
     lastMessagePreview: bodyText,
