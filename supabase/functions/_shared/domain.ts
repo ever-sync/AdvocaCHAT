@@ -207,34 +207,34 @@ function formatAutoCustomerName(
 function pickPhoneJidOverLidPair(
   primary: string | null | undefined,
   alt: string | null | undefined,
+  senderPn?: string | null,
 ): string | null {
-  const p = typeof primary === "string" ? primary.trim() : "";
-  const a = typeof alt === "string" ? alt.trim() : "";
-  if (!p && !a) return null;
+  const candidates = [primary, alt, senderPn]
+    .map((value) => typeof value === "string" ? value.trim() : "")
+    .filter(Boolean);
+  if (candidates.length === 0) return null;
 
   const isLid = (j: string) => j.toLowerCase().endsWith("@lid");
   const isPnNet = (j: string) => /@s\.whatsapp\.net$/i.test(j);
 
-  if (isPnNet(p)) return p;
-  if (isPnNet(a)) return a;
-  if (p && !isLid(p)) return p;
-  if (a && !isLid(a)) return a;
-  return p || a || null;
+  return candidates.find(isPnNet) ?? candidates.find((jid) => !isLid(jid)) ?? candidates[0] ?? null;
 }
 
-function extractRemoteJid(value: Record<string, unknown>) {
+export function extractRemoteJid(value: Record<string, unknown>) {
   const key = value.key as Record<string, unknown> | undefined;
   const nestedKey = (value as { data?: { key?: Record<string, unknown> } }).data?.key;
 
   const fromKey = pickPhoneJidOverLidPair(
     key?.remoteJid as string | undefined,
     key?.remoteJidAlt as string | undefined,
+    key?.senderPn as string | undefined,
   );
   if (fromKey) return fromKey;
 
   const fromNested = pickPhoneJidOverLidPair(
     nestedKey?.remoteJid as string | undefined,
     nestedKey?.remoteJidAlt as string | undefined,
+    nestedKey?.senderPn as string | undefined,
   );
   if (fromNested) return fromNested;
 
