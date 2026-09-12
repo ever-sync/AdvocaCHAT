@@ -80,4 +80,14 @@ A ferramenta `record_previdas` registra somente pedido autorizado, recusa ou nec
 
 **Pendente de integração externa:** API/link de agendamento e autenticação do Pré Vidas, disponibilidade real, confirmação/cancelamento, identificação segura dos eventos, recebimento do laudo e envio de lembretes. O painel registra acompanhamento interno e não realiza chamadas nem envia dados ao parceiro. Prazos exibidos não representam lembretes enviados. Não há confirmação automática baseada na fala do cliente. O registro administrativo é provisório até existir integração verificável com o parceiro.
 
+## Automação operacional do CRM
+
+As conversas novas do fluxo criam ou reutilizam uma única negociação aberta do cliente no funil `isencao-ir`. Mudanças persistidas pelo SDR, closer, documentos, contrato e Pré Vidas recalculam a etapa por regras do servidor. O modelo não escolhe livremente a coluna. Cada etapa operacional mantém uma tarefa aberta; ao mudar de etapa, a tarefa anterior é concluída e a próxima é criada. Registros anteriores à migração não são movidos automaticamente.
+
+Cada etapa agenda no máximo dois follow-ups, nos prazos configurados pelo administrador. A chegada de uma mensagem do cliente, mudança de etapa, retirada de consentimento ou opt-out cancela os envios ainda pendentes. Antes do envio, o worker confere novamente o fluxo, o canal, o cliente e a existência de resposta posterior. Falhas transitórias usam atraso crescente e aparecem no painel.
+
+Anexos registrados pelo closer entram numa fila idempotente. O worker baixa somente por HTTPS, limita o arquivo a 10 MiB, valida tipo e assinatura básica, cria ou reutiliza um caso consultivo vinculado à negociação e grava o arquivo no bucket privado jurídico com SHA-256. Laudos ficam na categoria médica; informes, contracheques e comprovantes de benefício ficam na categoria fiscal. O recebimento continua separado de processamento, revisão e aprovação.
+
+O rascunho de contrato fica vinculado à negociação e disponível no painel. A etapa `aguardando-assinatura` e a conclusão `contratado` exigem uma integração futura com recibos verificáveis do provedor de assinatura. A agenda do Pré Vidas também continua dependente da API ou webhook do parceiro; o agente só registra pedido autorizado e acompanhamento.
+
 Validação: `supabase/tests/previdas_operation.sql` após a fixture e as migrações de sales workflow e Pré Vidas; testes de interface `PrevidasPanel.test.tsx`; testes Deno do workflow. A suíte SQL usa transação revertida e dados sintéticos, sem mensagens externas.

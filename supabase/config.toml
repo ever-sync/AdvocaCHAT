@@ -88,6 +88,10 @@ verify_jwt = false
 [functions.ai-orchestrator]
 verify_jwt = false
 
+# Operação comercial dos agentes: follow-ups e cópia segura de anexos, protegida pelo cron secret.
+[functions.ai-sales-operations-dispatch]
+verify_jwt = false
+
 # Ingestão da base de conhecimento (RAG): JWT do admin (requireTenantContext valida).
 [functions.ai-knowledge]
 verify_jwt = false

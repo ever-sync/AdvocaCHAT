@@ -9,6 +9,9 @@ export type SalesWorkflowConfig = {
   contract_template: string;
   fee_terms: string;
   template_approved: boolean;
+  followups_enabled: boolean;
+  followup_first_hours: number;
+  followup_second_hours: number;
   revision: number;
 };
 export const DEFAULT_SALES_WORKFLOW: SalesWorkflowConfig = {
@@ -20,6 +23,9 @@ export const DEFAULT_SALES_WORKFLOW: SalesWorkflowConfig = {
   contract_template: "",
   fee_terms: "",
   template_approved: false,
+  followups_enabled: true,
+  followup_first_hours: 24,
+  followup_second_hours: 72,
   revision: 0,
 };
 export type SalesWorkflowRow = {
@@ -29,13 +35,20 @@ export type SalesWorkflowRow = {
   updated_at: string;
   documents_received: number;
   draft_id: string | null;
+  negotiation_id: string | null;
+  crm_stage_id: string | null;
+  documents_stored: number;
+  document_failures: number;
+  next_task_at: string | null;
+  next_followup_at: string | null;
+  followup_failures: number;
 };
 export async function getSalesWorkflowConfig(): Promise<SalesWorkflowConfig> {
   // RLS uses the actual admin identity, never the platform's impersonated tenant.
   const { data, error } = await requireSupabase()
     .from("ai_sales_workflow_config")
     .select(
-      "enabled,sdr_name,closer_name,sdr_instructions,closer_instructions,contract_template,fee_terms,template_approved,revision",
+      "enabled,sdr_name,closer_name,sdr_instructions,closer_instructions,contract_template,fee_terms,template_approved,followups_enabled,followup_first_hours,followup_second_hours,revision",
     )
     .maybeSingle();
   if (error) throw new Error(error.message);

@@ -161,6 +161,63 @@ function WorkflowEditor({
       </Card>
       <Card>
         <CardHeader>
+          <CardTitle className="text-lg">Follow-ups automáticos</CardTitle>
+          <CardDescription>
+            O sistema cancela as mensagens pendentes quando o cliente responde,
+            retira o consentimento ou muda de etapa.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <Label htmlFor="sales-followups-enabled">
+              Enviar follow-ups de pendências
+            </Label>
+            <Switch
+              id="sales-followups-enabled"
+              checked={form.followups_enabled}
+              onCheckedChange={(checked) => set({ followups_enabled: checked })}
+            />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="sales-followup-first">
+                Primeiro contato, em horas
+              </Label>
+              <Input
+                id="sales-followup-first"
+                type="number"
+                min={1}
+                max={168}
+                value={form.followup_first_hours}
+                onChange={(event) =>
+                  set({ followup_first_hours: Number(event.target.value) })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="sales-followup-second">
+                Segundo contato, em horas
+              </Label>
+              <Input
+                id="sales-followup-second"
+                type="number"
+                min={2}
+                max={336}
+                value={form.followup_second_hours}
+                onChange={(event) =>
+                  set({ followup_second_hours: Number(event.target.value) })
+                }
+              />
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Limite de duas tentativas por etapa. Falhas técnicas são repetidas
+            com atraso e ficam visíveis no painel.
+          </p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <FileText className="h-5 w-5" />
             Contrato e condições comerciais
@@ -335,6 +392,34 @@ export function SalesWorkflowPanel() {
                   <span className="text-sm text-muted-foreground">
                     {row.documents_received} anexo(s) não revisado(s)
                   </span>
+                  {row.crm_stage_id && (
+                    <Badge variant="outline">
+                      CRM: {row.crm_stage_id.replace(/-/g, " ")}
+                    </Badge>
+                  )}
+                  <span className="text-sm text-muted-foreground">
+                    {row.documents_stored ?? 0} no caso jurídico
+                  </span>
+                  {row.next_task_at && (
+                    <span className="text-sm text-muted-foreground">
+                      Tarefa:{" "}
+                      {new Date(row.next_task_at).toLocaleString("pt-BR")}
+                    </span>
+                  )}
+                  {row.next_followup_at && (
+                    <span className="text-sm text-muted-foreground">
+                      Follow-up:{" "}
+                      {new Date(row.next_followup_at).toLocaleString("pt-BR")}
+                    </span>
+                  )}
+                  {((row.document_failures ?? 0) > 0 ||
+                    (row.followup_failures ?? 0) > 0) && (
+                    <Badge variant="destructive">
+                      {(row.document_failures ?? 0) +
+                        (row.followup_failures ?? 0)}{" "}
+                      falha(s)
+                    </Badge>
+                  )}
                   {row.draft_id && (
                     <Button
                       size="sm"

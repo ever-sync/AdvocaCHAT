@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 const base = process.env.FUNCTIONS_URL?.replace(/\/$/, '');
 const secret = process.env.CRON_SECRET;
 if (!base || !secret) throw new Error('FUNCTIONS_URL and CRON_SECRET are required');
-const tasks = ['ai-orchestrator', 'marketing-flow-worker', 'webhook-dispatcher', 'marketing-email-dispatch', 'welcome-email-dispatch', 'scheduling-reminder-dispatch', 'billing-usage-alerts', 'legal-communication-dispatch', 'legal-payment-dispatch', 'legal-judicial-dispatch', 'legal-assistance-dispatch'];
+const tasks = ['ai-orchestrator', 'ai-sales-operations-dispatch', 'marketing-flow-worker', 'webhook-dispatcher', 'marketing-email-dispatch', 'welcome-email-dispatch', 'scheduling-reminder-dispatch', 'billing-usage-alerts', 'legal-communication-dispatch', 'legal-payment-dispatch', 'legal-judicial-dispatch', 'legal-assistance-dispatch'];
 let stopped = false;
 let lastTick = 0;
 let results = {};
