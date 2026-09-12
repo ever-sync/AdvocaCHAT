@@ -181,6 +181,29 @@ Deno.serve(async (request) => {
       }
     }
 
+    if (eventName === "LID_MAPPING_UPDATE") {
+      const mapping = (payload.mapping && typeof payload.mapping === "object"
+        ? payload.mapping
+        : payload) as Record<string, unknown>;
+      const lid = String(mapping.lid ?? "").trim();
+      const pn = String(mapping.pn ?? "").trim();
+      if (lid.endsWith("@lid") && pn.endsWith("@s.whatsapp.net")) {
+        const { data: chats } = await admin
+          .from("whatsapp_chats")
+          .select("id,remote_jid")
+          .eq("tenant_id", instance.tenant_id)
+          .eq("instance_id", instance.id)
+          .in("remote_jid", [pn, lid]);
+        const canonical = chats?.find((chat) => chat.remote_jid === pn) ?? chats?.[0];
+        if (canonical) {
+          await admin.from("whatsapp_chat_jid_aliases").upsert([
+            { tenant_id: instance.tenant_id, instance_id: instance.id, jid: pn, chat_id: canonical.id },
+            { tenant_id: instance.tenant_id, instance_id: instance.id, jid: lid, chat_id: canonical.id },
+          ], { onConflict: "tenant_id,instance_id,jid" });
+        }
+      }
+    }
+
     if (eventName === "QRCODE_UPDATED") {
       await admin
         .from("whatsapp_instances")

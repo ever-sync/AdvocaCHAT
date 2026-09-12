@@ -6,15 +6,16 @@ import makeWASocket, {
   DisconnectReason,
   delay,
   fetchLatestBaileysVersion,
+  makeCacheableSignalKeyStore,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
 import QRCode from "qrcode";
 import { WebhookOutbox } from "./webhook-outbox.js";
+import { DurableMessageStore } from "./message-store.js";
 
 const sessionsRoot = process.env.BAILEYS_SESSIONS_PATH || join(process.cwd(), ".baileys-sessions");
 const adminToken = process.env.BAILEYS_ADMIN_TOKEN || "";
 const sessions = new Map();
-const MAX_SENT_MESSAGES_PER_SESSION = 2_000;
 
 function safeName(value) {
   const name = String(value || "").trim();
@@ -54,20 +55,22 @@ async function emitWebhook(runtime, payload) {
   void runtime.outbox.flush(runtime.meta.webhookUrl).catch(() => console.error("[baileys] outbox unavailable"));
 }
 
-function rememberSentMessage(runtime, sent) {
-  const id = sent?.key?.id;
-  if (!id || !sent?.message) return;
-  runtime.sentMessages ||= new Map();
-  runtime.sentMessages.set(id, sent.message);
-  while (runtime.sentMessages.size > MAX_SENT_MESSAGES_PER_SESSION) {
-    runtime.sentMessages.delete(runtime.sentMessages.keys().next().value);
-  }
-}
-
-async function sendAndRemember(runtime, remoteJid, content) {
-  const sent = await runtime.socket.sendMessage(remoteJid, content);
-  rememberSentMessage(runtime, sent);
-  return sent;
+async function sendAndRemember(runtime, remoteJid, content, requestedDelay = 0) {
+  const run = async () => {
+    if (runtime.status !== "open" || !runtime.socket) throw new Error("Instancia do WhatsApp desconectada.");
+    const delayMs = Math.min(Math.max(Number(requestedDelay) || 0, 0), 10_000);
+    if (delayMs > 0) {
+      await runtime.socket.sendPresenceUpdate("composing", remoteJid);
+      await delay(delayMs);
+    }
+    const sent = await runtime.socket.sendMessage(remoteJid, content);
+    await runtime.messageStore.put(sent);
+    runtime.lastSentAt = new Date().toISOString();
+    return sent;
+  };
+  const queued = runtime.sendTail.catch(() => {}).then(run);
+  runtime.sendTail = queued.catch(() => {});
+  return queued;
 }
 
 async function startSession(name) {
@@ -75,10 +78,15 @@ async function startSession(name) {
   if (existing?.socket && existing.status !== "closed") return existing;
 
   const meta = await readMeta(name);
-  const runtime = existing || { name, meta, socket: null, status: "connecting", qr: null, phone: null, reconnecting: false, sentMessages: new Map() };
+  const runtime = existing || {
+    name, meta, socket: null, status: "connecting", qr: null, phone: null,
+    reconnecting: false, reconnectAttempts: 0, reconnectTimer: null,
+    sendTail: Promise.resolve(), lastReceivedAt: null, lastSentAt: null,
+  };
   runtime.meta = meta;
   runtime.stopping = false;
   runtime.outbox ||= new WebhookOutbox(join(sessionDir(name), "outbox"));
+  runtime.messageStore ||= new DurableMessageStore(join(sessionDir(name), "messages"));
   runtime.status = "connecting";
   sessions.set(name, runtime);
 
@@ -89,7 +97,10 @@ async function startSession(name) {
     trace() {}, debug() {}, info() {}, warn: console.warn, error: console.error, fatal: console.error,
   };
   const socket = makeWASocket({
-    auth: state,
+    auth: {
+      creds: state.creds,
+      keys: makeCacheableSignalKeyStore(state.keys, runtime.logger),
+    },
     version,
     browser: Browsers.macOS("AdvocaCHAT"),
     markOnlineOnConnect: false,
@@ -98,7 +109,7 @@ async function startSession(name) {
     // Quando um aparelho ainda não tem a sessão Signal usada no primeiro
     // envio, o WhatsApp pede uma nova cópia criptografada. Sem getMessage o
     // destinatário fica indefinidamente em "Aguardando mensagem".
-    getMessage: async (key) => runtime.sentMessages?.get(key?.id),
+    getMessage: async (key) => runtime.messageStore.get(key?.id),
     logger: runtime.logger,
   });
   runtime.socket = socket;
@@ -114,6 +125,9 @@ async function startSession(name) {
       runtime.status = "open";
       runtime.qr = null;
       runtime.phone = socket.user?.id?.split(":")[0] || socket.user?.id?.split("@")[0] || null;
+      runtime.reconnectAttempts = 0;
+      if (runtime.reconnectTimer) clearTimeout(runtime.reconnectTimer);
+      runtime.reconnectTimer = null;
       await emitWebhook(runtime, { event: "connection.update", status: "open", number: runtime.phone });
     }
     if (connection === "close") {
@@ -121,17 +135,21 @@ async function startSession(name) {
       runtime.socket = null;
       const code = lastDisconnect?.error?.output?.statusCode;
       await emitWebhook(runtime, { event: "connection.update", status: "disconnected" });
-      if (!runtime.stopping && code !== DisconnectReason.loggedOut && !runtime.reconnecting) {
-        runtime.reconnecting = true;
-        setTimeout(() => {
-          runtime.reconnecting = false;
+      if (!runtime.stopping && code !== DisconnectReason.loggedOut && !runtime.reconnectTimer) {
+        runtime.reconnectAttempts += 1;
+        const base = Math.min(60_000, 1_000 * 2 ** Math.min(runtime.reconnectAttempts, 6));
+        const waitMs = base + Math.floor(Math.random() * Math.max(250, base / 4));
+        runtime.reconnectTimer = setTimeout(() => {
+          runtime.reconnectTimer = null;
           if (!runtime.stopping) startSession(name).catch(() => console.error("[baileys] reconnect failed"));
-        }, 3000);
+        }, waitMs);
       }
     }
   });
 
   socket.ev.on("messages.upsert", async ({ messages }) => {
+    runtime.lastReceivedAt = new Date().toISOString();
+    await Promise.all(messages.map((message) => runtime.messageStore.put(message)));
     const enriched = await Promise.all(messages.map(async (message) => {
       if (message.key?.fromMe) return message;
       const sender = message.key?.senderPn || message.key?.remoteJidAlt || message.key?.remoteJid;
@@ -149,6 +167,40 @@ async function startSession(name) {
         MessageIDs: item.key?.id ? [item.key.id] : [],
       });
     }
+  });
+  socket.ev.on("message-receipt.update", async (receipts) => {
+    for (const item of receipts) {
+      const receipt = item.receipt ?? {};
+      const state = receipt.readTimestamp || receipt.playedTimestamp
+        ? "read"
+        : receipt.receiptTimestamp
+          ? "delivered"
+          : "sent";
+      await emitWebhook(runtime, {
+        event: "messages.update",
+        state,
+        MessageIDs: item.key?.id ? [item.key.id] : [],
+        receipt,
+      });
+    }
+  });
+  socket.ev.on("messages.delete", async (deleted) => {
+    await emitWebhook(runtime, { event: "messages.delete", deleted });
+  });
+  socket.ev.on("messages.reaction", async (reactions) => {
+    await emitWebhook(runtime, { event: "messages.reaction", reactions });
+  });
+  socket.ev.on("lid-mapping.update", async (mapping) => {
+    await emitWebhook(runtime, { event: "lid-mapping.update", mapping });
+  });
+  socket.ev.on("contacts.upsert", async (contacts) => {
+    await emitWebhook(runtime, { event: "contacts.upsert", contacts });
+  });
+  socket.ev.on("contacts.update", async (contacts) => {
+    await emitWebhook(runtime, { event: "contacts.update", contacts });
+  });
+  socket.ev.on("call", async (calls) => {
+    await emitWebhook(runtime, { event: "call", calls });
   });
   return runtime;
 }
@@ -179,9 +231,16 @@ function jid(number) {
 }
 
 async function profilePictureUrl(runtime, number) {
+  const target = jid(number);
+  runtime.profileCache ||= new Map();
+  const cached = runtime.profileCache.get(target);
+  if (cached && Date.now() - cached.cachedAt < 6 * 60 * 60 * 1000) return cached.url;
   try {
-    return await runtime.socket.profilePictureUrl(jid(number), "image");
+    const url = await runtime.socket.profilePictureUrl(target, "image");
+    runtime.profileCache.set(target, { url, cachedAt: Date.now() });
+    return url;
   } catch {
+    runtime.profileCache.set(target, { url: null, cachedAt: Date.now() });
     return null;
   }
 }
@@ -196,7 +255,29 @@ async function outgoingContent(body) {
 
 export async function installBaileysRoutes(app) {
   await mkdir(sessionsRoot, { recursive: true });
-  app.get("/baileys/health", (_req, res) => res.json({ ok: true, provider: "baileys", sessions: sessions.size }));
+  app.get("/baileys/health", async (_req, res) => {
+    const states = await Promise.all([...sessions.values()].map(async (runtime) => ({
+      name: runtime.name,
+      status: runtime.status,
+      outboxPending: (await runtime.outbox?.pending().catch(() => []))?.length ?? 0,
+      outboxError: runtime.outbox?.lastError ?? null,
+      reconnectAttempts: runtime.reconnectAttempts ?? 0,
+      lastReceivedAt: runtime.lastReceivedAt,
+      lastSentAt: runtime.lastSentAt,
+    })));
+    const connected = states.filter((state) => state.status === "open").length;
+    const pendingWebhooks = states.reduce((total, state) => total + state.outboxPending, 0);
+    const degraded = states.some((state) => state.status === "closed" || state.outboxPending > 100);
+    // O health de infraestrutura permanece 200 enquanto o processo responde.
+    // Derrubar o container não corrige uma conta deslogada e pode esconder o QR.
+    res.json({
+      ok: true,
+      provider: "baileys",
+      degraded,
+      sessions: { total: states.length, connected },
+      pendingWebhooks,
+    });
+  });
   const deliveryTimer = setInterval(() => {
     for (const runtime of sessions.values()) {
       void runtime.outbox?.flush(runtime.meta.webhookUrl).catch(() => console.error("[baileys] outbox unavailable"));
@@ -254,8 +335,8 @@ export async function installBaileysRoutes(app) {
   app.post("/baileys/send/text", async (req, res) => {
     const runtime = await requireSession(req, res); if (!runtime) return;
     try {
-      if (req.body?.delay) { await runtime.socket.sendPresenceUpdate("composing", jid(req.body.number)); await delay(Math.min(Number(req.body.delay), 10000)); }
-      const sent = await sendAndRemember(runtime, jid(req.body.number), { text: String(req.body?.text || "") });
+      const target = jid(req.body.number);
+      const sent = await sendAndRemember(runtime, target, { text: String(req.body?.text || "") }, req.body?.delay);
       res.json(sent);
     } catch (error) { res.status(400).json({ error: error.message }); }
   });

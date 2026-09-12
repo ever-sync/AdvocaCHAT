@@ -492,6 +492,19 @@ function extractBodyText(value: Record<string, unknown>) {
   const videoCaption = getStringCandidate((message.videoMessage as Record<string, unknown> | undefined)?.caption);
   const audioCaption = getStringCandidate((message.audioMessage as Record<string, unknown> | undefined)?.caption);
   const documentCaption = getStringCandidate((message.documentMessage as Record<string, unknown> | undefined)?.caption);
+  const template = message.templateMessage as Record<string, unknown> | undefined;
+  const hydratedTemplate = (template?.hydratedTemplate ?? template?.hydratedFourRowTemplate) as
+    | Record<string, unknown>
+    | undefined;
+  const templateText = getStringCandidate(
+    hydratedTemplate?.hydratedContentText,
+    hydratedTemplate?.hydratedTitleText,
+  );
+  const templateReply = message.templateButtonReplyMessage as Record<string, unknown> | undefined;
+  const selectedTemplateReply = getStringCandidate(
+    templateReply?.selectedDisplayText,
+    templateReply?.selectedId,
+  );
 
   /* uazapi v2: `message.content` pode ser string (texto direto) OU objeto
    * com `text`/`caption`/`URL`/`mimetype` etc. */
@@ -509,7 +522,8 @@ function extractBodyText(value: Record<string, unknown>) {
       v2ContentObject?.caption,
     );
 
-  return conversation ?? extendedText ?? imageCaption ?? videoCaption ?? audioCaption ?? documentCaption ?? v2Text ?? "";
+  return conversation ?? extendedText ?? imageCaption ?? videoCaption ?? audioCaption ?? documentCaption ??
+    selectedTemplateReply ?? templateText ?? v2Text ?? "";
 }
 
 function extractDisplayName(value: Record<string, unknown>) {
@@ -830,9 +844,14 @@ function normalizeWebhookEventName(rawEventName: string) {
       "message.update",
       "messages.update",
       "messages-update",
+      "message-receipt.update",
     ].includes(normalized)
   ) {
     return "MESSAGES_UPDATE";
+  }
+
+  if (["lid-mapping.update", "lid_mapping_update"].includes(normalized)) {
+    return "LID_MAPPING_UPDATE";
   }
 
   if (
@@ -1899,6 +1918,10 @@ export async function processMessagePayload(
 
   const direction = extractDirection(payload);
   const bodyText = extractBodyText(payload);
+  const messageBlock = getMessageLikeBlock(payload);
+  if (!bodyText && (messageBlock.protocolMessage || payload.messageStubType != null)) {
+    return null;
+  }
   const occurredAt = extractTimestamp(payload);
   // Em mensagens nossas (outbound/disparo) o pushName/senderName é o da NOSSA
   // conta (ex.: o nome do perfil do WhatsApp Business), não o do lead. Usar isso
