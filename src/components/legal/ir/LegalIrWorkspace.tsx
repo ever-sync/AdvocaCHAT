@@ -13,6 +13,7 @@ import { IrCatalog } from "./IrCatalog";
 import { IrChecklists } from "./IrChecklists";
 import { IrAssessments } from "./IrAssessments";
 import { IrRepresentations } from "./IrRepresentations";
+import { IrCaseOverview } from "./IrCaseOverview";
 
 const IrFinancialWorkspace = lazy(
   () => import("./financial/IrFinancialWorkspace"),
@@ -59,12 +60,13 @@ export default function LegalIrWorkspace(props: LegalOperationsProps) {
           {context.data.can_medical ? "autorizado" : "não autorizado"}
         </p>
       </OperationPanel>
-      <Tabs defaultValue={context.data.can_fiscal ? "income" : "evidence"}>
+      <Tabs defaultValue="overview">
         <div className="max-w-full overflow-x-auto pb-1">
           <TabsList
             aria-label="Áreas da triagem de IR"
             className="w-max justify-start"
           >
+            <TabsTrigger value="overview">Visão geral</TabsTrigger>
             <TabsTrigger value="income">Rendimentos</TabsTrigger>
             <TabsTrigger value="evidence">Dossiê e cronologia</TabsTrigger>
             <TabsTrigger value="checklist">Checklists</TabsTrigger>
@@ -74,6 +76,9 @@ export default function LegalIrWorkspace(props: LegalOperationsProps) {
             <TabsTrigger value="financial">Cálculos e pedidos</TabsTrigger>
           </TabsList>
         </div>
+        <TabsContent value="overview">
+          <IrCaseOverview {...shared} />
+        </TabsContent>
         <TabsContent value="income">
           <IrIncome {...shared} />
         </TabsContent>

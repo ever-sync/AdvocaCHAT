@@ -21,6 +21,7 @@ concluída porque um adaptador ou teste simulado passou.
 - F8: entrega técnica publicada (`fc60137`) e verificada em produção em 12/09/2026; [evidências](FASE_8_OPERACOES_ESPECIALIZADAS.md). Conectores institucionais reais seguem P04.
 - F9: código `3878281` publicado, migração aplicada e testes API/local concluídos; [evidências e limites](FASE_9_VALIDACAO_E_PENDENCIAS.md). Frontend público bloqueado por expiração do trial Railway (P09).
 - Qualidade pós-F9: cadastro passa a definir retorno explícito do link de confirmação, preserva o endereço somente na sessão do navegador e permite reenvio na tela de login. Lint local passou sem avisos; entrega real continua dependente da configuração SMTP e do frontend público (P06/P09).
+- Melhoria IR pós-F9: visão consolidada de prontidão, pendências e próxima ação, com [dossiê estático para revisão](IR_PAINEL_DECISAO.md) e nova conferência de acesso durante a exportação.
 - Automação anterior `continuar-fases-do-advocachat` não encontrada no diretório local nesta retomada; não foi recriada.
 
 Em cada etapa: conferir estado Git, preservar trabalho alheio, implementar,
