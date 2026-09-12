@@ -1,6 +1,6 @@
 # Plano de evolução do AdvocaCHAT: plataforma jurídica e isenção de IR
 
-Data de referência: **11/09/2026** · Versão: **1.7** · Situação: **F1–F7 com entregas técnicas verificadas; F8 em implementação**.
+Data de referência: **11/09/2026** · Versão: **1.8** · Situação: **F1–F8 com entregas técnicas verificadas; F9 em implementação**.
 
 Este é o roteiro de execução do produto. Reúne as 30 ideias de plataforma jurídica
 aprovadas na conversa e 25 funcionalidades específicas para escritórios que atuam
@@ -419,11 +419,11 @@ ou petição ocorre porque uma instrução dentro de um PDF pediu. Cobertura: J2
 
 - [ ] F8.01 Integrar Domicílio para instituições habilitadas, separando consulta e ato de ciência.
 - [ ] F8.02 Homologar conectores adicionais tribunal a tribunal e operação a operação.
-- [ ] F8.03 Avaliar peticionamento assistido somente com canal autorizado, assinatura e recibo verificável.
-- [ ] F8.04 Disponibilizar correspondentes e parceiros com acesso limitado e encerramento automático do acesso.
-- [ ] F8.05 Criar acompanhamento de sucessores com validação de representação.
+- [x] F8.03 Avaliar peticionamento assistido somente com canal autorizado, assinatura e recibo verificável.
+- [x] F8.04 Disponibilizar correspondentes e parceiros com acesso limitado e encerramento automático do acesso.
+- [x] F8.05 Criar acompanhamento de sucessores com validação de representação.
 - [ ] F8.06 Publicar pacotes de especialidade adicionais conforme demanda dos pilotos.
-- [ ] F8.07 Avaliar INSS, cartórios e outros serviços por disponibilidade contratual/técnica real.
+- [x] F8.07 Avaliar INSS, cartórios e outros serviços por disponibilidade contratual/técnica real.
 
 Saída: tabela de cobertura atualizada, credenciais segregadas e pilotos por conector.
 Não registrar “protocolado” sem recibo; resposta ambígua exige reconciliação antes de
@@ -753,3 +753,5 @@ não evidência de que a integração já está ativa.
 
 | 11/09/2026 | 1.6 | F6 publicada e verificada com monitoramento, regras e prazos assistidos; avanço para F7 |
 | 11/09/2026 | 1.7 | F7 publicada e verificada com OCR privado real, pesquisa, revisão e cotas; avanço para F8 |
+
+Registro de 12/09/2026: [evidência de produção F8](FASE_8_OPERACOES_ESPECIALIZADAS.md). F8.06 tem catálogo técnico disponível; adoção das especialidades pelos pilotos permanece pendente.

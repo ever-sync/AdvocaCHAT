@@ -1,5 +1,7 @@
 # F8 — Operações especializadas, sucessores e acesso por diligência
 
+Documento histórico; implementação e verificação finais em [F8 — entrega técnica](FASE_8_OPERACOES_ESPECIALIZADAS.md) e [contrato SQL](FASE_8_CONTRATO.md). Nenhum adaptador institucional foi implementado.
+
 Proposta de arquitetura preparada em **11/09/2026**, após a leitura do código F1–F7 e das fontes abaixo. Nomes e assinaturas são um contrato proposto para distribuição do trabalho; **a migration 2600 e os conectores F8 ainda não estão implementados neste documento**. Não há homologação institucional, autorização para atos externos ou aprovação de tese jurídica decorrente desta proposta.
 
 Referências internas: [plano, F8.01–F8.07](./PLANO_PLATAFORMA_JURIDICA_E_ISENCAO_IR.md), [portal F5](./FASE_5_ARQUITETURA.md), [captura e prazos F6](./FASE_6_CONTRATO.md), [assistência documental F7](./FASE_7_CONTRATO.md).

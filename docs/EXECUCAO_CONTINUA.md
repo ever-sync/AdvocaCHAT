@@ -18,8 +18,8 @@ concluída porque um adaptador ou teste simulado passou.
 - F5: entrega técnica publicada e verificada (`e2476ef`, correção de rota `035b34d`), com portal, comunicação, honorários, prestação de contas e rotina. [Evidências SQL, API e navegador](FASE_5_PORTAL_E_FINANCEIRO.md); entregas reais e cobrança seguem P06/P07.
 - F6: entrega técnica publicada e verificada (`e6af248`), incluindo API/navegador, 735 asserções SQL e oito testes de concorrência. [Evidências](FASE_6_MONITORAMENTO_E_PRAZOS.md); fontes e homologação reais seguem P03/P04.
 - F7: entrega técnica publicada e verificada (`ac6545d`, worker `a08ed0c`), com OCR Linux real, SQL/API/navegador, pesquisa e rascunhos revisáveis. [Evidências](FASE_7_ASSISTENCIA_DOCUMENTAL.md); nenhum provedor de IA ativado, P08.
-- F8: em execução — diligências, sucessores, especialidades e avaliação de cobertura; [arquitetura](FASE_8_ARQUITETURA.md). Conectores institucionais reais seguem P04.
-- F9: continuar após F8, com indicadores, carga, recuperação e preparação comercial.
+- F8: entrega técnica publicada (`fc60137`) e verificada em produção em 12/09/2026; [evidências](FASE_8_OPERACOES_ESPECIALIZADAS.md). Conectores institucionais reais seguem P04.
+- F9: em implementação, com indicadores, custos, importação assistida, manifesto de exportação, carga e recuperação.
 - Continuação vinculada à mesma tarefa por automação `continuar-fases-do-advocachat`.
 
 Em cada etapa: conferir estado Git, preservar trabalho alheio, implementar,
