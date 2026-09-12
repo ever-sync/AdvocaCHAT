@@ -34,8 +34,8 @@ export function saveMyLegalProfessionalProfile(input: Pick<LegalProfessionalProf
   return rpc("legal_set_professional_profile", { p_oab_number: input.oab_number, p_oab_state: input.oab_state });
 }
 
-export async function listLegalCases(filters: { search?: string; status?: LegalCaseStatus | "all"; customer_id?: string } = {}) {
-  let query = requireSupabase().from("legal_cases").select("*").order("updated_at", { ascending: false }).limit(200);
+export async function listLegalCases(filters: { search?: string; status?: LegalCaseStatus | "all"; customer_id?: string; offset?: number } = {}) {
+  let query = requireSupabase().from("legal_cases").select("*").order("updated_at", { ascending: false }).order("id").range(Math.max(0, filters.offset ?? 0), Math.max(0, filters.offset ?? 0) + 25);
   if (filters.status && filters.status !== "all") query = query.eq("status", filters.status);
   if (filters.customer_id) query = query.eq("customer_id", filters.customer_id);
   if (filters.search?.trim()) {
