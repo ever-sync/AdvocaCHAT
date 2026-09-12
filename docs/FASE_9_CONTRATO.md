@@ -1,6 +1,6 @@
 # F9 — Indicadores, custos e entrada/saída assistida
 
-Implementação em integração em 12/09/2026; publicação e evidências finais devem constar no registro de execução.
+Código e migração publicados em 12/09/2026; frontend público bloqueado pelo plano Railway. [Evidências e pendências](FASE_9_VALIDACAO_E_PENDENCIAS.md).
 
 Migração `20260912040000_legal_operational_readiness.sql`. Rota `/juridico/operacao`, acessível a partir da lista de casos. Todas as funções usam o perfil ativo e o escritório físico atual, sem tenant informado pelo navegador. Contas externas não possuem EXECUTE.
 
@@ -23,3 +23,5 @@ As tabelas novas usam RLS e não permitem acesso direto do navegador. Custos nã
 - Testes Vitest: importação UTF-8 limitada, métricas distintas, recurso desabilitado e ocultação de dados após negativa de acesso.
 
 Medição local: 1.000 casos, 10.000 metadados de arquivos, 3.000 custos sintéticos, quatro consultas simultâneas/20 requisições. p95 passou de 4.449,24 ms para 60,26 ms após calcular os conjuntos de permissões uma vez por consulta. Medição inclui início do processo psql; não é SLA nem teste de capacidade de toda a aplicação em produção.
+
+- `supabase/tests/legal_readiness_concurrency.py`: duas execuções sobrepostas no clone local de carga, verificando importação e custo únicos, com limpeza dos registros criados pelo teste.

@@ -1,8 +1,8 @@
 # F9 — Operação, treinamento e lançamento ampliado
 
-**Versão de planejamento: 11/09/2026.** Este documento define a próxima entrega de F9. Não cria planos comerciais, cotas, indicadores, importadores ou exportadores no produto. Não substitui os aceites jurídicos, fiscais e operacionais dos escritórios.
+**Roteiro de planejamento: 11/09/2026; atualizado em 12/09/2026.** As capacidades já implementadas e seus limites estão no [contrato F9](FASE_9_CONTRATO.md); a [validação e pendências](FASE_9_VALIDACAO_E_PENDENCIAS.md) registra o bloqueio Railway. Este roteiro não cria planos comerciais ou cotas contratadas. Não substitui os aceites jurídicos, fiscais e operacionais dos escritórios.
 
-F1–F7 possuem entregas técnicas descritas no [registro de execução](EXECUCAO_CONTINUA.md). F8 possui código e testes em integração; sua publicação e verificação devem constar naquele registro antes de entrar no treinamento de produção. Aprovação de um formulário ou teste sintético não significa homologação profissional, entrega de mensagem, pagamento, cobertura judicial ou geração real por IA.
+F1–F7 possuem entregas técnicas descritas no [registro de execução](EXECUCAO_CONTINUA.md). F8 foi publicada e verificada conforme o registro de execução. O frontend público F9 aguarda regularização do plano Railway. Aprovação de um formulário ou teste sintético não significa homologação profissional, entrega de mensagem, pagamento, cobertura judicial ou geração real por IA.
 
 ## 1. Critério de lançamento
 
@@ -162,7 +162,7 @@ O levantamento técnico da execução de 11/09/2026 identificou agendas de backu
 
 O mesmo levantamento registrou PITR desabilitado e imagem Supabase não compatível com a habilitação oferecida pela CLI. Não trocar a imagem do banco para habilitar PITR sem provar extensões, Auth, Storage e recuperação. PITR e backup de volume são mecanismos distintos; a disponibilidade descrita na documentação não comprova habilitação nesta instalação. [PITR](https://docs.railway.com/volumes/point-in-time-recovery).
 
-A restauração isolada de banco e Storage é uma tarefa técnica separada em execução; este documento não afirma seu resultado. Guardar relatório com origem/destino sem credenciais, versão/esquema/extensões, horário do ponto recuperado, contagens, relações, amostra de arquivos/hash, testes de ACL, tempo e diferença entre último fato confirmado e ponto restaurado. Medir RTO/RPO do ensaio; metas contratuais permanecem P05. Backup lógico do banco não inclui automaticamente bytes externos do Storage, segredos, papéis e binários.
+A restauração isolada de banco e Storage foi verificada em 12/09/2026; resultados e limitações estão no relatório F9 vinculado acima. Guardar relatório com origem/destino sem credenciais, versão/esquema/extensões, horário do ponto recuperado, contagens, relações, amostra de arquivos/hash, testes de ACL, tempo e diferença entre último fato confirmado e ponto restaurado. Medir RTO/RPO do ensaio; metas contratuais permanecem P05. Backup lógico do banco não inclui automaticamente bytes externos do Storage, segredos, papéis e binários.
 
 Teste de carga deve usar identidades/casos sintéticos e combinações reais: lista paginada, leitura autorizada, upload, OCR limitado, cálculo, fila/callback simulado, revogação concorrente, importação/exportação propostas e atraso de provedor. Medir latências, erros, CPU/memória, conexões/locks, fila e bytes; executar apenas em ambiente isolado ou escopo operacional explicitamente autorizado. Não aumentar réplicas de worker/filas antes de verificar leases, idempotência e limites do banco.
 
@@ -179,7 +179,7 @@ P01 (assinatura), P02 (calendário), P04 (fontes/cobertura) e P07 (gateway) cont
 
 O relatório de cada ampliação deve separar **implementado/testado tecnicamente**, **publicado/verificado**, **homologado pelo responsável** e **dependência pendente**. Responsável pelo lançamento decide o próximo grupo com base nessa evidência, preservando a alternativa manual e reunindo as dúvidas restantes no relatório consolidado.
 
-## 12. Entregas F9 ainda necessárias
+## 12. Ampliação e aceites ainda necessários
 
 - Consultas/API/UI de indicadores e custos com autorização, fórmulas versionadas e distinção entre fato e estimativa.
 - Medição de capacidade/carga e relatório de restauração conjunta banco/arquivos; aceite P05.

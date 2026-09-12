@@ -1,6 +1,6 @@
 # Plano de evolução do AdvocaCHAT: plataforma jurídica e isenção de IR
 
-Data de referência: **11/09/2026** · Versão: **1.8** · Situação: **F1–F8 com entregas técnicas verificadas; F9 em implementação**.
+Data de referência: **11/09/2026** · Versão: **1.9** · Situação: **F1–F8 verificadas; F9 implementada em parte, publicação bloqueada pelo plano Railway**.
 
 Este é o roteiro de execução do produto. Reúne as 30 ideias de plataforma jurídica
 aprovadas na conversa e 25 funcionalidades específicas para escritórios que atuam
@@ -431,14 +431,14 @@ nova tentativa. Cobertura: J10, J12, J16, J18 e IR24.
 
 ### F9 — Validar escala e ampliar a comercialização
 
-- [ ] F9.01 Criar indicadores gerais e específicos IR, medindo resultado efetivo.
+- [x] F9.01 Criar indicadores gerais e específicos IR, medindo resultado efetivo.
 - [ ] F9.02 Medir custo por escritório/caso: infra, monitoramento, armazenamento, assinatura, mensagens e IA.
-- [ ] F9.03 Executar teste de carga representativo e corrigir gargalos antes de aumentar réplicas.
-- [ ] F9.04 Homologar restauração de banco e documentos; medir perda e tempo de recuperação.
+- [x] F9.03 Executar teste de carga representativo e corrigir gargalos antes de aumentar réplicas.
+- [x] F9.04 Homologar restauração de banco e documentos; medir perda e tempo de recuperação.
 - [ ] F9.05 Definir planos comerciais por equipe, casos/processos e consumo, com limites transparentes.
 - [ ] F9.06 Criar importação assistida, treinamento, suporte e exportação de dados no encerramento.
 - [ ] F9.07 Ampliar gradualmente os escritórios após estabilidade e revisão dos indicadores.
-- [ ] F9.08 Registrar plano de resposta a incidentes, plantão operacional e manutenção de fontes/regras.
+- [x] F9.08 Registrar plano de resposta a incidentes, plantão operacional e manutenção de fontes/regras.
 
 Saída M4: metas da seção 13 atendidas no piloto, custos conhecidos e recuperação
 demonstrada. Cobertura: J28, conclusão de J30 e IR25. O produto não terá promessa
@@ -755,3 +755,5 @@ não evidência de que a integração já está ativa.
 | 11/09/2026 | 1.7 | F7 publicada e verificada com OCR privado real, pesquisa, revisão e cotas; avanço para F8 |
 
 Registro de 12/09/2026: [evidência de produção F8](FASE_8_OPERACOES_ESPECIALIZADAS.md). F8.06 tem catálogo técnico disponível; adoção das especialidades pelos pilotos permanece pendente.
+
+F9 em 12/09/2026: [validação, limites e bloqueio Railway](FASE_9_VALIDACAO_E_PENDENCIAS.md). F9.02 dispõe de custos manuais separados por natureza/moeda, sem conciliação automática de fornecedores. F9.06 dispõe de importação de casos e manifesto por caso, com arquivos separados; exportação integral automática de escritório permanece fora da entrega. F9.05/F9.07 exigem decisões comerciais e pilotos.

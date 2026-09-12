@@ -1,3 +1,5 @@
+> Estado jurídico em 12/09/2026: [F8 verificada](FASE_8_OPERACOES_ESPECIALIZADAS.md) e [F9: evidências e bloqueio Railway](FASE_9_VALIDACAO_E_PENDENCIAS.md). Informações históricas abaixo não substituem esses registros. A publicação de F9 foi recusada por trial expirado; não declarar o frontend F9 em produção antes de regularizar o plano e observar SUCCESS.
+
 # Implantação AdvocaCHAT — 2026-09-10
 
 Instalação independente no workspace EverSync, projeto AdvocaCHAT, ambiente production.

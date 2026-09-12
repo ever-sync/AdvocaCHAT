@@ -19,8 +19,8 @@ concluída porque um adaptador ou teste simulado passou.
 - F6: entrega técnica publicada e verificada (`e6af248`), incluindo API/navegador, 735 asserções SQL e oito testes de concorrência. [Evidências](FASE_6_MONITORAMENTO_E_PRAZOS.md); fontes e homologação reais seguem P03/P04.
 - F7: entrega técnica publicada e verificada (`ac6545d`, worker `a08ed0c`), com OCR Linux real, SQL/API/navegador, pesquisa e rascunhos revisáveis. [Evidências](FASE_7_ASSISTENCIA_DOCUMENTAL.md); nenhum provedor de IA ativado, P08.
 - F8: entrega técnica publicada (`fc60137`) e verificada em produção em 12/09/2026; [evidências](FASE_8_OPERACOES_ESPECIALIZADAS.md). Conectores institucionais reais seguem P04.
-- F9: em implementação, com indicadores, custos, importação assistida, manifesto de exportação, carga e recuperação.
-- Continuação vinculada à mesma tarefa por automação `continuar-fases-do-advocachat`.
+- F9: código `3878281` publicado, migração aplicada e testes API/local concluídos; [evidências e limites](FASE_9_VALIDACAO_E_PENDENCIAS.md). Frontend público bloqueado por expiração do trial Railway (P09).
+- Automação anterior `continuar-fases-do-advocachat` não encontrada no diretório local nesta retomada; não foi recriada.
 
 Em cada etapa: conferir estado Git, preservar trabalho alheio, implementar,
 validar com fixtures sintéticas, publicar o escopo em `origin/main`, verificar
@@ -43,6 +43,7 @@ encerrar a execução disponível com relatório consolidado e pausar a continua
 | P05 | Política de retenção por finalidade, orçamento e metas de recuperação | Preservação sem descarte automático, controles e medição em testes | Prazos/obrigações contratuais e aceite das metas de operação |
 | P06 | Canal de comunicação autorizado do escritório e destinatários verificados | Portal, conteúdo aprovado, fila, adapters e recibos verificáveis; templates de OTP | Homologação real de entrega pelo canal contratado e recebimento de OTP no endereço correto |
 | P07 | Gateway de honorários e conta recebedora do escritório, sandbox e regras de estorno | Obrigações, conciliação, reversões e adapter isolado do billing SaaS | Cobrança e callback reais com provedor contratado |
+| P09 | Plano Railway do workspace do projeto expirado | Código, banco, CI, testes API e interface local com backend real | Publicação e conferência do frontend F9 no endereço público |
 | P08 | Provedor/modelo de IA, política de tratamento de documentos, orçamento e credenciais próprios | OCR privado, transcrição, pesquisa e rascunhos manuais revisáveis; adaptador isolado | Habilitação e homologação de geração real com o modelo e política contratados |
 
 Não reutilizar credenciais, clientes ou base de dados de outros produtos.
@@ -51,6 +52,6 @@ Não contratar serviços nem enviar mensagens a terceiros sem autorização espe
 ## Acompanhamento técnico para as fases seguintes
 
 - F3: preservar natureza de renda e fontes separadas; avaliação conjunta exige acesso médico e fiscal.
-- Fixtures F3–F7 mantidas isoladamente para validar as próximas fases; remover blobs, registros e usuários internos/externos sintéticos e conferir preservação do estado real antes do encerramento disponível. O recurso jurídico do tenant real foi habilitado por usuário em 11/09/2026 às 22:13 UTC; preservar esse estado, sem restaurar o antigo valor desligado.
+- Fixtures F3–F9 removidas em 12/09/2026: 630 registros, cinco usuários e 26 arquivos; cópias temporárias de recuperação também removidas. Registros reais preservados por hash. O recurso jurídico do tenant real foi habilitado por usuário em 11/09/2026 às 22:13 UTC; preservar esse estado, sem restaurar o antigo valor desligado.
 - F5: integração Auth real passou sem envio; tipos herdados de convite/scheduling-public foram corrigidos e verificados. Preservar a separação entre convite e credenciais próprias do cliente.
-- F9: paginação das listas jurídicas (limite atual 200), tratamento auditado de uploads interrompidos, carga e recuperação integral. Medir também volume de snapshots F4 e custo de conferir atualidade de todas as versões; consultas fiscais recusam silenciosa truncagem acima de 25.000 linhas, mas ainda precisam de filtros/paginação apropriados para grandes casos.
+- F9: lista de casos paginada em 25 registros; outras listas e tratamento auditado de uploads interrompidos, carga e recuperação integral. Medir também volume de snapshots F4 e custo de conferir atualidade de todas as versões; consultas fiscais recusam silenciosa truncagem acima de 25.000 linhas, mas ainda precisam de filtros/paginação apropriados para grandes casos.
