@@ -7,11 +7,17 @@ export type UazapiInstanceConfig = {
   apiVersion?: UazapiApiVersion;
 };
 
+export type UazapiInitResult = {
+  instanceName: string;
+  instanceToken: string;
+  connectionState: Record<string, unknown>;
+};
+
 /**
  * Default `delay` (ms) aplicado quando o usuario nao pediu simulacao de digitacao.
  * Mantem compatibilidade historica com o comportamento anterior de UAZAPI.
  */
-const DEFAULT_SEND_DELAY_MS = 0;
+const DEFAULT_SEND_DELAY_MS = 200;
 
 /**
  * Erro HTTP da UAZAPI. A flag `retryable` permite que `withRetries` aborte
@@ -50,6 +56,11 @@ type UazapiSendInput = {
 };
 
 function joinUrl(baseUrl: string, path: string) {
+  const configuredBaileysUrl = String(Deno.env.get("BAILEYS_BASE_URL") ?? "").replace(/\/+$/, "");
+  const requestedUrl = baseUrl.replace(/\/+$/, "");
+  if (!configuredBaileysUrl || requestedUrl !== configuredBaileysUrl) {
+    throw new Error("Canal legado bloqueado. Remova esta instancia e conecte novamente pelo Baileys.");
+  }
   return `${baseUrl.replace(/\/+$/, "")}/${path.replace(/^\/+/, "")}`;
 }
 
@@ -144,7 +155,7 @@ export async function requestJson<T>(
   method = "GET",
   body?: unknown,
 ) {
-  const headers =
+  const headers: Record<string, string> =
     config.apiVersion === "v2"
       ? {
           token: config.apiKey,
@@ -183,7 +194,7 @@ export async function requestJson<T>(
         : null;
 
     throw new UazapiHttpError(
-      payloadMessage || rawText || `UAZAPI request failed: ${response.status}`,
+      payloadMessage || rawText || `Baileys request failed: ${response.status}`,
       response.status,
       payload,
     );
@@ -192,11 +203,15 @@ export async function requestJson<T>(
   return payload as T;
 }
 
-export async function requestAdminJson<T>(
+/**
+ * Faz requisicao usando o header `admintoken` em vez de `token`.
+ * Necessario para endpoints administrativos como `instance/init` e `instance/delete`.
+ */
+async function requestJsonAdmin<T>(
   baseUrl: string,
   adminToken: string,
   path: string,
-  method = "GET",
+  method = "POST",
   body?: unknown,
 ) {
   const response = await fetch(joinUrl(baseUrl, path), {
@@ -230,7 +245,7 @@ export async function requestAdminJson<T>(
         : null;
 
     throw new UazapiHttpError(
-      payloadMessage || rawText || `UAZAPI request failed: ${response.status}`,
+      payloadMessage || rawText || `Baileys request failed: ${response.status}`,
       response.status,
       payload,
     );
@@ -239,22 +254,27 @@ export async function requestAdminJson<T>(
   return payload as T;
 }
 
+export async function requestAdminJson<T>(
+  baseUrl: string,
+  adminToken: string,
+  path: string,
+  method = "POST",
+  body?: unknown,
+) {
+  return requestJsonAdmin<T>(baseUrl, adminToken, path, method, body);
+}
+
 export async function createUazapiInstance(
   baseUrl: string,
   adminToken: string,
   name: string,
-  extra?: { adminField01?: string; adminField02?: string },
 ) {
-  return requestAdminJson<Record<string, unknown>>(
+  return requestJsonAdmin<Record<string, unknown>>(
     baseUrl,
     adminToken,
-    "instance/create",
+    "instance/init",
     "POST",
-    {
-      name,
-      ...(extra?.adminField01 ? { adminField01: extra.adminField01 } : {}),
-      ...(extra?.adminField02 ? { adminField02: extra.adminField02 } : {}),
-    },
+    { Name: name },
   );
 }
 
@@ -340,16 +360,16 @@ export function resolveInstanceStatus(connectionState: Record<string, unknown>) 
       "disconnected",
   ).toLowerCase();
 
+  if (["close", "closed", "disconnect", "logout"].some((value) => rawState.includes(value))) {
+    return "disconnected" as const;
+  }
+
   if (["open", "connected", "online", "ready"].some((value) => rawState.includes(value))) {
     return "connected" as const;
   }
 
   if (["error", "failed"].some((value) => rawState.includes(value))) {
     return "error" as const;
-  }
-
-  if (["close", "closed", "disconnect", "logout"].some((value) => rawState.includes(value))) {
-    return "disconnected" as const;
   }
 
   return "connecting" as const;
@@ -432,8 +452,8 @@ export async function resolveConnectionConfig(
 
   throw new Error(
     errors.length > 0
-      ? `Nao consegui localizar a instancia na UAZAPI. Tentativas: ${errors.join(" | ")}`
-      : "Nao foi possivel localizar a instancia na UAZAPI.",
+      ? `Nao consegui localizar a instancia no Baileys. Tentativas: ${errors.join(" | ")}`
+      : "Nao foi possivel localizar a instancia no Baileys.",
   );
 }
 
@@ -447,6 +467,8 @@ export async function setWebhook(config: UazapiInstanceConfig, url: string) {
       events: [
         "connection",
         "messages",
+        "messages_update",
+        "chats",
       ],
     });
   }
@@ -462,11 +484,11 @@ export async function setWebhook(config: UazapiInstanceConfig, url: string) {
       STATUS_INSTANCE: true,
       MESSAGES_UPSERT: true,
       SEND_MESSAGE: true,
-      MESSAGES_UPDATE: false,
+      MESSAGES_UPDATE: true,
       QRCODE_UPDATED: true,
-      CHATS_SET: false,
-      CHATS_UPSERT: false,
-      CHATS_UPDATE: false,
+      CHATS_SET: true,
+      CHATS_UPSERT: true,
+      CHATS_UPDATE: true,
       CONNECTION_UPDATE: true,
       groups_ignore: true,
     },
@@ -891,4 +913,191 @@ export async function sendMessageViaUazapi(config: UazapiInstanceConfig, input: 
       ...(payload ?? {}),
     },
   );
+}
+
+/**
+ * Cria uma nova instancia na UAZAPI usando o admintoken.
+ * Retorna o nome da instancia e o token individual gerado pela API.
+ */
+export async function initInstanceWithAdmin(
+  baseUrl: string,
+  adminToken: string,
+  instanceName: string,
+): Promise<UazapiInitResult> {
+  const result = await requestJsonAdmin<Record<string, unknown>>(
+    baseUrl,
+    adminToken,
+    "instance/init",
+    "POST",
+    { Name: instanceName },
+  );
+
+  const instanceToken = String(
+    result.token ??
+    (result.instance as Record<string, unknown> | undefined)?.token ??
+    "",
+  ).trim();
+
+  if (!instanceToken) {
+    throw new Error("O conector Baileys nao retornou token para a nova instancia.");
+  }
+
+  const resolvedName = String(
+    result.name ??
+    (result.instance as Record<string, unknown> | undefined)?.name ??
+    instanceName,
+  ).trim();
+
+  return {
+    instanceName: resolvedName,
+    instanceToken,
+    connectionState: result as Record<string, unknown>,
+  };
+}
+
+/** @deprecated Use initInstanceWithAdmin instead */
+export async function initInstance(config: UazapiInstanceConfig) {
+  if (config.apiVersion === "v2") {
+    try {
+      return await requestJson<Record<string, unknown>>(config, "instance/init", "POST", {});
+    } catch (e) {
+      console.error("v2 instance/init failed", e);
+      try {
+        return await requestJson<Record<string, unknown>>(config, "instance/create", "POST", {
+          instanceName: config.instanceName,
+        });
+      } catch (e2) {
+        throw new Error(`Failed to initialize v2 instance: ${(e as Error).message}. Fallback: ${(e2 as Error).message}`);
+      }
+    }
+  } else {
+    try {
+      return await requestJson<Record<string, unknown>>(config, "instance/create", "POST", {
+        instanceName: config.instanceName,
+      });
+    } catch (e) {
+      console.error("v1 instance/create failed", e);
+      try {
+        return await requestJson<Record<string, unknown>>(config, "instance/init", "POST", {
+          instanceName: config.instanceName,
+        });
+      } catch (e2) {
+        throw new Error(`Failed to initialize v1 instance: ${(e as Error).message}. Fallback: ${(e2 as Error).message}`);
+      }
+    }
+  }
+}
+
+export async function connectInstance(config: UazapiInstanceConfig) {
+  const resolvedConfig = await ensureResolvedConfig(config);
+
+  if (resolvedConfig.apiVersion === "v2") {
+    try {
+      return await requestJson<Record<string, unknown>>(resolvedConfig, "instance/connect", "POST", {});
+    } catch (e) {
+      console.error("v2 instance/connect failed", e);
+      try {
+        return await requestJson<Record<string, unknown>>(
+          resolvedConfig,
+          `instance/connect/${resolvedConfig.instanceName}`,
+          "POST",
+          {},
+        );
+      } catch (e2) {
+        throw new Error(`Failed to connect v2 instance: ${(e as Error).message}. Fallback: ${(e2 as Error).message}`);
+      }
+    }
+  } else {
+    try {
+      return await requestJson<Record<string, unknown>>(
+        resolvedConfig,
+        `instance/connect/${resolvedConfig.instanceName}`,
+        "POST",
+        {},
+      );
+    } catch (e) {
+      console.error("v1 instance/connect path failed", e);
+      try {
+        return await requestJson<Record<string, unknown>>(resolvedConfig, "instance/connect", "POST", {
+          instanceName: resolvedConfig.instanceName,
+        });
+      } catch (e2) {
+        throw new Error(`Failed to connect v1 instance: ${(e as Error).message}. Fallback: ${(e2 as Error).message}`);
+      }
+    }
+  }
+}
+
+export async function deleteInstanceFromUazapi(config: UazapiInstanceConfig) {
+  const resolvedConfig = await ensureResolvedConfig(config);
+
+  if (resolvedConfig.apiVersion === "v2") {
+    try {
+      await requestJson<Record<string, unknown>>(resolvedConfig, "instance/logout", "POST", {});
+    } catch {
+      try {
+        await requestJson<Record<string, unknown>>(resolvedConfig, "instance/disconnect", "POST", {});
+      } catch {
+        // ignore logout/disconnect failure
+      }
+    }
+
+    try {
+      return await requestJson<Record<string, unknown>>(resolvedConfig, "instance/delete", "DELETE", {});
+    } catch (e) {
+      console.error("v2 instance/delete DELETE failed", e);
+      try {
+        return await requestJson<Record<string, unknown>>(resolvedConfig, "instance/delete", "POST", {});
+      } catch (e2) {
+        throw new Error(`Failed to delete v2 instance: ${(e as Error).message}. Fallback: ${(e2 as Error).message}`);
+      }
+    }
+  } else {
+    try {
+      await requestJson<Record<string, unknown>>(
+        resolvedConfig,
+        `instance/logout/${resolvedConfig.instanceName}`,
+        "POST",
+        {},
+      );
+    } catch {
+      try {
+        await requestJson<Record<string, unknown>>(
+          resolvedConfig,
+          `instance/disconnect/${resolvedConfig.instanceName}`,
+          "POST",
+          {},
+        );
+      } catch {
+        // ignore
+      }
+    }
+
+    try {
+      return await requestJson<Record<string, unknown>>(
+        resolvedConfig,
+        `instance/delete/${resolvedConfig.instanceName}`,
+        "DELETE",
+        {},
+      );
+    } catch (e) {
+      console.error("v1 instance/delete DELETE failed", e);
+      try {
+        return await requestJson<Record<string, unknown>>(
+          resolvedConfig,
+          `instance/delete/${resolvedConfig.instanceName}`,
+          "POST",
+          {},
+        );
+      } catch (e2) {
+        try {
+          return await requestJson<Record<string, unknown>>(resolvedConfig, "instance/delete", "POST", {
+            instanceName: resolvedConfig.instanceName,
+          });
+        } catch (e3) {
+          throw new Error(`Failed to delete v1 instance: ${(e as Error).message}. Fallback: ${(e2 as Error).message}. Fallback 2: ${(e3 as Error).message}`);
+        }
+      }
+    }
+  }
 }

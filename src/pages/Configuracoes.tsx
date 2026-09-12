@@ -64,7 +64,7 @@ import { WebhooksSettingsSection } from "@/components/settings/WebhooksSettingsS
 import { AdsSettings } from "@/components/settings/AdsSettings";
 import { TeamsSettingsSection } from "@/components/settings/TeamsSettingsSection";
 import { TwoFactorSettingsCard } from "@/components/settings/TwoFactorSettingsCard";
-import { UazapiChannelWizardDialog } from "@/components/settings/UazapiChannelWizardDialog";
+import { BaileysChannelWizardDialog } from "@/components/settings/BaileysChannelWizardDialog";
 import { BillingSettingsCard } from "@/components/settings/BillingSettingsCard";
 import { usePlatformAdminAccess } from "@/lib/api/platform-admin";
 import { useTenantBillingSnapshot } from "@/lib/api/billing";
@@ -493,8 +493,8 @@ export default function Configuracoes() {
   const syncInstances = useSyncWhatsappInstances({
     onSuccess: (_data, variables) => {
       const descricao = variables?.instanceId
-        ? "Esta instancia foi sincronizada na UAZAPI."
-        : "Todas as instancias foram sincronizadas na UAZAPI.";
+        ? "Esta instancia foi sincronizada na Baileys."
+        : "Todas as instancias foram sincronizadas na Baileys.";
       toast({ title: "Sincronizacao concluida", description: descricao });
       useAppStore.getState().addNotification({
         tipo: "sucesso",
@@ -923,7 +923,7 @@ export default function Configuracoes() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h2 className="text-xl font-bold text-foreground">Integrações operacionais</h2>
-              <p className="text-sm text-muted-foreground">Conecte instancias UAZAPI e acompanhe a operacao.</p>
+              <p className="text-sm text-muted-foreground">Conecte instancias Baileys e acompanhe a operacao.</p>
             </div>
             <div className="flex gap-2">
               <Button
@@ -969,7 +969,7 @@ export default function Configuracoes() {
             </div>
           </div>
 
-          <UazapiChannelWizardDialog
+          <BaileysChannelWizardDialog
             open={dialogOpen && canEditConfiguracoes}
             onOpenChange={(open) => {
               if (!canEditConfiguracoes) {
@@ -994,7 +994,7 @@ export default function Configuracoes() {
           <Card className="border-border/60 bg-card/80">
             <CardHeader>
               <CardTitle className="text-lg">Instancias WhatsApp</CardTitle>
-              <CardDescription>Estados reais vindos da UAZAPI e do banco.</CardDescription>
+              <CardDescription>Estados reais vindos da Baileys e do banco.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {isLoading ? <p className="text-sm text-muted-foreground">Carregando instancias...</p> : error ? <p className="text-sm text-destructive">{error.message}</p> : instances.length === 0 ? (

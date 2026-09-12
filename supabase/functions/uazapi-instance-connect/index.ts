@@ -35,11 +35,11 @@ Deno.serve(async (request) => {
     const displayName = String(body.displayName ?? "").trim();
     const providedInstanceName = String(body.uazapiInstanceName ?? "").trim();
     const apiKey = String(body.apiKey ?? "").trim();
-    const uazapiBaseUrl = String(body.uazapiBaseUrl ?? "https://api.uazapi.com").trim();
+    const uazapiBaseUrl = String(body.uazapiBaseUrl ?? Deno.env.get("BAILEYS_BASE_URL") ?? "").trim();
     const isDefault = Boolean(body.isDefault);
 
-    if (!displayName || !apiKey) {
-      throw new Error("displayName e apiKey sao obrigatorios.");
+    if (!displayName || !apiKey || !uazapiBaseUrl) {
+      throw new Error("displayName, apiKey e BAILEYS_BASE_URL sao obrigatorios.");
     }
 
     const resolved = await resolveConnectionConfig(uazapiBaseUrl, apiKey, providedInstanceName);

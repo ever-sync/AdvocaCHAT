@@ -24,7 +24,7 @@ function toQrSrc(value?: string | null) {
   return raw.startsWith("data:") ? raw : `data:image/png;base64,${raw}`;
 }
 
-export function UazapiChannelWizardDialog({
+export function BaileysChannelWizardDialog({
   open,
   onOpenChange,
   canEdit,
@@ -55,7 +55,7 @@ export function UazapiChannelWizardDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl rounded-2xl">
         <DialogHeader>
-          <DialogTitle>Criar novo canal Uazapi</DialogTitle>
+          <DialogTitle>Criar novo canal Baileys</DialogTitle>
           <DialogDescription>
             Criamos a instância com o mesmo nome do canal e já abrimos o QR para conectar no WhatsApp.
           </DialogDescription>
@@ -83,7 +83,7 @@ export function UazapiChannelWizardDialog({
                 disabled={!canEdit || createChannel.isPending}
               />
               <p className="text-xs text-muted-foreground">
-                Este será o nome usado no painel da Uazapi e no AdvocaCHAT.
+                Este será o nome usado no painel da Baileys e no AdvocaCHAT.
               </p>
             </div>
             <div className="flex items-center justify-between rounded-xl border border-border/60 bg-card/60 px-4 py-3">
@@ -151,7 +151,7 @@ export function UazapiChannelWizardDialog({
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Canal criado</p>
                 <p className="mt-1 text-base font-semibold text-foreground">{createdInstance?.displayName ?? channelName}</p>
                 <p className="text-sm text-muted-foreground">
-                  {createdInstance?.uazapiInstanceName ? `Instância Uazapi: ${createdInstance.uazapiInstanceName}` : "Aguardando nome da instância."}
+                  {createdInstance?.uazapiInstanceName ? `Instância Baileys: ${createdInstance.uazapiInstanceName}` : "Aguardando nome da instância."}
                 </p>
               </div>
               <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400">
@@ -190,7 +190,7 @@ export function UazapiChannelWizardDialog({
               <div className="rounded-2xl border border-dashed border-border p-8 text-center">
                 <p className="text-sm font-medium text-foreground">QR code ainda não disponível</p>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  A Uazapi não devolveu o QR nesta resposta. Você pode fechar e tentar novamente em alguns segundos.
+                  A Baileys não devolveu o QR nesta resposta. Você pode fechar e tentar novamente em alguns segundos.
                 </p>
               </div>
             )}

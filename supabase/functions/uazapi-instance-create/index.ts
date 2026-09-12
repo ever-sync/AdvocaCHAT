@@ -16,7 +16,7 @@ import {
   type UazapiInstanceConfig,
 } from "../_shared/uazapi.ts";
 
-const DEFAULT_UAZAPI_BASE_URL = "https://eversync2.uazapi.com";
+const DEFAULT_BAILEYS_BASE_URL = "";
 
 type CreateUazapiResponse = {
   token?: string | null;
@@ -28,9 +28,9 @@ type CreateUazapiResponse = {
 };
 
 function readAdminToken() {
-  const token = Deno.env.get("UAZAPI_ADMIN_TOKEN")?.trim();
+  const token = Deno.env.get("BAILEYS_ADMIN_TOKEN")?.trim();
   if (!token) {
-    throw new Error("Configure UAZAPI_ADMIN_TOKEN no ambiente da função antes de criar canais.");
+    throw new Error("Configure BAILEYS_ADMIN_TOKEN no ambiente da função antes de criar canais.");
   }
   return token;
 }
@@ -56,11 +56,11 @@ Deno.serve(async (request) => {
 
     const body = await request.json().catch(() => ({}));
     const displayName = String(body.displayName ?? "").trim();
-    const uazapiBaseUrl = String(body.uazapiBaseUrl ?? DEFAULT_UAZAPI_BASE_URL).trim();
+    const uazapiBaseUrl = String(body.uazapiBaseUrl ?? Deno.env.get("BAILEYS_BASE_URL") ?? DEFAULT_BAILEYS_BASE_URL).trim();
     const isDefault = Boolean(body.isDefault ?? true);
 
-    if (!displayName) {
-      throw new Error("displayName e obrigatorio.");
+    if (!displayName || !uazapiBaseUrl) {
+      throw new Error("displayName e BAILEYS_BASE_URL sao obrigatorios.");
     }
 
     const { error: limitError } = await admin.rpc("assert_tenant_plan_limit", {
@@ -85,7 +85,7 @@ Deno.serve(async (request) => {
     ).trim();
 
     if (!createdToken) {
-      throw new Error("A UAZAPI nao retornou o token da instancia criada.");
+      throw new Error("O Baileys nao retornou o token da instancia criada.");
     }
 
     const encryptedApiKey = await encryptSecret(createdToken);

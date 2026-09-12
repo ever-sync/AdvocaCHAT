@@ -100,7 +100,7 @@ export function ChannelsHubSection({
               </div>
               <div>
                 <CardTitle className="text-base">WhatsApp</CardTitle>
-                <CardDescription>Instancias UAZAPI conectadas ao atendimento.</CardDescription>
+                <CardDescription>Instancias Baileys conectadas ao atendimento.</CardDescription>
               </div>
             </div>
             <Badge className="shrink-0 bg-success/20 text-success">Ativo</Badge>
