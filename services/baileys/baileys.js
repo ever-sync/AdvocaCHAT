@@ -14,6 +14,7 @@ import { WebhookOutbox } from "./webhook-outbox.js";
 const sessionsRoot = process.env.BAILEYS_SESSIONS_PATH || join(process.cwd(), ".baileys-sessions");
 const adminToken = process.env.BAILEYS_ADMIN_TOKEN || "";
 const sessions = new Map();
+const MAX_SENT_MESSAGES_PER_SESSION = 2_000;
 
 function safeName(value) {
   const name = String(value || "").trim();
@@ -53,12 +54,28 @@ async function emitWebhook(runtime, payload) {
   void runtime.outbox.flush(runtime.meta.webhookUrl).catch(() => console.error("[baileys] outbox unavailable"));
 }
 
+function rememberSentMessage(runtime, sent) {
+  const id = sent?.key?.id;
+  if (!id || !sent?.message) return;
+  runtime.sentMessages ||= new Map();
+  runtime.sentMessages.set(id, sent.message);
+  while (runtime.sentMessages.size > MAX_SENT_MESSAGES_PER_SESSION) {
+    runtime.sentMessages.delete(runtime.sentMessages.keys().next().value);
+  }
+}
+
+async function sendAndRemember(runtime, remoteJid, content) {
+  const sent = await runtime.socket.sendMessage(remoteJid, content);
+  rememberSentMessage(runtime, sent);
+  return sent;
+}
+
 async function startSession(name) {
   const existing = sessions.get(name);
   if (existing?.socket && existing.status !== "closed") return existing;
 
   const meta = await readMeta(name);
-  const runtime = existing || { name, meta, socket: null, status: "connecting", qr: null, phone: null, reconnecting: false };
+  const runtime = existing || { name, meta, socket: null, status: "connecting", qr: null, phone: null, reconnecting: false, sentMessages: new Map() };
   runtime.meta = meta;
   runtime.stopping = false;
   runtime.outbox ||= new WebhookOutbox(join(sessionDir(name), "outbox"));
@@ -78,6 +95,10 @@ async function startSession(name) {
     markOnlineOnConnect: false,
     syncFullHistory: false,
     generateHighQualityLinkPreview: false,
+    // Quando um aparelho ainda não tem a sessão Signal usada no primeiro
+    // envio, o WhatsApp pede uma nova cópia criptografada. Sem getMessage o
+    // destinatário fica indefinidamente em "Aguardando mensagem".
+    getMessage: async (key) => runtime.sentMessages?.get(key?.id),
     logger: runtime.logger,
   });
   runtime.socket = socket;
@@ -234,28 +255,28 @@ export async function installBaileysRoutes(app) {
     const runtime = await requireSession(req, res); if (!runtime) return;
     try {
       if (req.body?.delay) { await runtime.socket.sendPresenceUpdate("composing", jid(req.body.number)); await delay(Math.min(Number(req.body.delay), 10000)); }
-      const sent = await runtime.socket.sendMessage(jid(req.body.number), { text: String(req.body?.text || "") });
+      const sent = await sendAndRemember(runtime, jid(req.body.number), { text: String(req.body?.text || "") });
       res.json(sent);
     } catch (error) { res.status(400).json({ error: error.message }); }
   });
   app.post("/baileys/send/media", async (req, res) => {
     const runtime = await requireSession(req, res); if (!runtime) return;
-    try { res.json(await runtime.socket.sendMessage(jid(req.body.number), await outgoingContent(req.body))); }
+    try { res.json(await sendAndRemember(runtime, jid(req.body.number), await outgoingContent(req.body))); }
     catch (error) { res.status(400).json({ error: error.message }); }
   });
   app.post("/baileys/send/location", async (req, res) => {
     const runtime = await requireSession(req, res); if (!runtime) return;
-    try { res.json(await runtime.socket.sendMessage(jid(req.body.number), { location: { degreesLatitude: Number(req.body.latitude), degreesLongitude: Number(req.body.longitude), name: req.body.name, address: req.body.address } })); }
+    try { res.json(await sendAndRemember(runtime, jid(req.body.number), { location: { degreesLatitude: Number(req.body.latitude), degreesLongitude: Number(req.body.longitude), name: req.body.name, address: req.body.address } })); }
     catch (error) { res.status(400).json({ error: error.message }); }
   });
   app.post("/baileys/send/contact", async (req, res) => {
     const runtime = await requireSession(req, res); if (!runtime) return;
-    try { res.json(await runtime.socket.sendMessage(jid(req.body.number), { contacts: { displayName: req.body.displayName || "Contato", contacts: req.body.contacts || [] } })); }
+    try { res.json(await sendAndRemember(runtime, jid(req.body.number), { contacts: { displayName: req.body.displayName || "Contato", contacts: req.body.contacts || [] } })); }
     catch (error) { res.status(400).json({ error: error.message }); }
   });
   app.post("/baileys/send/menu", async (req, res) => {
     const runtime = await requireSession(req, res); if (!runtime) return;
-    try { res.json(await runtime.socket.sendMessage(jid(req.body.number), { text: String(req.body.text || "") })); }
+    try { res.json(await sendAndRemember(runtime, jid(req.body.number), { text: String(req.body.text || "") })); }
     catch (error) { res.status(400).json({ error: error.message }); }
   });
   app.post("/baileys/chat/find", async (req, res) => { const runtime = await requireSession(req, res); if (runtime) res.json({ data: [] }); });
