@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildIrCaseDossier, deriveIrReadiness, type IrDossierData } from "./legal-ir-dossier";
+import { buildIrCaseDossier, deriveIrFiscalOverview, deriveIrReadiness, type IrDossierData } from "./legal-ir-dossier";
 
 const base = {
   context: {
@@ -39,5 +39,21 @@ describe("dossiê consolidado de isenção de IR", () => {
     expect(html).toContain("&lt;script&gt;alert(&quot;laudo&quot;)&lt;/script&gt;");
     expect(html).toContain("Não determina direito, probabilidade de êxito ou valor recuperável");
     expect(html).toContain("Revisão de entrada 4");
+  });
+
+  it("compara anos sem perder precisão monetária e aponta lacunas fiscais", () => {
+    const data = structuredClone(base);
+    data.taxEntries = [
+      { id: "a", calendar_year: 2025, competence: "2025-01", source_id: "payer", withheld: "99999999999999.99" },
+      { id: "b", calendar_year: 2025, competence: "2025-02", source_id: "payer", withheld: "0.01" },
+      { id: "c", calendar_year: null, competence: null, source_id: null, withheld: null },
+    ] as IrDossierData["taxEntries"];
+    data.calculations = [{ status: "in_review" }] as IrDossierData["calculations"];
+    data.claims = [{ status: "awaiting" }] as IrDossierData["claims"];
+    data.cessations = [{ status: "reopened" }] as IrDossierData["cessations"];
+    const fiscal = deriveIrFiscalOverview(data);
+    expect(fiscal.years).toEqual([{ year: 2025, entries: 2, withheldCents: 10_000_000_000_000_000n }]);
+    expect(fiscal).toMatchObject({ entriesMissingPeriod: 1, entriesMissingPayer: 1, calculationsAwaitingReview: 1, openClaims: 1, activeWithholdingChecks: 1 });
+    expect(buildIrCaseDossier(data, "Caso")).toContain("R$ 100.000.000.000.000,00");
   });
 });

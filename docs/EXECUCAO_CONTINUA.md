@@ -45,7 +45,7 @@ encerrar a execução disponível com relatório consolidado e pausar a continua
 | P05 | Política de retenção por finalidade, orçamento e metas de recuperação | Preservação sem descarte automático, controles e medição em testes | Prazos/obrigações contratuais e aceite das metas de operação |
 | P06 | Canal de comunicação autorizado do escritório e destinatários verificados | Portal, conteúdo aprovado, fila, adapters e recibos verificáveis; templates de OTP | Homologação real de entrega pelo canal contratado e recebimento de OTP no endereço correto |
 | P07 | Gateway de honorários e conta recebedora do escritório, sandbox e regras de estorno | Obrigações, conciliação, reversões e adapter isolado do billing SaaS | Cobrança e callback reais com provedor contratado |
-| P09 | Plano Railway do workspace do projeto expirado | Código, banco, CI, testes API e interface local com backend real | Publicação e conferência do frontend F9 no endereço público |
+| P09 | Resolvida em 12/09/2026: plano Railway regularizado e publicação retomada | `web`, `functions` e serviços de apoio voltaram a receber deployments | Manter conferência de SHA, estado terminal e fluxo público a cada entrega |
 | P08 | Provedor/modelo de IA, política de tratamento de documentos, orçamento e credenciais próprios | OCR privado, transcrição, pesquisa e rascunhos manuais revisáveis; adaptador isolado | Habilitação e homologação de geração real com o modelo e política contratados |
 
 Não reutilizar credenciais, clientes ou base de dados de outros produtos.

@@ -10,6 +10,9 @@ isenção de IR e reúne, sem alterar registros:
 - fatos da cronologia com datas não exatas;
 - retenções que ainda precisam ser confirmadas;
 - situação da análise profissional e próxima ação operacional sugerida.
+- panorama fiscal por ano, com lançamentos e IR retido informado;
+- lançamentos sem período ou fonte, cálculos a revisar, pedidos abertos e
+  retenções em acompanhamento.
 
 O índice mede somente a completude dos registros acessíveis. Ele não representa
 enquadramento, probabilidade de êxito, valor recuperável ou concessão externa. A
@@ -29,11 +32,13 @@ O arquivo contém somente os registros retornados pelas políticas de acesso do
 caso. Ele identifica a revisão de entrada e declara que a situação atual deve ser
 conferida antes de qualquer providência. O arquivo não protocola pedido, não
 envia mensagem, não calcula crédito e não substitui revisão jurídica ou fiscal.
+As somas anuais usam aritmética decimal em centavos e permanecem identificadas
+como valores informados, sem serem apresentadas como crédito ou recebimento.
 
 ## Validação
 
 - Testes unitários cobrem conjunto completo, prioridade de pendências e escape
   de conteúdo privado/malicioso.
 - TypeScript e ESLint verificam a integração do painel ao workspace existente.
-- A suíte completa, builds e jornada de navegador devem ser executados antes da
-  publicação, conforme o processo geral do projeto.
+- A suíte completa, builds e jornada de navegador foram executados antes da
+  publicação inicial. Cada evolução repete a validação aplicável.

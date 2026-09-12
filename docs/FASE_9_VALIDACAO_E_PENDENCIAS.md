@@ -1,4 +1,8 @@
-# F9 — Entrega técnica e bloqueio de publicação
+# F9 — Entrega técnica e publicação
+
+> Atualização em 12/09/2026: o bloqueio de cobrança descrito abaixo foi
+> regularizado posteriormente. O frontend e as funções estão publicados no
+> Railway; o estado atual deve ser conferido em `EXECUCAO_CONTINUA.md`.
 
 **12/09/2026.** Código `38782817b19e5b1d2eb80b004f688b9968900fd2` publicado e SHA confirmado em `origin/main`. CI GitHub `34704068593`: **SUCCESS**. [Contrato das funções e limites](FASE_9_CONTRATO.md). O frontend público ainda não contém esta entrega: as três solicitações de deploy foram recusadas pelo Railway com **“Your trial has expired. Please select a plan to continue using Railway.”** Não houve contratação nem mudança de plano pela tarefa.
 
@@ -42,8 +46,7 @@ Evidências privadas locais: `/tmp/advocachat-f9/`, `/tmp/advocachat-f9-final/` 
 
 ## Próximos passos que exigem decisão externa
 
-1. **P09 — Railway:** regularizar o plano do workspace do projeto AdvocaCHAT; depois publicar a versão de F9 e conferir a interface pública. A tarefa não contratou um plano.
-2. P03/P05: responsáveis pelos pilotos, revisão jurídica/fiscal, escopo de oferta, preços, retenção, suporte e metas de recuperação. A matriz comercial é uma proposta.
-3. P01/P02/P04/P06/P07/P08: habilitar somente as integrações contratadas e homologar assinatura, calendário, Justiça, canais/OTP, pagamentos e IA. Estados não configurados e alternativas manuais permanecem explícitos.
+1. P03/P05: responsáveis pelos pilotos, revisão jurídica/fiscal, escopo de oferta, preços, retenção, suporte e metas de recuperação. A matriz comercial é uma proposta.
+2. P01/P02/P04/P06/P07/P08: habilitar somente as integrações contratadas e homologar assinatura, calendário, Justiça, canais/OTP, pagamentos e IA. Estados não configurados e alternativas manuais permanecem explícitos.
 
 A antiga automação `continuar-fases-do-advocachat` não foi encontrada nos arquivos locais de automação nesta retomada. Nenhuma repetição de deploy pago ou automação substituta foi criada.
