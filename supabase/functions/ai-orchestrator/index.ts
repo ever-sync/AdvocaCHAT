@@ -296,7 +296,7 @@ async function processJob(admin: Admin, job: Record<string, unknown>) {
   const negotiationId = (chat.primary_negotiation_id as string | null) ?? null;
   const customerId = (chat.customer_id as string | null) ?? null;
   const salesWorkflow = await loadSalesWorkflow({ admin, tenantId, chat });
-  if (salesWorkflow) tools = [...tools.filter((tool) => ["send_whatsapp_message", "handoff"].includes(tool.name)), ...salesTools(salesWorkflow)];
+  if (salesWorkflow) tools = [...tools.filter((tool) => tool.name === "send_whatsapp_message"), ...salesTools(salesWorkflow)];
 
   const negotiation = negotiationId ? await loadNegotiation(admin, negotiationId) : null;
   const stages = negotiation?.funnelId ? await loadFunnelStages(admin, tenantId, negotiation.funnelId) : [];
