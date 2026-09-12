@@ -400,6 +400,17 @@ export function SalesWorkflowPanel() {
                   <span className="text-sm text-muted-foreground">
                     {row.documents_stored ?? 0} no caso jurídico
                   </span>
+                  <span className="text-sm text-muted-foreground">
+                    Theo: {row.theo_completed ?? 0} analisado(s)
+                    {(row.theo_pending ?? 0) > 0
+                      ? ` · ${row.theo_pending} na fila`
+                      : ""}
+                  </span>
+                  {row.theo_recommended_action && (
+                    <span className="text-sm text-muted-foreground">
+                      Próxima ação: {row.theo_recommended_action.replace(/_/g, " ")}
+                    </span>
+                  )}
                   {row.next_task_at && (
                     <span className="text-sm text-muted-foreground">
                       Tarefa:{" "}

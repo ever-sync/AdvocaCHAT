@@ -39,6 +39,9 @@ export type SalesWorkflowRow = {
   crm_stage_id: string | null;
   documents_stored: number;
   document_failures: number;
+  theo_pending: number;
+  theo_completed: number;
+  theo_recommended_action: string | null;
   next_task_at: string | null;
   next_followup_at: string | null;
   followup_failures: number;
