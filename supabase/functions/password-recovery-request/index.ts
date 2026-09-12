@@ -83,6 +83,10 @@ Deno.serve(async (request) => {
       actionLink,
     });
 
+    if (!result.sent) {
+      return jsonResponse({ error: "O serviço de e-mail não está configurado para enviar a recuperação." }, 503);
+    }
+
     return jsonResponse({ ok: true, sent: result.sent, skipped: result.skipped });
   } catch (e) {
     return jsonResponse({ error: e instanceof Error ? e.message : "Erro ao enviar recuperacao" }, 400);

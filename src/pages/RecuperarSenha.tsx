@@ -17,10 +17,14 @@ export default function RecuperarSenha() {
     setLoading(true);
 
     try {
-      await invokePublicFunction<{ ok: boolean; sent?: boolean; skipped?: boolean }>(
+      const result = await invokePublicFunction<{ ok: boolean; sent?: boolean; skipped?: boolean }>(
         "password-recovery-request",
         { email: email.trim() },
       );
+
+      if (!result.sent) {
+        throw new Error("O serviço de e-mail não confirmou o envio. Tente novamente em alguns instantes.");
+      }
 
       const okDesc = "Se o e-mail existir, enviamos um link para redefinir sua senha.";
       toast({ title: "Link enviado", description: okDesc });
