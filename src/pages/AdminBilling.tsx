@@ -51,7 +51,7 @@ function isExceeded(row: BillingAdminUsage): boolean {
 
 export default function AdminBilling() {
   const { data, isLoading, isError, error } = useBillingAdminTenants();
-  const tenants = data?.tenants ?? [];
+  const tenants = useMemo(() => data?.tenants ?? [], [data?.tenants]);
   const plans = data?.plans ?? [];
 
   const summary = useMemo(() => {

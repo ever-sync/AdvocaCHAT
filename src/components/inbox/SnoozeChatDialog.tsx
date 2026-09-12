@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { addHours, format, setHours, setMinutes, startOfTomorrow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -31,10 +31,10 @@ export function SnoozeChatDialog({
   onConfirm,
   pending,
 }: SnoozeChatDialogProps) {
-  const defaultCustom = useMemo(() => toDatetimeLocalValue(addHours(new Date(), 1)), [open]);
+  const defaultCustom = toDatetimeLocalValue(addHours(new Date(), 1));
   const [customLocal, setCustomLocal] = useState(defaultCustom);
 
-  const presets = useMemo(() => {
+  const presets = (() => {
     const now = new Date();
     const tomorrow9 = setMinutes(setHours(startOfTomorrow(), 9), 0);
     return [
@@ -42,7 +42,7 @@ export function SnoozeChatDialog({
       { label: "3 horas", until: addHours(now, 3) },
       { label: "Amanhã 9h", until: tomorrow9 },
     ];
-  }, [open]);
+  })();
 
   const apply = (until: Date) => {
     void Promise.resolve(onConfirm(until)).then(() => onOpenChange(false));

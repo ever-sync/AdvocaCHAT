@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DEFAULT_FORM_THEME,
   buildDefaultFormSteps,
@@ -319,16 +319,19 @@ export function FormWidget() {
   const conversational = Boolean((form?.settings as Record<string, unknown> | undefined)?.conversational);
   const fieldGap = form?.settings?.fieldGap ?? 3;
   const gap = formFieldGapToCss(fieldGap);
-  const currentStepFieldIds = configuredSteps[step] ? stepFieldIds(configuredSteps[step]) : [];
-  function isVisibleStepField(field: FormField | undefined): field is FormField {
+  const currentStepFieldIds = useMemo(
+    () => (configuredSteps[step] ? stepFieldIds(configuredSteps[step]) : []),
+    [configuredSteps, step],
+  );
+  const isVisibleStepField = useCallback((field: FormField | undefined): field is FormField => {
     if (!field) return false;
     return field.type !== "hidden" && isFormFieldVisible(field, values);
-  }
+  }, [values]);
   const currentStepFields = useMemo(() => {
     if (!form?.settings.multiStep || configuredSteps.length === 0) return allVisibleFields;
     if (!isFormStepVisible(configuredSteps[Math.min(step, configuredSteps.length - 1)], values)) return [];
     return currentStepFieldIds.map((id) => fieldById.get(id)).filter(isVisibleStepField);
-  }, [allVisibleFields, configuredSteps.length, currentStepFieldIds, fieldById, form, values]);
+  }, [allVisibleFields, configuredSteps, currentStepFieldIds, fieldById, form, isVisibleStepField, step, values]);
   const resolvedStepIndexes = useMemo(() => {
     if (!form?.settings.multiStep || configuredSteps.length === 0) return [];
     return configuredSteps
@@ -339,7 +342,7 @@ export function FormWidget() {
         return fieldIds.map((id) => fieldById.get(id)).some(isVisibleStepField);
       })
       .map(({ index }) => index);
-  }, [configuredSteps, fieldById, form, values]);
+  }, [configuredSteps, fieldById, form, isVisibleStepField, values]);
   const activeStepIndex = useMemo(() => {
     if (!form?.settings.multiStep || resolvedStepIndexes.length === 0) return 0;
     const exact = resolvedStepIndexes.find((index) => index >= step);

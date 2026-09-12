@@ -222,7 +222,6 @@ export default function Onboarding() {
       },
     ];
   }, [
-    aiConfig?.llmProvider,
     aiConfig?.provider,
     billingSnapshot?.subscription,
     collaborators.length,

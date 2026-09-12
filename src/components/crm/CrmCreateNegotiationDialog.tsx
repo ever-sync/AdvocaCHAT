@@ -193,7 +193,7 @@ export function CrmCreateNegotiationDialog({
     [createFunnelId, funnels],
   );
 
-  const stageOptions = createFunnel?.stages ?? [];
+  const stageOptions = useMemo(() => createFunnel?.stages ?? [], [createFunnel]);
 
   useEffect(() => {
     if (!open) {

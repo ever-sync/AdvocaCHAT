@@ -618,7 +618,7 @@ export default function Clientes() {
       return `${countLabel} com filtros aplicados`;
     }
     return countLabel;
-  }, [totalCount, hasAnyListFilters, isLoading]);
+  }, [filtered.length, totalCount, hasAnyListFilters, isLoading]);
 
   const exportCustomers = (customers: Customer[], fileLabel: string) => {
     if (!customers.length) {

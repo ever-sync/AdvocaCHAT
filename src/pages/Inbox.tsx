@@ -77,6 +77,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRolePermissions } from "@/hooks/useRolePermissions";
 import { useQuickReplies } from "@/lib/api/quick-replies";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { isE2eMockAuth } from "@/lib/e2e";
 import { type InboxChat } from "@/types/domain";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -316,7 +317,11 @@ export default function Inbox() {
     isLoading: deepLinkChatLoading,
     isFetched: deepLinkChatFetched,
   } = useInboxChatById(requestedChatId, {
-    enabled: Boolean(requestedChatId?.trim() && !requestedChatInList && isSupabaseConfigured),
+    enabled: Boolean(
+      requestedChatId?.trim() &&
+      !requestedChatInList &&
+      (isSupabaseConfigured || isE2eMockAuth),
+    ),
   });
 
   const activeChat = useMemo(() => {

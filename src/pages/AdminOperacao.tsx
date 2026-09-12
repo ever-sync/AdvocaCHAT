@@ -70,7 +70,7 @@ export default function AdminOperacao() {
     },
     onError: (error) => toast({ title: "Nao foi possivel rechecar os workers", description: error.message, variant: "destructive" }),
   });
-  const tenants = data?.tenants ?? [];
+  const tenants = useMemo(() => data?.tenants ?? [], [data?.tenants]);
   const audit = useOperationAdminAuditLogs({
     tenantId: auditTenantId === "all" ? null : auditTenantId,
     entityType: auditEntityType === "all" ? null : auditEntityType,

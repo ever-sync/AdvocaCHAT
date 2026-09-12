@@ -19,6 +19,7 @@ import {
 } from "@/lib/api/billing";
 import { isBillingAccessAllowed } from "@/lib/billing-access";
 import { usePlatformAdminAccess } from "@/lib/api/platform-admin";
+import { isE2eMockAuth } from "@/lib/e2e";
 
 function money(cents: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
@@ -64,7 +65,10 @@ export function TrialActivationGate() {
   const availablePlans = useMemo(() => plans.filter((plan) => plan.prices[period]), [period, plans]);
   const aiAddon = addons.find((addon) => addon.id === "ia");
 
-  if (isLoading || adminLoading || platformAccess?.isPlatformAdmin || !blocked) return null;
+  // A suíte de navegador usa uma identidade local sem tenant ou assinatura no
+  // backend. O gate precisa respeitar esse modo, ou ele cobre toda a aplicação
+  // e impede que os cenários de CRM/Inbox validem o comportamento pretendido.
+  if (isE2eMockAuth || isLoading || adminLoading || platformAccess?.isPlatformAdmin || !blocked) return null;
 
   async function openCheckout(planId: string) {
     setCheckoutLoading(planId);

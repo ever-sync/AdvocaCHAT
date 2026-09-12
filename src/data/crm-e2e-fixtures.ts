@@ -1,5 +1,22 @@
 import { E2E_CHAT_POOL, E2E_POOL_NEGOTIATION_ID } from "@/data/inbox-e2e-fixtures";
+import type { CrmFunnel } from "@/data/crm-funnels";
 import type { CrmNegotiation, CrmNegotiationRecord } from "@/types/domain";
+
+/** Funil isolado usado pelo navegador E2E; nunca é aplicado a tenants reais. */
+export const E2E_CRM_FUNNELS: CrmFunnel[] = [
+  {
+    id: "comercial",
+    listName: "COMERCIAL",
+    stages: [
+      { id: "lead", title: "LEAD" },
+      { id: "contato", title: "CONTATO" },
+      { id: "andamento", title: "EM ANDAMENTO" },
+      { id: "contrato", title: "CONTRATO", requiredFields: ["total_value"] },
+      { id: "venda", title: "VENDA", isSaleStage: true },
+      { id: "perdido", title: "PERDIDO", isLostStage: true },
+    ],
+  },
+];
 
 /** Negociação no pool (UUID) para E2E de claim sem Supabase. */
 export const E2E_POOL_NEGOTIATION: CrmNegotiation = {

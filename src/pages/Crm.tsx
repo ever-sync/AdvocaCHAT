@@ -211,7 +211,7 @@ import {
   resolveConfiguredLostStageId,
   resolveConfiguredSaleStageId,
 } from "@/data/crm-funnels";
-import { E2E_POOL_NEGOTIATION } from "@/data/crm-e2e-fixtures";
+import { E2E_CRM_FUNNELS, E2E_POOL_NEGOTIATION } from "@/data/crm-e2e-fixtures";
 import { MOCK_NEGOTIATIONS } from "@/data/crm-mock-negotiations";
 import { isE2eMockAuth } from "@/lib/e2e";
 import type { CrmNegotiation, CrmNegotiationStatus, Customer } from "@/types/domain";
@@ -288,7 +288,7 @@ export default function Crm() {
   });
   const tenantFunnelsSaved = tenantCrmFunnelConfigQuery.data;
   const funnels = useMemo(
-    () => tenantFunnelsSaved ?? DEFAULT_CRM_FUNNELS,
+    () => isE2eMockAuth ? E2E_CRM_FUNNELS : tenantFunnelsSaved ?? DEFAULT_CRM_FUNNELS,
     [tenantFunnelsSaved],
   );
   const { data: collaborators = [] } = useTenantCollaborators({
@@ -549,7 +549,7 @@ export default function Crm() {
     });
 
     return persistedCards;
-  }, [customers, dbRecords, e2eAssigneeOverrides, funnelId, funnels, profileId, stageOverrides]);
+  }, [customers, dbRecords, e2eAssigneeOverrides, funnels, profileId, stageOverrides]);
 
   const attendants = useMemo(() => {
     if (isSupabaseConfigured) {
@@ -568,7 +568,7 @@ export default function Crm() {
       map.set(profileId, profile.nome);
     }
     return [...map.entries()].map(([id, name]) => ({ id, name }));
-  }, [collaborators, isSupabaseConfigured, profile?.nome, profileId]);
+  }, [collaborators, profile?.nome, profileId]);
 
   // Callbacks estáveis p/ o card memoizado do Kanban (DraggableNegotiationCard).
   const handleOpenCustomerCard = useCallback(
@@ -590,7 +590,7 @@ export default function Crm() {
         }));
     }
     return attendants;
-  }, [attendants, collaborators, isSupabaseConfigured]);
+  }, [attendants, collaborators]);
 
   const [funnelOpen, setFunnelOpen] = useState(false);
   const [filtersPopoverOpen, setFiltersPopoverOpen] = useState(false);
@@ -885,7 +885,6 @@ export default function Crm() {
     appliedOwner,
     creationDateFilter,
     funnelId,
-    isSupabaseConfigured,
     profileId,
     sourceNegotiations,
     statusFilter,
@@ -1854,6 +1853,7 @@ export default function Crm() {
       funnelId,
       funnels,
       pendingWinDrag,
+      profile?.role,
       profileId,
       queryClient,
       toast,

@@ -465,7 +465,7 @@ export default function Relatorios() {
     enabled: tab === "sla" && compare,
   });
   const lostReasonsQ = useLostReasons(funnelId, fromDate, toDate, { enabled: tab === "perdas" });
-  const lostReasons = lostReasonsQ.data ?? [];
+  const lostReasons = useMemo(() => lostReasonsQ.data ?? [], [lostReasonsQ.data]);
 
   const tasksReportQ = useCrmTasksReport(fromDate, toDate, { enabled: tab === "tarefas" });
   const { data: taskTemplates = [] } = useCrmTaskTemplates();
@@ -630,14 +630,14 @@ export default function Relatorios() {
     return [...map.values()].sort((a, b) => b.total - a.total);
   }, [tasksReport, taskCollaborators]);
 
-  const attendance = attendanceQ.data ?? [];
-  const funnelRows = funnelQ.data ?? [];
+  const attendance = useMemo(() => attendanceQ.data ?? [], [attendanceQ.data]);
+  const funnelRows = useMemo(() => funnelQ.data ?? [], [funnelQ.data]);
   const staleSummary = staleSummaryQ.data;
   const staleRows = staleQ.data ?? [];
   const crmSla = crmSlaQ.data;
-  const crmSellers = crmSellersQ.data ?? [];
-  const sellerSales = salesQ.data ?? [];
-  const prevAttendance = prevAttendanceQ.data ?? [];
+  const crmSellers = useMemo(() => crmSellersQ.data ?? [], [crmSellersQ.data]);
+  const sellerSales = useMemo(() => salesQ.data ?? [], [salesQ.data]);
+  const prevAttendance = useMemo(() => prevAttendanceQ.data ?? [], [prevAttendanceQ.data]);
   const prevSla = prevCrmSlaQ.data;
 
   const sortedFunnelRows = useMemo(

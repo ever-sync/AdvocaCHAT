@@ -300,7 +300,7 @@ export function ChatHeaderActions({
             onClick={() => void onClaimChatAndNegotiation()}
             disabled={claimBusy || !canEditInbox || !canEditCrm}
             className={cn(ICON_BTN, "bg-primary text-primary-foreground hover:bg-primary/90")}
-            aria-label="Assumir conversa e negócio"
+            aria-label="Assumir ambos: conversa e negócio"
             data-testid="inbox-claim-both"
           >
             <Hand className="h-4 w-4" />
