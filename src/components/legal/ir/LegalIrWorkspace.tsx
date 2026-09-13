@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,6 +20,7 @@ const IrFinancialWorkspace = lazy(
 );
 
 export default function LegalIrWorkspace(props: LegalOperationsProps) {
+  const [activeTab, setActiveTab] = useState("overview");
   const context = useQuery({
     queryKey: irKey(props, "context"),
     queryFn: () => getIrCaseContext(props.legalCase.id),
@@ -60,7 +61,7 @@ export default function LegalIrWorkspace(props: LegalOperationsProps) {
           {context.data.can_medical ? "autorizado" : "não autorizado"}
         </p>
       </OperationPanel>
-      <Tabs defaultValue="overview">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="max-w-full overflow-x-auto pb-1">
           <TabsList
             aria-label="Áreas da triagem de IR"
@@ -77,7 +78,7 @@ export default function LegalIrWorkspace(props: LegalOperationsProps) {
           </TabsList>
         </div>
         <TabsContent value="overview">
-          <IrCaseOverview {...shared} />
+          <IrCaseOverview {...shared} onNavigate={setActiveTab} />
         </TabsContent>
         <TabsContent value="income">
           <IrIncome {...shared} />

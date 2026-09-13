@@ -67,13 +67,19 @@ export function deriveIrFiscalOverview(data: IrDossierData): IrFiscalOverview {
     current.withheldCents += decimalCents(entry.withheld);
     byYear.set(entry.calendar_year, current);
   }
+  const latest = new Map<string, NonNullable<IrDossierData["cessations"]>[number]>();
+  for (const record of data.cessations ?? []) {
+    const previous = latest.get(record.source_id);
+    const order = (item: typeof record) => `${item.competence}:${item.observed_on}:${item.created_at}:${item.id}`;
+    if (!previous || order(record) > order(previous)) latest.set(record.source_id, record);
+  }
   return {
     years: [...byYear.entries()].sort(([a], [b]) => b - a).map(([year, totals]) => ({ year, ...totals })),
     entriesMissingPeriod: (data.taxEntries ?? []).filter((item) => !item.competence && !item.calendar_year).length,
     entriesMissingPayer: (data.taxEntries ?? []).filter((item) => !item.source_id).length,
     calculationsAwaitingReview: (data.calculations ?? []).filter((item) => ["incomplete", "draft", "in_review"].includes(item.status)).length,
     openClaims: (data.claims ?? []).filter((item) => !["granted", "denied", "closed"].includes(item.status)).length,
-    activeWithholdingChecks: (data.cessations ?? []).filter((item) => item.status !== "verified").length,
+    activeWithholdingChecks: [...latest.values()].filter((item) => item.status !== "verified").length,
   };
 }
 

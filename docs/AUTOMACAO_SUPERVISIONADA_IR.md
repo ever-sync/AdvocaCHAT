@@ -1,0 +1,28 @@
+# Automação supervisionada de IR
+
+## Entrega desta iteração
+
+A Visão geral deriva uma fila de providências dos dados acessíveis: checklist
+obrigatório, conferências pendentes/divergentes, lançamentos fiscais incompletos,
+cálculos para revisão e análise profissional desatualizada. Cada item tem chave
+estável e atalho para a etapa correspondente. Não cria tarefas persistentes nem
+envia mensagens; a fila é recalculada quando os dados são atualizados.
+
+Falhas de consulta suspendem a apresentação da fila e oferecem nova tentativa.
+Permissões atuais filtram as pendências, inclusive com cache já preenchido.
+O indicador de retenções considera a última competência por fonte, evitando
+contar como ativo um acompanhamento histórico já sucedido por cessação verificada.
+
+## Próximas entregas ainda não executadas
+
+- Conferência documental por OCR com fontes e divergências rastreáveis.
+- Execução persistente das rotinas, idempotência no servidor e histórico de execução.
+- Lembretes configuráveis com consentimento, templates e comprovantes de entrega.
+- Integrações de assinatura, cobrança e calendário com credenciais de homologação.
+- Monitoramento judicial contratado e preparação de protocolo com recibos.
+- Sugestão fundamentada de enquadramento e estratégia, com revisão profissional.
+- Tratamento de falhas dos provedores e reconciliação de resultados ambíguos.
+
+As porcentagens de automação mencionadas na conversa eram estimativas sem medição;
+não são indicadores comprovados. Aprovação técnica não homologa cálculo fiscal,
+estratégia jurídica, envio externo ou operação financeira.

@@ -1,3 +1,4 @@
+import { deriveIrAutomationActions, type IrAutomationAction } from "@/lib/legal-ir-automation";
 import { useState } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, Download, FileCheck2, Landmark, ListChecks, Route } from "lucide-react";
@@ -13,7 +14,7 @@ import { irCategoryAllowed, irKey, type IrPanelProps } from "./ir-ui";
 
 const LEVEL = { initial: "Cadastro inicial", attention: "Exige atenção", review: "Pronto para revisão", ready: "Organização completa" } as const;
 
-export function IrCaseOverview(props: IrPanelProps) {
+export function IrCaseOverview(props: IrPanelProps & { onNavigate?: (tab: IrAutomationAction["tab"]) => void }) {
   const { toast } = useToast();
   const [downloading, setDownloading] = useState(false);
   const [payers, incomes, evidence, reviews, checklist, assessments, taxEntries, calculations, claims, cessations] = useQueries({ queries: [
@@ -41,6 +42,7 @@ export function IrCaseOverview(props: IrPanelProps) {
     claims: props.ir.can_fiscal ? (claims.data ?? []) : [],
     cessations: props.ir.can_fiscal ? (cessations.data ?? []) : [],
   };
+  const actions = deriveIrAutomationActions(data);
   const readiness = deriveIrReadiness(data);
   const fiscal = deriveIrFiscalOverview(data);
   const queries = [payers, incomes, evidence, reviews, checklist, assessments, taxEntries, calculations, claims, cessations];
@@ -74,6 +76,9 @@ export function IrCaseOverview(props: IrPanelProps) {
   }
 
   return <div className="space-y-4">
+    <OperationPanel title="Fila de providências" description="Pendências identificadas automaticamente a partir dos registros acessíveis.">
+      {loading ? <p role="status">Atualizando pendências…</p> : failed ? <div role="alert"><p>Não foi possível conferir todas as pendências.</p><Button variant="outline" onClick={() => queries.forEach(query => { if (query.isEnabled) void query.refetch(); })}>Tentar novamente</Button></div> : actions.length ? <ul className="space-y-3">{actions.map(action => <li key={action.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3"><div className="min-w-0"><p className="font-medium break-words">{action.title}</p><p className="text-sm text-muted-foreground break-words">{action.detail}</p></div>{props.onNavigate ? <Button size="sm" variant="outline" onClick={() => props.onNavigate?.(action.tab)}>Abrir etapa</Button> : null}</li>)}</ul> : <p>Nenhuma pendência identificada nos dados acessíveis. A conclusão jurídica depende da revisão profissional.</p>}
+    </OperationPanel>
     <OperationPanel title="Visão de decisão do caso" description="Prontidão documental, divergências e próxima providência em uma única leitura." actions={<Button size="sm" variant="outline" onClick={() => void exportDossier()} disabled={downloading || loading || failed}><Download className="mr-2 h-4 w-4" aria-hidden />{downloading ? "Conferindo…" : "Baixar dossiê"}</Button>}>
       {failed ? <p className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">Parte dos indicadores não pôde ser carregada. Atualize antes de tomar uma decisão.</p> : null}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

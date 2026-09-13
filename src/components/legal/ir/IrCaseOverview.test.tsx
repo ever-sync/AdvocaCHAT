@@ -74,4 +74,11 @@ describe("visão consolidada de isenção de IR", () => {
     expect(screen.queryByText("IR retido informado: R$ 1.234,56")).not.toBeInTheDocument();
     expect(screen.queryByText("Panorama fiscal por ano")).not.toBeInTheDocument();
   });
+  it("abre a etapa indicada pela fila automática", async () => {
+    const onNavigate = vi.fn();
+    render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><IrCaseOverview {...props} onNavigate={onNavigate} /></QueryClientProvider>);
+    fireEvent.click(await screen.findByRole("button", { name: "Abrir etapa" }));
+    expect(onNavigate).toHaveBeenCalledWith("checklist");
+  });
+
 });
