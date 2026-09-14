@@ -13,7 +13,7 @@ const context: IrCaseContext = {
 };
 const api = vi.hoisted(() => ({
   getIrCaseContext: vi.fn(), listIrPayers: vi.fn(), listIrIncomeSources: vi.fn(), listIrEvidenceEvents: vi.fn(),
-  listIrDocumentReviews: vi.fn(), listIrChecklistItems: vi.fn(), listIrAssessmentVersions: vi.fn(),
+  listIrDocumentReviews: vi.fn(), listIrChecklistItems: vi.fn(), listIrAssessmentVersions: vi.fn(), syncIrAutomationTasks: vi.fn(),
 }));
 const financialApi = vi.hoisted(() => ({
   listIrTaxEntries: vi.fn(), listIrCalculationVersions: vi.fn(), listIrClaims: vi.fn(), listIrCessationRecords: vi.fn(),
@@ -41,6 +41,7 @@ describe("visão consolidada de isenção de IR", () => {
     api.listIrDocumentReviews.mockResolvedValue([]);
     api.listIrChecklistItems.mockResolvedValue([{ id: "item", category: "medical", title: "Laudo", required: true }]);
     api.listIrAssessmentVersions.mockResolvedValue([{ id: "assessment", version_number: 1, status: "approved", summary: "Revisada" }]);
+    api.syncIrAutomationTasks.mockResolvedValue({ created: 1, resolved: 0, dismissed: 0, active: 1 });
     financialApi.listIrTaxEntries.mockResolvedValue([{ id: "entry", calendar_year: 2025, competence: "2025-01", source_id: "payer", withheld: "1234.56" }]);
     financialApi.listIrCalculationVersions.mockResolvedValue([{ id: "calculation", status: "approved" }]);
     financialApi.listIrClaims.mockResolvedValue([{ id: "claim", status: "awaiting" }]);
@@ -79,6 +80,14 @@ describe("visão consolidada de isenção de IR", () => {
     render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><IrCaseOverview {...props} onNavigate={onNavigate} /></QueryClientProvider>);
     fireEvent.click(await screen.findByRole("button", { name: "Abrir etapa" }));
     expect(onNavigate).toHaveBeenCalledWith("checklist");
+  });
+
+  it("persiste a fila somente pela ação do responsável", async () => {
+    render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><IrCaseOverview {...props} /></QueryClientProvider>);
+    const button = await screen.findByRole("button", { name: "Sincronizar tarefas" });
+    await waitFor(() => expect(button).toBeEnabled());
+    fireEvent.click(button);
+    await waitFor(() => expect(api.syncIrAutomationTasks).toHaveBeenCalledWith("case"));
   });
 
 });

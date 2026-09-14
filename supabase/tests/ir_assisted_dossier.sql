@@ -310,6 +310,22 @@ reset role;
 set local role authenticated;
 select pg_temp.login('owner');
 select pg_temp.assert_true(not exists(select 1 from public.legal_case_events where case_id=pg_temp.lid('case') and (description like '%Synthetic confidential onset%' or metadata::text like '%Synthetic physician%' or metadata::text like '%Additional verified fiscal fact%')),'shared audit excludes medical and fiscal body data');
+
+-- The lawyer explicitly turns derived IR suggestions into persistent tasks.
+select pg_temp.assert_true((public.legal_ir_sync_automation_tasks(pg_temp.lid('case'))->>'created')::integer>0,'owner creates persistent tasks from current IR pendencies');
+select pg_temp.assert_true((public.legal_ir_sync_automation_tasks(pg_temp.lid('case'))->>'created')::integer=0,'repeated synchronization is idempotent');
+select public.legal_save_case_task(pg_temp.lid('case'),' {"status":"completed"}'::jsonb,(
+ select task_id from public.legal_ir_automation_task_links where case_id=pg_temp.lid('case') and state='active' order by opened_at,id limit 1
+));
+select pg_temp.assert_true((public.legal_ir_sync_automation_tasks(pg_temp.lid('case'))->>'dismissed')::integer=1,'manual completion dismisses its automatic link');
+select pg_temp.assert_true((public.legal_ir_sync_automation_tasks(pg_temp.lid('case'))->>'created')::integer=0,'manual completion is not reopened while the source remains pending');
+select pg_temp.login('member');
+select pg_temp.expect_error($q$select public.legal_ir_sync_automation_tasks(pg_temp.lid('case'))$q$,'42501','only the responsible lawyer synchronizes the task queue');
+select pg_temp.assert_true(not exists(
+ select 1 from public.legal_case_tasks t join public.legal_ir_automation_task_links l on l.task_id=t.id
+ where l.case_id=pg_temp.lid('case') and l.category in('fiscal','combined')
+),'task list hides automatic fiscal and combined work after fiscal access revocation');
+select pg_temp.login('owner');
 select public.legal_set_workspace_enabled(false);
 select pg_temp.assert_true((select count(*) from public.ir_payers)=0 and (select count(*) from public.ir_rule_versions)=0,'disabled legal workspace hides fiscal data and catalog');
 select pg_temp.expect_error($q$select public.ir_create_rule_version('{"rule_key":"disabled"}')$q$,'42501','disabled workspace cannot author catalog');

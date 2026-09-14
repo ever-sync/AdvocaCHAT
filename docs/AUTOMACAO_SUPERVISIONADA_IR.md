@@ -5,8 +5,11 @@
 A Visão geral deriva uma fila de providências dos dados acessíveis: checklist
 obrigatório, conferências pendentes/divergentes, lançamentos fiscais incompletos,
 cálculos para revisão e análise profissional desatualizada. Cada item tem chave
-estável e atalho para a etapa correspondente. Não cria tarefas persistentes nem
-envia mensagens; a fila é recalculada quando os dados são atualizados.
+estável e atalho para a etapa correspondente. A fila é recalculada quando os
+dados são atualizados. O responsável pode sincronizá-la com as tarefas
+persistentes do caso. A operação é transacional e idempotente: repetições não
+duplicam tarefas, pendências resolvidas encerram somente tarefas criadas pela
+automação e conclusões/cancelamentos manuais não são reabertos.
 
 Falhas de consulta suspendem a apresentação da fila e oferecem nova tentativa.
 Permissões atuais filtram as pendências, inclusive com cache já preenchido.
@@ -16,7 +19,8 @@ contar como ativo um acompanhamento histórico já sucedido por cessação verif
 ## Próximas entregas ainda não executadas
 
 - Conferência documental por OCR com fontes e divergências rastreáveis.
-- Execução persistente das rotinas, idempotência no servidor e histórico de execução.
+- Execução periódica no servidor; a persistência idempotente já pode ser acionada
+  pelo responsável na Visão geral.
 - Lembretes configuráveis com consentimento, templates e comprovantes de entrega.
 - Integrações de assinatura, cobrança e calendário com credenciais de homologação.
 - Monitoramento judicial contratado e preparação de protocolo com recibos.

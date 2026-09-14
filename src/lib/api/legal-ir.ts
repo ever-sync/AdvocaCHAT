@@ -14,6 +14,7 @@ async function list<T>(table: string, caseId?: string): Promise<T[]> {
   return (data ?? []) as T[];
 }
 export const getIrCaseContext = (caseId: string) => rpc<IrCaseContext>("ir_get_case_context", { p_case_id: caseId });
+export const syncIrAutomationTasks = (caseId: string) => rpc<{ created: number; resolved: number; dismissed: number; active: number }>("legal_ir_sync_automation_tasks", { p_case_id: caseId });
 export const listIrPayers = (caseId: string) => list<IrPayer>("ir_payers", caseId);
 export const saveIrPayer = (caseId: string, payload: IrPayerPayload, id?: string) => rpc<IrPayer>("ir_save_payer", { p_case_id: caseId, p_payload: payload, p_payer_id: id ?? null });
 export const listIrIncomeSources = (caseId: string) => list<IrIncomeSource>("ir_income_sources", caseId);

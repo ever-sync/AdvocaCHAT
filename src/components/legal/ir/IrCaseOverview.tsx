@@ -1,14 +1,15 @@
 import { deriveIrAutomationActions, type IrAutomationAction } from "@/lib/legal-ir-automation";
 import { useState } from "react";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, Download, FileCheck2, Landmark, ListChecks, Route } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { listIrAssessmentVersions, listIrChecklistItems, listIrDocumentReviews, listIrEvidenceEvents, listIrIncomeSources, listIrPayers, getIrCaseContext } from "@/lib/api/legal-ir";
+import { listIrAssessmentVersions, listIrChecklistItems, listIrDocumentReviews, listIrEvidenceEvents, listIrIncomeSources, listIrPayers, getIrCaseContext, syncIrAutomationTasks } from "@/lib/api/legal-ir";
 import { listIrCalculationVersions, listIrCessationRecords, listIrClaims, listIrTaxEntries } from "@/lib/api/legal-ir-calculations";
 import { deriveIrFiscalOverview, deriveIrReadiness, downloadIrCaseDossier, formatIrCents, type IrDossierData } from "@/lib/legal-ir-dossier";
 import { OperationPanel } from "../operations/OperationPanel";
+import { operationsKey } from "../operations/operations-ui";
 import { legalErrorMessage } from "../legal-ui";
 import { irCategoryAllowed, irKey, type IrPanelProps } from "./ir-ui";
 
@@ -16,7 +17,9 @@ const LEVEL = { initial: "Cadastro inicial", attention: "Exige atenção", revie
 
 export function IrCaseOverview(props: IrPanelProps & { onNavigate?: (tab: IrAutomationAction["tab"]) => void }) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [downloading, setDownloading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [payers, incomes, evidence, reviews, checklist, assessments, taxEntries, calculations, claims, cessations] = useQueries({ queries: [
     { queryKey: irKey(props, "payers"), queryFn: () => listIrPayers(props.legalCase.id), enabled: props.ir.can_fiscal },
     { queryKey: irKey(props, "income"), queryFn: () => listIrIncomeSources(props.legalCase.id), enabled: props.ir.can_fiscal },
@@ -75,8 +78,21 @@ export function IrCaseOverview(props: IrPanelProps & { onNavigate?: (tab: IrAuto
     }
   }
 
+  async function syncTasks() {
+    setSyncing(true);
+    try {
+      const result = await syncIrAutomationTasks(props.legalCase.id);
+      await queryClient.invalidateQueries({ queryKey: operationsKey(props, "tasks") });
+      toast({ title: "Tarefas sincronizadas", description: `${result.created} criada(s), ${result.resolved} encerrada(s) e ${result.active} ativa(s).` });
+    } catch (error) {
+      toast({ title: "Não foi possível sincronizar", description: legalErrorMessage(error), variant: "destructive" });
+    } finally {
+      setSyncing(false);
+    }
+  }
+
   return <div className="space-y-4">
-    <OperationPanel title="Fila de providências" description="Pendências identificadas automaticamente a partir dos registros acessíveis.">
+    <OperationPanel title="Fila de providências" description="Pendências identificadas automaticamente a partir dos registros acessíveis." actions={props.canEdit && props.legalCase.owner_id === props.workspace.user_id ? <Button size="sm" onClick={() => void syncTasks()} disabled={syncing || loading || failed}>{syncing ? "Sincronizando…" : "Sincronizar tarefas"}</Button> : null}>
       {loading ? <p role="status">Atualizando pendências…</p> : failed ? <div role="alert"><p>Não foi possível conferir todas as pendências.</p><Button variant="outline" onClick={() => queries.forEach(query => { if (query.isEnabled) void query.refetch(); })}>Tentar novamente</Button></div> : actions.length ? <ul className="space-y-3">{actions.map(action => <li key={action.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3"><div className="min-w-0"><p className="font-medium break-words">{action.title}</p><p className="text-sm text-muted-foreground break-words">{action.detail}</p></div>{props.onNavigate ? <Button size="sm" variant="outline" onClick={() => props.onNavigate?.(action.tab)}>Abrir etapa</Button> : null}</li>)}</ul> : <p>Nenhuma pendência identificada nos dados acessíveis. A conclusão jurídica depende da revisão profissional.</p>}
     </OperationPanel>
     <OperationPanel title="Visão de decisão do caso" description="Prontidão documental, divergências e próxima providência em uma única leitura." actions={<Button size="sm" variant="outline" onClick={() => void exportDossier()} disabled={downloading || loading || failed}><Download className="mr-2 h-4 w-4" aria-hidden />{downloading ? "Conferindo…" : "Baixar dossiê"}</Button>}>
