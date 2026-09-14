@@ -11,6 +11,12 @@ persistentes do caso. A operação é transacional e idempotente: repetições n
 duplicam tarefas, pendências resolvidas encerram somente tarefas criadas pela
 automação e conclusões/cancelamentos manuais não são reabertos.
 
+Na conferência médica, o texto OCR atual é analisado por regras determinísticas
+e apresenta indícios favoráveis, sinais de outro tipo documental, lacunas e as
+páginas de origem. A sugestão não é gravada como conclusão. O responsável deve
+confirmar se o original é laudo/relatório, atestado, exame, receita ou outro
+documento antes de registrar a revisão.
+
 Falhas de consulta suspendem a apresentação da fila e oferecem nova tentativa.
 Permissões atuais filtram as pendências, inclusive com cache já preenchido.
 O indicador de retenções considera a última competência por fonte, evitando
@@ -18,7 +24,7 @@ contar como ativo um acompanhamento histórico já sucedido por cessação verif
 
 ## Próximas entregas ainda não executadas
 
-- Conferência documental por OCR com fontes e divergências rastreáveis.
+- Piloto profissional da classificação documental em amostra autorizada.
 - Execução periódica no servidor; a persistência idempotente já pode ser acionada
   pelo responsável na Visão geral.
 - Lembretes configuráveis com consentimento, templates e comprovantes de entrega.

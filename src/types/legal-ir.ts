@@ -23,7 +23,8 @@ export interface IrEvidencePayload { category: LegalDocumentCategory; event_type
 export interface IrEvidenceEvent extends IrCaseRecord, IrEvidencePayload { event_date: string | null; document_id: string | null; source_page: number | null; supersedes_id: string | null; created_by: string }
 export type IrDocumentCheck = "present" | "absent" | "unclear" | "not_applicable";
 export type IrDocumentChecks = Partial<Record<"identity" | "issuer" | "signature" | "date" | "readability" | "source", IrDocumentCheck>>;
-export interface IrDocumentReviewMetadata { issuer_name?: string; professional_registration?: string; document_nature?: "official" | "private" | "unknown"; issued_on?: string | null; reported_onset_on?: string | null }
+export type IrConfirmedDocumentType = "medical_report" | "medical_certificate" | "exam" | "prescription" | "other" | "unknown";
+export interface IrDocumentReviewMetadata { issuer_name?: string; professional_registration?: string; document_nature?: "official" | "private" | "unknown"; confirmed_document_type?: IrConfirmedDocumentType; issued_on?: string | null; reported_onset_on?: string | null }
 export interface IrDocumentReview extends IrCaseRecord { document_id: string; category: LegalDocumentCategory; checks: IrDocumentChecks; metadata: IrDocumentReviewMetadata; result: "sufficient" | "pending" | "inconsistent"; review_note: string; reviewer_id: string }
 export interface IrOfficialSource { url: string; title?: string; checked_on?: string; version_note?: string }
 export interface IrRulePayload { rule_key: string; title: string; scope: Record<string, IrJson>; criteria: string; sources: IrOfficialSource[] }

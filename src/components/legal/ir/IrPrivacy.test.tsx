@@ -12,6 +12,12 @@ import { IrChecklists } from "./IrChecklists";
 import { IrAssessments } from "./IrAssessments";
 import { irKey, irWorkspaceKey, type IrPanelProps } from "./ir-ui";
 
+const assistanceApi = vi.hoisted(() => ({
+  listAssistance: vi.fn(),
+  listAssistanceTextPages: vi.fn(),
+  readAssistanceTextPage: vi.fn(),
+}));
+
 vi.mock("@/lib/api/legal", () => ({
   listLegalDocuments: vi.fn(),
   downloadLegalDocument: vi.fn(),
@@ -19,6 +25,7 @@ vi.mock("@/lib/api/legal", () => ({
 vi.mock("@/lib/api/legal-operations", () => ({
   listLegalDocumentRequests: vi.fn(),
 }));
+vi.mock("@/lib/api/legal-assistance", () => assistanceApi);
 vi.mock("@/lib/api/legal-ir", () => ({
   listIrDocumentReviews: vi.fn(),
   listIrEvidenceEvents: vi.fn(),
@@ -118,6 +125,72 @@ it("hides cached medical evidence and clears an open protected draft when access
     screen.queryByDisplayValue("Rascunho médico privado"),
   ).not.toBeInTheDocument();
   expect(queryClient.getQueryData(irKey(initial, "documents"))).toHaveLength(1);
+});
+
+it("mostra os indícios por página e exige que o advogado confirme o tipo", async () => {
+  assistanceApi.listAssistance.mockResolvedValue({
+    items: [
+      {
+        id: "version",
+        document_id: "doc",
+        is_current: true,
+        state: "approved",
+      },
+    ],
+    has_more: false,
+  });
+  assistanceApi.listAssistanceTextPages.mockResolvedValue({
+    items: [{ page_number: 1 }, { page_number: 2 }],
+    has_more: false,
+  });
+  assistanceApi.readAssistanceTextPage
+    .mockResolvedValueOnce({
+      page: {
+        page_number: 1,
+        page_status: "recognized",
+        text: "Laudo médico. Paciente identificado. Histórico clínico.",
+      },
+    })
+    .mockResolvedValueOnce({
+      page: {
+        page_number: 2,
+        page_status: "recognized",
+        text: "Conclusão. CRM/SP 123456. Assinado digitalmente em 10/09/2026.",
+      },
+    });
+  const queryClient = client();
+  const ownerProps = {
+    ...initial,
+    workspace: { ...initial.workspace, user_id: "owner" },
+  };
+  queryClient.setQueryData(irKey(ownerProps, "documents"), [
+    {
+      id: "doc",
+      case_id: "case",
+      category: "medical",
+      display_name: "Documento médico",
+    },
+  ]);
+  queryClient.setQueryData(irKey(ownerProps, "evidence"), []);
+  queryClient.setQueryData(irKey(ownerProps, "document-reviews"), []);
+  render(wrap(queryClient, <IrEvidence {...ownerProps} />));
+  fireEvent.click(screen.getByRole("button", { name: /Conferir documento/ }));
+  expect(
+    await screen.findByText(/Provável laudo ou relatório médico/),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(/Registro CRM identificável · página\(s\) 2/),
+  ).toBeInTheDocument();
+  const submit = screen.getByRole("button", { name: "Registrar conferência" });
+  expect(submit).toBeDisabled();
+  fireEvent.change(screen.getByLabelText("Tipo confirmado pelo advogado"), {
+    target: { value: "medical_report" },
+  });
+  fireEvent.change(
+    screen.getByLabelText("Fundamento da conferência e pendências"),
+    { target: { value: "Original conferido pelo responsável" } },
+  );
+  expect(submit).toBeEnabled();
 });
 
 it("hides cached restricted checklist items, payer names and open linking dialog after revocation", async () => {

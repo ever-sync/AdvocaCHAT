@@ -12,6 +12,12 @@ import {
   recordIrDocumentReview,
 } from "@/lib/api/legal-ir";
 import { downloadLegalDocument, listLegalDocuments } from "@/lib/api/legal";
+import {
+  listAssistance,
+  listAssistanceTextPages,
+  readAssistanceTextPage,
+} from "@/lib/api/legal-assistance";
+import { analyzeMedicalDocument } from "@/lib/legal-medical-document-analysis";
 import type {
   IrDocumentChecks,
   IrDocumentReview,
@@ -322,8 +328,41 @@ function DocumentReviewDialog({
     issuer_name: "",
     professional_registration: "",
     document_nature: "unknown",
+    confirmed_document_type: "unknown",
     issued_on: null,
     reported_onset_on: null,
+  });
+  const assistedAnalysis = useQuery({
+    queryKey: ["ir-medical-document-analysis", document.case_id, document.id],
+    enabled: document.category === "medical",
+    retry: false,
+    queryFn: async () => {
+      const versions = await listAssistance(
+        document.case_id,
+        "text_versions",
+        50,
+      );
+      const version = versions.items.find(
+        (item) => item.document_id === document.id && item.is_current,
+      );
+      if (!version) return analyzeMedicalDocument([]);
+      const pageList = await listAssistanceTextPages(version.id, 50);
+      const pages = await Promise.all(
+        pageList.items.map((item) =>
+          readAssistanceTextPage(version.id, item.page_number),
+        ),
+      );
+      const result = analyzeMedicalDocument(
+        pages.map(({ page }) => ({
+          page: page.page_number,
+          text: page.text,
+          status: page.page_status,
+        })),
+      );
+      result.suggestedChecks.source =
+        version.state === "approved" ? "present" : "unclear";
+      return result;
+    },
   });
   const action = useLegalAction();
   async function save(event: FormEvent) {
@@ -356,6 +395,64 @@ function DocumentReviewDialog({
           Registre o que consta no arquivo e a avaliação do responsável. A data
           de emissão não define validade automática do laudo.
         </p>
+        {document.category === "medical" ? (
+          <div className="space-y-3 rounded-lg border bg-muted/20 p-4">
+            <div>
+              <p className="font-medium">Análise assistida do texto</p>
+              <p className="text-sm text-muted-foreground">
+                A sugestão localiza indícios no OCR; somente sua confirmação
+                define o tipo registrado.
+              </p>
+            </div>
+            {assistedAnalysis.isPending ? (
+              <p role="status" className="text-sm">
+                Analisando texto autorizado…
+              </p>
+            ) : assistedAnalysis.error ? (
+              <p role="alert" className="text-sm text-destructive">
+                Não foi possível analisar o texto OCR atual.
+              </p>
+            ) : assistedAnalysis.data ? (
+              <>
+                <p className="text-sm font-medium">
+                  {assistedAnalysis.data.summary}
+                </p>
+                {assistedAnalysis.data.signals.length ? (
+                  <ul className="space-y-1 text-sm">
+                    {assistedAnalysis.data.signals.map((signal) => (
+                      <li key={signal.key}>
+                        {signal.kind === "support" ? "Encontrado" : "Atenção"}:{" "}
+                        {signal.label} · página(s) {signal.pages.join(", ")}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {assistedAnalysis.data.missing.length ? (
+                  <p className="text-sm text-muted-foreground">
+                    Não localizado: {assistedAnalysis.data.missing.join("; ")}.
+                  </p>
+                ) : null}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setChecks({
+                      ...checks,
+                      ...assistedAnalysis.data?.suggestedChecks,
+                    });
+                    if (!note.trim())
+                      setNote(
+                        `Análise assistida: ${assistedAnalysis.data?.summary} Conferir o arquivo original e registrar divergências antes da conclusão.`,
+                      );
+                  }}
+                >
+                  Usar como ponto de partida
+                </Button>
+              </>
+            ) : null}
+          </div>
+        ) : null}
         <div className="grid gap-3 sm:grid-cols-2">
           {Object.entries(DOCUMENT_CHECKS).map(([key, label]) => (
             <LegalField key={key} label={label}>
@@ -427,6 +524,37 @@ function DocumentReviewDialog({
             )}
           </LegalField>
         </div>
+        {document.category === "medical" ? (
+          <LegalField
+            label="Tipo confirmado pelo advogado"
+            hint="A sugestão do OCR não preenche esta decisão."
+          >
+            {(id) => (
+              <select
+                id={id}
+                required
+                className={selectClassName}
+                value={metadata.confirmed_document_type ?? "unknown"}
+                onChange={(event) =>
+                  setMetadata({
+                    ...metadata,
+                    confirmed_document_type: event.target
+                      .value as IrDocumentReviewMetadata["confirmed_document_type"],
+                  })
+                }
+              >
+                <option value="unknown">Ainda não confirmado</option>
+                <option value="medical_report">
+                  Laudo ou relatório médico
+                </option>
+                <option value="medical_certificate">Atestado médico</option>
+                <option value="exam">Exame ou resultado</option>
+                <option value="prescription">Receita ou prescrição</option>
+                <option value="other">Outro documento</option>
+              </select>
+            )}
+          </LegalField>
+        ) : null}
         <div className="grid gap-3 sm:grid-cols-2">
           <LegalField label="Emissão indicada no documento">
             {(id) => (
@@ -500,7 +628,15 @@ function DocumentReviewDialog({
           <Button type="button" variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={action.pending || !note.trim()}>
+          <Button
+            type="submit"
+            disabled={
+              action.pending ||
+              !note.trim() ||
+              (document.category === "medical" &&
+                metadata.confirmed_document_type === "unknown")
+            }
+          >
             Registrar conferência
           </Button>
         </DialogFooter>
@@ -719,6 +855,24 @@ export function IrEvidence(props: IrPanelProps) {
                             ? "Particular"
                             : "Ainda não confirmada"}
                       </p>
+                      {document.category === "medical" ? (
+                        <p>
+                          Tipo confirmado:{" "}
+                          {
+                            {
+                              medical_report: "Laudo ou relatório médico",
+                              medical_certificate: "Atestado médico",
+                              exam: "Exame ou resultado",
+                              prescription: "Receita ou prescrição",
+                              other: "Outro documento",
+                              unknown: "Ainda não confirmado",
+                            }[
+                              review.metadata.confirmed_document_type ??
+                                "unknown"
+                            ]
+                          }
+                        </p>
+                      ) : null}
                       <p>
                         Emissão indicada:{" "}
                         {review.metadata.issued_on
