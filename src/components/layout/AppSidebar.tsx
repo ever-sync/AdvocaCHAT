@@ -175,7 +175,7 @@ export function AppSidebar() {
       const saved = localStorage.getItem("advocachat:sidebar-expanded");
       if (saved !== null) return saved === "true";
     } catch { /* Storage may be unavailable in private sessions. */ }
-    return window.matchMedia("(min-width: 1280px)").matches;
+    return false;
   });
   function toggleSidebar() {
     const next = !expanded;
@@ -258,7 +258,7 @@ export function AppSidebar() {
   return (
     <aside
       data-expanded={expanded}
-      className={cn("group/sidebar relative z-40 hidden h-[100dvh] shrink-0 flex-col border-r border-sidebar-border bg-sidebar py-3 text-sidebar-foreground md:flex", expanded ? "w-[208px]" : "w-[64px]")}
+      className={cn("app-rail group/sidebar relative z-40 hidden shrink-0 flex-col text-sidebar-foreground md:flex", expanded ? "w-[208px]" : "w-[64px]")}
       aria-label="Navegacao principal"
     >
       <NavLink to="/inbox" aria-label="AdvocaCHAT, início" className="mx-2 mb-4 flex h-11 shrink-0 items-center justify-center gap-2 rounded-md text-sidebar-foreground group-data-[expanded=true]/sidebar:justify-start group-data-[expanded=true]/sidebar:px-3"><Scale strokeWidth={1.5} className="h-6 w-6 shrink-0 text-sidebar-primary" aria-hidden /><span className="hidden text-base font-semibold tracking-tight group-data-[expanded=true]/sidebar:block">AdvocaCHAT</span></NavLink>

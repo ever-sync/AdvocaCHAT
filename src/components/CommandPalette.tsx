@@ -96,7 +96,12 @@ export function CommandPalette() {
       }
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    const openSearch = () => setOpen(true);
+    window.addEventListener("advocachat:open-search", openSearch);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("advocachat:open-search", openSearch);
+    };
   }, []);
 
   // Customers já estão em cache na app — reusamos a query existente sem refetch extra.

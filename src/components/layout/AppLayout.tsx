@@ -5,11 +5,12 @@ import { AppSidebar } from "./AppSidebar";
 import { CrmNotificationListener } from "./CrmNotificationListener";
 import { MobileNav } from "./MobileNav";
 import { TrialActivationGate } from "@/components/billing/TrialActivationGate";
+import { AppTopbar } from "./AppTopbar";
 
 export function AppLayout() {
   return (
     <CalculadoraProvider>
-      <div className="flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-background md:flex-row">
+      <div className="app-shell flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden md:flex-row">
         <AppSidebar />
         <CrmNotificationListener />
         <CommandPalette />
@@ -17,7 +18,8 @@ export function AppLayout() {
         <TrialActivationGate />
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <AppTopbar />
+          <div className="app-workspace flex min-h-0 flex-1 flex-col overflow-hidden">
             <Outlet />
           </div>
         </div>
