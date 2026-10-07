@@ -7,6 +7,11 @@ aprovadas na conversa e 25 funcionalidades específicas para escritórios que at
 com isenção de Imposto de Renda. As fases, estimativas e metas são propostas de
 planejamento; funcionalidades futuras não estão implementadas por constarem aqui.
 
+O fluxo executável de análise documental, cálculo, honorários, contrato, assinatura,
+comunicação e cobrança está detalhado no
+[`PLANO_OPERACIONAL_DOCUMENTOS_CONTRATOS_HONORARIOS.md`](PLANO_OPERACIONAL_DOCUMENTOS_CONTRATOS_HONORARIOS.md),
+incluindo prevenção de falhas, reconciliação e critérios de liberação.
+
 ## 1. Objetivo e recorte inicial
 
 Construir uma plataforma em que o escritório acompanhe cada cliente, caso,
