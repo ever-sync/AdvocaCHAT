@@ -9,6 +9,7 @@ import {
   findWebhook,
   resolveConnectionConfig,
   resolveInstanceStatus,
+  resolveInstanceAvatarUrl,
   resolvePhoneNumber,
   resolveQrCode,
   setWebhook,
@@ -102,6 +103,7 @@ Deno.serve(async (request) => {
       .from("whatsapp_instances")
       .update({
         phone_number: phoneNumber,
+        avatar_url: resolveInstanceAvatarUrl(connectionState),
         status,
         last_qr: qr,
         last_sync_at: new Date().toISOString(),
@@ -109,7 +111,7 @@ Deno.serve(async (request) => {
       })
       .eq("id", instance.id)
       .select(
-        "id, display_name, uazapi_instance_name, uazapi_base_url, phone_number, status, is_default, last_qr, last_sync_at, last_error, created_at",
+        "id, display_name, uazapi_instance_name, uazapi_base_url, phone_number, avatar_url, status, is_default, last_qr, last_sync_at, last_error, created_at",
       )
       .single();
 

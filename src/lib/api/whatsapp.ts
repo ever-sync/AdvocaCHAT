@@ -106,6 +106,7 @@ type InstanceRow = {
   meta_page_id?: string | null;
   meta_ig_user_id?: string | null;
   phone_number: string | null;
+  avatar_url?: string | null;
   status: WhatsappInstance["status"];
   is_default: boolean;
   last_qr: string | null;
@@ -188,6 +189,7 @@ function mapInstance(row: InstanceRow): WhatsappInstance {
     metaPageId: row.meta_page_id ?? null,
     metaIgUserId: row.meta_ig_user_id ?? null,
     phoneNumber: row.phone_number,
+    avatarUrl: row.avatar_url ?? null,
     status: row.status,
     isDefault: row.is_default,
     lastQr: row.last_qr,
@@ -315,7 +317,7 @@ export async function listWhatsappInstances() {
   const supabase = requireSupabase();
   const { data, error } = await supabase
     .from("whatsapp_instances")
-    .select("id, display_name, uazapi_instance_name, uazapi_base_url, provider, meta_page_id, meta_ig_user_id, phone_number, status, is_default, last_qr, last_sync_at, last_error, archived_at, created_at, ai_enabled")
+    .select("id, display_name, uazapi_instance_name, uazapi_base_url, provider, meta_page_id, meta_ig_user_id, phone_number, avatar_url, status, is_default, last_qr, last_sync_at, last_error, archived_at, created_at, ai_enabled")
     .eq("tenant_id", tenantId)
     .is("archived_at", null)
     .order("is_default", { ascending: false })

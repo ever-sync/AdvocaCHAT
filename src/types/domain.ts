@@ -686,6 +686,7 @@ export interface WhatsappInstance {
   metaPageId?: string | null;
   metaIgUserId?: string | null;
   phoneNumber?: string | null;
+  avatarUrl?: string | null;
   status: WhatsappInstanceStatus;
   isDefault: boolean;
   lastQr?: string | null;

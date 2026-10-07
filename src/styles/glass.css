@@ -32,6 +32,15 @@
   .app-topbar-link:last-child { margin-right: auto; }
   .app-topbar-link:hover { background: var(--glass-fill); }
   .app-topbar-link[aria-current="page"] { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+  .app-topbar-channels { display: flex; flex-shrink: 0; align-items: center; gap: 10px; }
+  .app-topbar-channels-label { font-size: 11px; font-weight: 600; color: hsl(var(--muted-foreground)); text-transform: uppercase; letter-spacing: .08em; }
+  .app-topbar-channel-stack { display: flex; align-items: center; min-height: 42px; }
+  .app-topbar-channel-avatar { position: relative; display: inline-flex; margin-left: -8px; border-radius: 999px; }
+  .app-topbar-channel-avatar:first-child { margin-left: 0; }
+  .app-topbar-channel-avatar:hover { z-index: 2; transform: translateY(-1px); }
+  .app-topbar-channel-online { position: absolute; right: 1px; bottom: 1px; width: 10px; height: 10px; border: 2px solid hsl(var(--background)); border-radius: 999px; background: hsl(142 71% 45%); }
+  .app-topbar-channel-more { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-left: -8px; border: 2px solid hsl(var(--background)); border-radius: 999px; background: hsl(var(--muted)); font-size: 11px; font-weight: 700; }
+  .app-topbar-channels-empty { font-size: 12px; color: hsl(var(--muted-foreground)); white-space: nowrap; }
   .app-round-action { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--glass-edge); background: var(--glass-fill); }
   .app-round-action:hover { background: hsl(var(--accent)); }
   .app-rail { background: transparent; border: 0; height: 100%; padding-top: 0; }
@@ -65,6 +74,9 @@
   .app-topbar-link { padding: 12px; }
   .app-topbar-brand { font-size: 19px; }
   .app-topbar-brand span { display: none; }
+  .app-topbar-channels-label { display: none; }
+  .app-topbar-channels-empty { display: none; }
+  .app-topbar-channel-stack > :nth-child(n+5):not(.app-topbar-channel-more) { display: none; }
 }
 @media (max-width: 767px) {
   .app-shell { padding: 0; gap: 0; }

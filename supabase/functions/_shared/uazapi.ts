@@ -397,6 +397,29 @@ export function resolvePhoneNumber(
   );
 }
 
+/** Foto do perfil comercial retornada pelas variantes v1/v2 do provedor. */
+export function resolveInstanceAvatarUrl(connectionState: Record<string, unknown>) {
+  const payload = connectionState as Record<string, unknown> & {
+    instance?: Record<string, unknown>;
+    status?: Record<string, unknown>;
+  };
+  const candidate =
+    payload.instance?.profilePicUrl ??
+    payload.instance?.profilePictureUrl ??
+    payload.instance?.profilePicture ??
+    payload.instance?.picture ??
+    payload.status?.profilePicUrl ??
+    payload.status?.profilePictureUrl ??
+    payload.profilePicUrl ??
+    payload.profilePictureUrl ??
+    payload.picture ??
+    null;
+
+  return typeof candidate === "string" && /^https?:\/\//i.test(candidate.trim())
+    ? candidate.trim()
+    : null;
+}
+
 export function resolveQrCode(connectionState: Record<string, unknown>) {
   const payload = connectionState as Record<string, unknown> & {
     instance?: Record<string, unknown>;
