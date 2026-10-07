@@ -1,4 +1,4 @@
-import { ChevronDown, ListFilter, Search, Smartphone, SquarePen, Tag, Trash2, X } from "lucide-react";
+import { CheckCheck, ChevronDown, Instagram, ListFilter, MessageCircle, Search, Tag, Trash2, X } from "lucide-react";
 import { useMemo, useRef, useState, type MouseEvent, type RefObject } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { INBOX_QUICK_FILTER_OPTIONS, inboxQuickFilterLabel } from "@/lib/inbox-quick-filters";
+import { inboxQuickFilterLabel } from "@/lib/inbox-quick-filters";
 import type { ChatTag, InboxChat, InboxListScope, InboxQuickFilter, UserRole, WhatsappInstance } from "@/types/domain";
 import { ConversationRow } from "./ConversationRow";
 
@@ -250,19 +250,14 @@ export function ConversationList({
   onPinChat,
   followupIndex,
 }: ConversationListProps) {
-  const [tagsPopoverOpen, setTagsPopoverOpen] = useState(false);
   const [filtersPanelOpen, setFiltersPanelOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(Boolean(search));
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ chatId: string; x: number; y: number } | null>(null);
   const activeTagCount = selectedTagIds.length;
   const selectedChatCount = selectedChatIds.length;
   const selectionMode = selectedChatCount > 0;
   const selectedChatSet = useMemo(() => new Set(selectedChatIds), [selectedChatIds]);
-  const tagFilterLabel =
-    activeTagCount > 0
-      ? `${activeTagCount} etiqueta${activeTagCount > 1 ? "s" : ""}`
-      : "Etiquetas";
-
   const selectedInstanceLabel = useMemo(() => {
     if (selectedInstanceIds.length === 0) return "Todas";
     if (selectedInstanceIds.length === 1) {
@@ -272,6 +267,29 @@ export function ConversationList({
   }, [instances, selectedInstanceIds]);
 
   const listHeading = inboxQuickFilterLabel(quickFilter);
+  const unreadCount = useMemo(
+    () => chats.reduce((total, chat) => total + (chat.unreadCount ?? 0), 0),
+    [chats],
+  );
+  const whatsappInstanceIds = useMemo(
+    () => instances.filter((instance) => instance.provider !== "meta_instagram").map((instance) => instance.id),
+    [instances],
+  );
+  const instagramInstanceIds = useMemo(
+    () => instances.filter((instance) => instance.provider === "meta_instagram").map((instance) => instance.id),
+    [instances],
+  );
+
+  function selectInstanceGroup(instanceIds: string[]) {
+    onClearInstances();
+    instanceIds.forEach((instanceId) => onInstanceToggle(instanceId));
+  }
+
+  function isInstanceGroupSelected(instanceIds: string[]) {
+    return instanceIds.length > 0 &&
+      selectedInstanceIds.length === instanceIds.length &&
+      instanceIds.every((instanceId) => selectedInstanceIds.includes(instanceId));
+  }
 
   const hasCustomFilters =
     selectedInstanceIds.length > 0 ||
@@ -332,15 +350,35 @@ export function ConversationList({
 
   return (
     <aside className="flex h-full min-h-0 min-w-0 w-full max-w-full flex-col overflow-hidden border-r border-border bg-card md:max-w-[336px] lg:max-w-none">
-      <div className="shrink-0 border-b border-border px-2.5 pb-1.5 pt-2.5">
-        <div className="flex items-center justify-between gap-1.5 px-0.5">
-          <h1 className="truncate text-lg font-semibold leading-tight text-foreground">Conversas</h1>
-          <div className="flex shrink-0 items-center gap-0.5">
+      <div className="shrink-0 border-b border-border px-4 pb-3 pt-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <h1 className="truncate text-xl font-bold leading-tight text-foreground">Conversas</h1>
+            <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold tabular-nums text-rose-600">
+              {unreadCount}
+            </span>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              className={cn(
+                "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:bg-wchat-50 hover:text-foreground",
+                searchOpen && "border-primary/35 bg-primary/5 text-primary",
+              )}
+              aria-label="Pesquisar conversas"
+              aria-expanded={searchOpen}
+              onClick={() => {
+                setSearchOpen((open) => !open);
+                window.setTimeout(() => searchInputRef?.current?.focus(), 0);
+              }}
+            >
+              <Search className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden />
+            </button>
             <Popover open={filtersPanelOpen} onOpenChange={setFiltersPanelOpen}>
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-wchat-100 hover:text-foreground"
+                  className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:bg-wchat-50 hover:text-foreground"
                   aria-label="Filtros"
                 >
                   <ListFilter className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden />
@@ -382,13 +420,6 @@ export function ConversationList({
                 </div>
               </PopoverContent>
             </Popover>
-            <button
-              type="button"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-wchat-100 hover:text-foreground"
-              aria-label="Nova conversa"
-            >
-              <SquarePen className="h-[18px] w-[18px]" strokeWidth={1.75} />
-            </button>
           </div>
         </div>
 
@@ -404,8 +435,8 @@ export function ConversationList({
           </button>
         ) : null}
 
-        <div className="mt-2 space-y-2">
-          <div className="relative">
+        <div className="mt-3 space-y-2.5">
+          {searchOpen ? <div className="relative">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               ref={searchInputRef}
@@ -414,7 +445,7 @@ export function ConversationList({
               placeholder="Pesquisar"
               className="h-9 rounded-lg border-0 bg-wchat-50 pl-9 text-[13px] text-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary"
             />
-          </div>
+          </div> : null}
 
           <div className="flex items-center gap-1.5">
             <Popover>
@@ -423,13 +454,13 @@ export function ConversationList({
                   type="button"
                   aria-label="Filtrar por instâncias"
                   className={cn(
-                    "flex h-8 min-w-0 flex-1 items-center justify-between gap-2 rounded-lg bg-wchat-50 px-2.5 text-[11px] text-foreground transition-colors hover:bg-wchat-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary",
+                    "flex h-[52px] min-w-0 flex-1 items-center justify-between gap-2 rounded-2xl border border-border bg-card px-3.5 text-left text-xs text-foreground transition-colors hover:bg-wchat-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary",
                     selectedInstanceIds.length > 0 && "ring-1 ring-primary/35",
                   )}
                 >
-                  <span className="flex min-w-0 items-center gap-1.5 truncate">
-                    <Smartphone className="h-3 w-3 shrink-0 text-muted-foreground" />
-                    <span className="truncate">{selectedInstanceLabel}</span>
+                  <span className="flex min-w-0 flex-col truncate">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Canal selecionado</span>
+                    <span className="mt-0.5 truncate font-semibold">{selectedInstanceLabel}</span>
                   </span>
                   <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 </button>
@@ -466,83 +497,51 @@ export function ConversationList({
               </PopoverContent>
             </Popover>
 
-            <Popover open={tagsPopoverOpen} onOpenChange={setTagsPopoverOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className={cn(
-                    "flex h-8 flex-1 min-w-0 items-center justify-between gap-2 rounded-lg bg-wchat-50 px-2.5 text-[11px] text-foreground transition-colors hover:bg-wchat-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary",
-                    activeTagCount > 0 && "ring-1 ring-primary/35",
-                  )}
-                  aria-label="Filtrar por etiquetas"
-                >
-                  <span className="flex min-w-0 items-center gap-1.5 truncate">
-                    <Tag className="h-3 w-3 shrink-0 text-muted-foreground" />
-                    {tagFilterLabel}
-                  </span>
-                  <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                align="start"
-                className="w-[var(--radix-popover-trigger-width)] border-border bg-card p-1.5 text-foreground"
-              >
-                <ConversationTagFilterList
-                  tagsLoading={tagsLoading}
-                  availableTags={availableTags}
-                  selectedTagIds={selectedTagIds}
-                  onTagToggle={onTagToggle}
-                  onClearTags={onClearTags}
-                  onAfterClear={() => setTagsPopoverOpen(false)}
-                />
-              </PopoverContent>
-            </Popover>
           </div>
 
-          <div
-            className="relative -mx-1 px-1 before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:z-10 before:w-4 before:bg-gradient-to-r before:from-background before:to-transparent after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:z-10 after:w-4 after:bg-gradient-to-l after:from-background after:to-transparent"
-          >
-            <div
-              className="flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:thin] [-webkit-overflow-scrolling:touch]"
-              role="tablist"
-              aria-label="Filtros rápidos de conversas"
-            >
+          <div className="grid grid-cols-3 gap-1 rounded-2xl border border-border bg-wchat-50 p-1" role="group" aria-label="Filtrar por canal">
             <button
               type="button"
-              role="tab"
-              aria-selected={quickFilter === null}
-              onClick={() => onQuickFilterChange(null)}
+              aria-pressed={isInstanceGroupSelected(whatsappInstanceIds)}
+              onClick={() => selectInstanceGroup(whatsappInstanceIds)}
+              disabled={whatsappInstanceIds.length === 0}
               className={cn(
-                "shrink-0 rounded-full px-3 py-1 text-[11px] font-medium transition-colors",
-                quickFilter === null
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "bg-wchat-50 text-muted-foreground hover:bg-wchat-100 hover:text-foreground",
+                "flex h-9 items-center justify-center rounded-xl transition-colors disabled:opacity-35",
+                isInstanceGroupSelected(whatsappInstanceIds) ? "bg-emerald-500 text-white shadow-sm" : "text-muted-foreground hover:bg-card",
               )}
+              aria-label="WhatsApp"
             >
-              Todas
+              <MessageCircle className="h-[18px] w-[18px]" aria-hidden />
             </button>
-            {INBOX_QUICK_FILTER_OPTIONS.filter(o => o.id === "mine" || o.id === "unread").map(({ id, label }) => {
-              const active = quickFilter === id;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => onQuickFilterChange(active ? null : id)}
-                  className={cn(
-                    "shrink-0 rounded-full px-3 py-1 text-[11px] font-medium transition-colors",
-                    active
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "bg-wchat-50 text-muted-foreground hover:bg-wchat-100 hover:text-foreground",
-                  )}
-                >
-                  {label}
-                </button>
-              );
-            })}
-            </div>
+            <button
+              type="button"
+              aria-pressed={isInstanceGroupSelected(instagramInstanceIds)}
+              onClick={() => selectInstanceGroup(instagramInstanceIds)}
+              disabled={instagramInstanceIds.length === 0}
+              className={cn(
+                "flex h-9 items-center justify-center rounded-xl transition-colors disabled:opacity-35",
+                isInstanceGroupSelected(instagramInstanceIds) ? "bg-gradient-to-br from-fuchsia-500 to-orange-400 text-white shadow-sm" : "text-muted-foreground hover:bg-card",
+              )}
+              aria-label="Instagram"
+            >
+              <Instagram className="h-[18px] w-[18px]" aria-hidden />
+            </button>
+            <button type="button" disabled className="flex h-9 items-center justify-center rounded-xl text-muted-foreground opacity-35" aria-label="Messenger indisponível">
+              <MessageCircle className="h-[18px] w-[18px] fill-current" aria-hidden />
+            </button>
           </div>
+
+          <button
+            type="button"
+            onClick={() => onQuickFilterChange(quickFilter === "unread" ? null : "unread")}
+            className={cn(
+              "flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-border text-xs font-semibold transition-colors",
+              quickFilter === "unread" ? "border-primary/30 bg-primary/5 text-primary" : "bg-card text-muted-foreground hover:bg-wchat-50 hover:text-foreground",
+            )}
+          >
+            <CheckCheck className="h-4 w-4" aria-hidden />
+            {quickFilter === "unread" ? "Mostrar todas" : `Ver não lidas (${unreadCount})`}
+          </button>
 
           {selectedTagIds.length > 0 ? (
             <div className="flex flex-wrap gap-1">

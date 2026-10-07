@@ -523,6 +523,9 @@ const DraggableNegotiationCard = memo(function DraggableNegotiationCard({
           <span className="truncate">{customerPhone}</span>
         </div>
       ) : null}
+      {isCompact ? (
+        <CrmNegotiationAlertBadges alerts={alerts} className="mb-2" compact nextTaskAt={card.nextTaskAt} />
+      ) : null}
       {!isCompact ? (
         <div className="mb-2 flex flex-wrap items-center gap-1.5">
           {customerChannel ? (

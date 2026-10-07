@@ -24,17 +24,17 @@ import {
 
 export type CardDensity = "compact" | "cozy" | "expanded";
 
-export const CARD_DENSITY_STORAGE_KEY = "CaleoCRM:crm:card-density";
+export const CARD_DENSITY_STORAGE_KEY = "CaleoCRM:crm:card-density-v2";
 
 export function readCardDensity(): CardDensity {
-  if (typeof window === "undefined") return "cozy";
+  if (typeof window === "undefined") return "compact";
   try {
     const raw = window.localStorage.getItem(CARD_DENSITY_STORAGE_KEY);
     if (raw === "compact" || raw === "cozy" || raw === "expanded") return raw;
   } catch {
     // localStorage indisponível (modo privado) → silencia.
   }
-  return "cozy";
+  return "compact";
 }
 
 export type SortId =
