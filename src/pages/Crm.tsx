@@ -3216,13 +3216,14 @@ export default function Crm() {
         </div>
       ) : view === "board" ? (
         <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={(e) => void handleDragEnd(e)}>
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4 md:h-[calc(100dvh-8rem)] md:p-6">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-slate-100/45 p-3 md:h-[calc(100dvh-8rem)] md:p-4">
             <div className="scrollbar-hide min-h-0 flex-1 overflow-x-auto overflow-y-hidden">
-              <div className="flex h-full min-h-0 min-w-max items-stretch gap-4 pb-2">
-                {stagesWithCards.map((stage) => (
+              <div className="flex h-full min-h-0 min-w-max items-stretch gap-3 pb-2">
+                {stagesWithCards.map((stage, stageIndex) => (
                   <KanbanColumn
                   key={stage.id}
                   stage={stage}
+                  stageIndex={stageIndex}
                   phoneIndex={phoneIndex}
                   customers={customers}
                   kanbanTaskPreviews={kanbanTaskPreviews}

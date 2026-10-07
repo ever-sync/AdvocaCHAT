@@ -1,14 +1,16 @@
 // Cartoes e coluna do quadro de CRM, extraidos de Crm.tsx (monolito). Recebem
 // tudo por props (sao memo-friendly) e dependem apenas de helpers/UI importados.
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   ChevronLeft,
   ChevronRight,
+  Eye,
   Hand,
   Info,
   MessageCircle,
+  Phone,
   RefreshCw,
   Search,
   Star,
@@ -41,6 +43,17 @@ import { canAtendimentoModifyNegotiation } from "@/lib/crm/negotiation-assignee"
 import type { CrmStageDef } from "@/data/crm-funnels";
 import type { CrmNegotiation, Customer } from "@/types/domain";
 import { type CardDensity, statusLabel } from "./board-helpers";
+
+const KANBAN_STAGE_PALETTE = [
+  { accent: "#dc2626", tint: "#fef2f2", ink: "#b91c1c" },
+  { accent: "#2563eb", tint: "#eff6ff", ink: "#1d4ed8" },
+  { accent: "#7c3aed", tint: "#f5f3ff", ink: "#6d28d9" },
+  { accent: "#0284c7", tint: "#f0f9ff", ink: "#0369a1" },
+  { accent: "#0d9488", tint: "#f0fdfa", ink: "#0f766e" },
+  { accent: "#db2777", tint: "#fdf2f8", ink: "#be185d" },
+  { accent: "#7e22ce", tint: "#faf5ff", ink: "#6b21a8" },
+  { accent: "#ea580c", tint: "#fff7ed", ink: "#c2410c" },
+];
 
 export function CrmPoolBadge({ className }: { className?: string }) {
   return (
@@ -308,6 +321,8 @@ const DraggableNegotiationCard = memo(function DraggableNegotiationCard({
         zIndex: isDragging ? 50 : undefined,
       }
     : undefined;
+  const customerPhone = customer?.celular || customer?.telefone || customer?.phoneE164;
+  const customerChannel = customer?.canal?.trim();
 
   return (
     <article
@@ -315,10 +330,10 @@ const DraggableNegotiationCard = memo(function DraggableNegotiationCard({
       data-testid={`crm-card-${card.id}`}
       style={style}
       className={cn(
-        "cursor-grab rounded-lg border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.08)] transition-shadow active:cursor-grabbing",
+        "cursor-grab rounded-xl border bg-card shadow-[0_2px_8px_rgba(15,23,42,0.06)] transition-all active:cursor-grabbing",
         cardAccent.className ?? "border-[var(--crm-surface-2)]",
         isCompact ? "p-2" : isExpanded ? "p-4" : "p-3",
-        isDragging ? "opacity-90 shadow-lg ring-2 ring-[var(--crm-brand-2)]/40" : "hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)]",
+        isDragging ? "opacity-90 shadow-lg ring-2 ring-[var(--crm-brand-2)]/40" : "hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(15,23,42,0.09)]",
       )}
       {...listeners}
       {...attributes}
@@ -502,6 +517,24 @@ const DraggableNegotiationCard = memo(function DraggableNegotiationCard({
       >
         {card.title}
       </p>
+      {customerPhone ? (
+        <div className="mb-2 flex min-w-0 items-center gap-1.5 text-[11px] text-[var(--crm-ink-3)]">
+          <Phone className="h-3 w-3 shrink-0" aria-hidden />
+          <span className="truncate">{customerPhone}</span>
+        </div>
+      ) : null}
+      {!isCompact ? (
+        <div className="mb-2 flex flex-wrap items-center gap-1.5">
+          {customerChannel ? (
+            <span className="max-w-[9rem] truncate rounded-full bg-sky-100 px-2 py-1 text-[10px] font-semibold text-sky-700">
+              {customerChannel}
+            </span>
+          ) : null}
+          <span className="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-semibold text-amber-700">
+            {statusLabel(card.status)}
+          </span>
+        </div>
+      ) : null}
       {isCompact ? null : (
         <CrmNegotiationAlertBadges alerts={alerts} className="mb-2" nextTaskAt={card.nextTaskAt} />
       )}
@@ -659,6 +692,21 @@ const DraggableNegotiationCard = memo(function DraggableNegotiationCard({
             ) : null}
           </div>
         ) : null}
+        {customer?.id && onOpenCustomer && !isCompact ? (
+          <Button
+            type="button"
+            variant="ghost"
+            className="h-8 w-full gap-2 rounded-lg text-xs font-medium text-[var(--crm-ink-2)] shadow-none hover:bg-[var(--crm-surface)]"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenCustomer(customer.id);
+            }}
+          >
+            <Eye className="h-3.5 w-3.5" aria-hidden />
+            Ver cliente
+          </Button>
+        ) : null}
         {showDelete && !isCompact ? (
           <Button
             type="button"
@@ -683,6 +731,7 @@ const DraggableNegotiationCard = memo(function DraggableNegotiationCard({
 
 export function KanbanColumn({
   stage,
+  stageIndex,
   phoneIndex,
   customers,
   kanbanTaskPreviews,
@@ -713,6 +762,7 @@ export function KanbanColumn({
   scoresByNegId,
 }: {
   stage: CrmStageDef & { cards: CrmNegotiation[] };
+  stageIndex: number;
   phoneIndex: Map<string, Set<string>>;
   customers: Customer[];
   kanbanTaskPreviews: Map<string, KanbanTaskPreview>;
@@ -751,6 +801,12 @@ export function KanbanColumn({
     columnValue > 0
       ? formatBRL(columnValue)
       : "R$ 0,00";
+  const palette = KANBAN_STAGE_PALETTE[stageIndex % KANBAN_STAGE_PALETTE.length];
+  const columnStyle = {
+    "--kanban-stage-accent": palette.accent,
+    "--kanban-stage-tint": palette.tint,
+    "--kanban-stage-ink": palette.ink,
+  } as CSSProperties;
 
   const { setNodeRef, isOver } = useDroppable({
     id: `stage-${stage.id}`,
@@ -776,13 +832,19 @@ export function KanbanColumn({
   });
 
   return (
-    <div className="flex h-full min-h-0 w-[min(100vw-1.5rem,340px)] shrink-0 flex-col rounded-lg bg-[var(--crm-surface-2)] p-2.5 shadow-sm sm:w-[320px] md:w-[300px] md:p-3">
-      <div className="mb-3 flex shrink-0 items-start justify-between gap-2">
-        <div>
-          <h3 className="text-[11px] font-bold uppercase leading-tight tracking-wide text-[var(--crm-ink-2)]">
-            {stage.title}{" "}
-            <span className="font-semibold text-[var(--crm-ink-3)]">({count})</span>
+    <div
+      style={columnStyle}
+      className="flex h-full min-h-0 w-[min(100vw-1.5rem,300px)] shrink-0 flex-col rounded-2xl border border-slate-200/80 bg-slate-50/75 p-2 shadow-[0_4px_18px_rgba(15,23,42,0.04)] sm:w-[290px] md:w-[280px]"
+    >
+      <div className="relative mb-2 flex min-h-12 shrink-0 items-center justify-between gap-2 overflow-hidden rounded-xl border border-slate-200/80 bg-white px-3 pt-1 shadow-sm">
+        <span className="absolute inset-x-0 top-0 h-[3px] bg-[var(--kanban-stage-accent)]" aria-hidden />
+        <div className="flex min-w-0 items-center gap-2">
+          <h3 className="truncate text-xs font-bold leading-tight text-slate-800">
+            {stage.title}
           </h3>
+          <span className="rounded-full bg-[var(--kanban-stage-tint)] px-2 py-0.5 text-[10px] font-bold text-[var(--kanban-stage-ink)]">
+            {count}
+          </span>
         </div>
         <div className="flex shrink-0 items-center gap-0.5">
           {canMoveStageLeft ? (
@@ -805,7 +867,7 @@ export function KanbanColumn({
               <ChevronRight className="h-3.5 w-3.5" />
             </button>
           ) : null}
-          <span className="rounded bg-[var(--crm-border)] px-2 py-0.5 text-[11px] font-semibold text-[var(--crm-ink-2)]">{displayValue}</span>
+          <span className="hidden rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600 xl:inline">{displayValue}</span>
           <button
             type="button"
             className="rounded p-1 text-[var(--crm-ink-3)] transition-colors hover:bg-[var(--crm-border)]/80"
@@ -830,10 +892,16 @@ export function KanbanColumn({
         data-testid={`crm-column-${stage.id}`}
         style={{ touchAction: "pan-y" }}
         className={cn(
-          "scrollbar-hide min-h-0 flex-1 overflow-y-scroll overscroll-y-contain rounded-md transition-colors",
+          "scrollbar-hide min-h-0 flex-1 overflow-y-scroll overscroll-y-contain rounded-xl transition-colors",
           isOver && "bg-[var(--crm-info-tint)]/90 ring-2 ring-[var(--crm-brand-2)] ring-inset",
         )}
       >
+        {stage.cards.length === 0 ? (
+          <div className="flex h-40 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white/55 px-4 text-center">
+            <span className="mb-2 h-3 w-3 rounded-full border-2 border-[var(--kanban-stage-accent)] opacity-45" aria-hidden />
+            <span className="text-[11px] font-medium text-slate-400">Nenhum caso nesta etapa</span>
+          </div>
+        ) : null}
         {/* Virtualizado: renderiza só os cards visíveis (+overscan). Gap via pb-2. */}
         <div className="relative w-full" style={{ height: cardVirtualizer.getTotalSize() }}>
           {cardVirtualizer.getVirtualItems().map((virtualRow) => {
