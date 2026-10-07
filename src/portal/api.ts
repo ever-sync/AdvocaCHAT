@@ -122,6 +122,16 @@ export async function inspectPortalInvite(
 export async function acceptPortalInvite(token: string) {
   return portalAccess<{ status: string }>({ action: "accept", token });
 }
+export async function decidePortalContract(input: { membershipId: string; releaseId: string; decision: "accepted" | "declined"; typedName: string; idempotencyKey: string }) {
+  return portalAccess<{ id: string; decision: "accepted" | "declined"; created_at: string }>({
+    action: "decide_contract",
+    membership_id: input.membershipId,
+    release_id: input.releaseId,
+    decision: input.decision,
+    typed_name: input.typedName,
+    idempotency_key: input.idempotencyKey,
+  });
+}
 export async function diligenceAccess<T>(
   body: object,
   signal?: AbortSignal,

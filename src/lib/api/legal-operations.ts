@@ -1,6 +1,6 @@
 import { requireSupabase, supabaseAnonKey, supabaseUrl } from "@/lib/supabase";
 import type { LegalDocumentCategory } from "@/types/legal";
-import type { LegalOperationSettings, LegalCaseOperation, LegalInterviewTemplate, LegalInterviewVersion, LegalInterviewSubmission, LegalInterviewQuestion, LegalConflictReview, LegalConflictDecision, LegalDocumentRequest, LegalInstrument, LegalInstrumentVersion, LegalInstrumentType, LegalExternalSignatureRecord, LegalTaskTemplate, LegalCaseTask, LegalTaskPayload, LegalAppointment, LegalAppointmentPayload } from "@/types/legal-operations";
+import type { LegalOperationSettings, LegalCaseOperation, LegalInterviewTemplate, LegalInterviewVersion, LegalInterviewSubmission, LegalInterviewQuestion, LegalConflictReview, LegalConflictDecision, LegalDocumentRequest, LegalInstrument, LegalInstrumentVersion, LegalInstrumentType, LegalExternalSignatureRecord, LegalContractRelease, LegalTaskTemplate, LegalCaseTask, LegalTaskPayload, LegalAppointment, LegalAppointmentPayload } from "@/types/legal-operations";
 async function rpc<T>(name: string, params: Record<string, unknown> = {}): Promise<T> {
   const { data, error } = await requireSupabase().rpc(name, params);
   if (error) throw new Error(error.message);
@@ -49,6 +49,9 @@ export function submitLegalInstrumentReview(versionId: string) { return rpc<Lega
 export function reviewLegalInstrument(versionId: string, decision: "approved" | "revoked", note: string) { return rpc<LegalInstrumentVersion>("legal_review_instrument", { p_version_id: versionId, p_decision: decision, p_note: note }); }
 export const listLegalExternalSignatures = (caseId: string) => rows<LegalExternalSignatureRecord>("legal_external_signature_records", "case_id", caseId);
 export function recordLegalExternalSignature(versionId: string, documentId: string, evidenceNote: string) { return rpc<LegalExternalSignatureRecord>("legal_record_external_signature", { p_version_id: versionId, p_document_id: documentId, p_evidence_note: evidenceNote }); }
+export function listLegalContractReleases(caseId: string) { return rpc<LegalContractRelease[]>("legal_contract_release_list", { p_case_id: caseId }); }
+export function releaseLegalInstrumentToPortal(versionId: string, membershipId: string, expiresAt: string) { return rpc<LegalContractRelease>("legal_release_instrument_to_portal", { p_version_id: versionId, p_membership_id: membershipId, p_expires_at: expiresAt }); }
+export function revokeLegalContractRelease(releaseId: string, reason: string) { return rpc<LegalContractRelease>("legal_revoke_contract_release", { p_release_id: releaseId, p_reason: reason }); }
 export const listLegalTaskTemplates = () => rows<LegalTaskTemplate>("legal_task_templates");
 export function saveLegalTaskTemplate(input: { title: string; notes?: string; default_due_days?: number | null }, id?: string) { return rpc<LegalTaskTemplate>("legal_save_task_template", { p_title: input.title, p_notes: input.notes ?? "", p_default_due_days: input.default_due_days ?? null, p_template_id: id ?? null }); }
 export const listLegalCaseTasks = (caseId: string) => rows<LegalCaseTask>("legal_case_tasks", "case_id", caseId);

@@ -51,6 +51,16 @@ Deno.test("portal uses verified Auth UUID, never an actor supplied by caller", a
   assertEquals((await handler(json({ action: "context" }))).status, 200);
   assertEquals(fake.calls[0].args, { p_actor_id: actorId });
 });
+Deno.test("contract decision derives identity and accepts only strict reviewed fields", async () => {
+  const fake = fakeAdmin({ rpc: () => ({ data: { id: documentId, decision: "accepted" }, error: null }) });
+  const handler = createPortalAccessHandler(() => fake.admin);
+  const response = await handler(json({ action: "decide_contract", membership_id: membershipId, release_id: documentId, decision: "accepted", typed_name: "Pessoa Teste", idempotency_key: inviteId }));
+  assertEquals(response.status, 201);
+  assertEquals(fake.calls[0], { name: "legal_portal_service_contract_decide", args: { p_actor_id: actorId, p_membership_id: membershipId, p_release_id: documentId, p_decision: "accepted", p_typed_name: "Pessoa Teste", p_idempotency_key: inviteId } });
+  const injected = await handler(json({ action: "decide_contract", membership_id: membershipId, release_id: documentId, decision: "accepted", typed_name: "Pessoa Teste", idempotency_key: inviteId, actor_id: inviteId }));
+  assertEquals(injected.status, 400);
+  assertEquals(fake.calls.length, 1);
+});
 Deno.test("portal refuses internal, forged metadata role, and missing sessions", async () => {
   for (const user of [{ ...external, role: "authenticated" }, { ...external, app_metadata: {} }, null]) {
     const fake = fakeAdmin({ user });

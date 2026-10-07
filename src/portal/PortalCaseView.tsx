@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   downloadPortalDocument,
   downloadPortalExport,
+  decidePortalContract,
   portalAccess,
   PortalApiError,
   uploadPortalDocument,
@@ -20,6 +21,7 @@ import {
   type PortalCase,
   type PortalCategory,
   type PortalDocumentRequest,
+  type PortalContract,
   type PortalExportManifest,
   type PortalMembership,
 } from "./types";
@@ -124,6 +126,8 @@ export function PortalCaseView({
     membership.access_kind === "accountant" ? "fiscal" : "general",
   );
   const [manifest, setManifest] = useState<PortalExportManifest | null>(null);
+  const [contractName, setContractName] = useState("");
+  const contractKey = useRef(crypto.randomUUID());
   const alive = useRef(true);
   const messageKey = useRef(crypto.randomUUID());
   const fingerprint = portalMembershipFingerprint([membership]);
@@ -135,6 +139,14 @@ export function PortalCaseView({
         signal,
       ),
     enabled: !expired && !denied,
+    refetchOnWindowFocus: true,
+    refetchInterval: 15000,
+    retry: false,
+  });
+  const contractsQuery = useQuery({
+    queryKey: ["portal", identityId, "contracts", membership.id, fingerprint],
+    queryFn: ({ signal }) => portalAccess<PortalContract[]>({ action: "contracts", membership_id: membership.id }, signal),
+    enabled: !expired && !denied && membership.scopes.includes("documents:read"),
     refetchOnWindowFocus: true,
     refetchInterval: 15000,
     retry: false,
@@ -262,6 +274,7 @@ export function PortalCaseView({
         has("requests:upload") ||
         has("fiscal_exports:read"),
     },
+    { id: "contracts", label: "Contratos", visible: has("documents:read") },
     {
       id: "statements",
       label: "Demonstrativos",
@@ -293,6 +306,7 @@ export function PortalCaseView({
     (m) =>
       has("messages:read") && portalCategoryAllowed(membership, m.category),
   );
+  const contracts = (Array.isArray(contractsQuery.data) ? contractsQuery.data : []).filter((item) => portalCategoryAllowed(membership, item.category));
   return (
     <div className="min-w-0 space-y-5">
       <Link
@@ -337,6 +351,31 @@ export function PortalCaseView({
         aria-labelledby={`portal-tab-${selected}`}
         className="space-y-4"
       >
+        {selected === "contracts" && (
+          <section className="space-y-4">
+            {contractsQuery.isPending ? <PortalNotice>Consultando contratos…</PortalNotice> : contracts.length === 0 ? <PortalNotice>Nenhum contrato aguardando sua decisão.</PortalNotice> : contracts.map((contract) => (
+              <article key={contract.id} className="space-y-4 rounded-xl border bg-card p-5">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <h2 className="break-words font-semibold">{contract.title}</h2>
+                  <Badge variant={contract.state === "declined" || contract.state === "revoked" ? "destructive" : "secondary"}>{contract.state === "active" ? "Aguardando decisão" : contract.state === "accepted" ? "Aceito" : contract.state === "declined" ? "Recusado" : contract.state === "expired" ? "Expirado" : "Revogado"}</Badge>
+                </div>
+                <p className="whitespace-pre-wrap break-words rounded-lg bg-muted/30 p-4 text-sm">{contract.content}</p>
+                <p className="text-xs text-muted-foreground">Versão protegida: {contract.content_hash.slice(0, 12)}… · disponível até {portalDate(contract.expires_at)}</p>
+                {contract.state === "active" ? (
+                  <div className="space-y-3 border-t pt-4">
+                    <PortalField label="Digite seu nome completo para registrar a decisão" hint="A decisão será vinculada à sua conta autenticada, a esta versão e ao horário do servidor.">
+                      <Input value={contractName} maxLength={200} disabled={busy} onChange={(event) => { setContractName(event.target.value); contractKey.current = crypto.randomUUID(); }} />
+                    </PortalField>
+                    <div className="flex flex-wrap gap-2">
+                      <Button disabled={busy || contractName.trim().length < 2} onClick={() => void run(async () => { await decidePortalContract({ membershipId: membership.id, releaseId: contract.id, decision: "accepted", typedName: contractName.trim(), idempotencyKey: contractKey.current }); setContractName(""); contractKey.current = crypto.randomUUID(); await contractsQuery.refetch(); }, "Aceite registrado para esta versão do contrato.")}>Aceitar contrato</Button>
+                      <Button variant="outline" disabled={busy || contractName.trim().length < 2} onClick={() => void run(async () => { await decidePortalContract({ membershipId: membership.id, releaseId: contract.id, decision: "declined", typedName: contractName.trim(), idempotencyKey: contractKey.current }); setContractName(""); contractKey.current = crypto.randomUUID(); await contractsQuery.refetch(); }, "Recusa registrada. O escritório será informado.")}>Recusar</Button>
+                    </div>
+                  </div>
+                ) : contract.decided_at ? <p className="text-sm text-muted-foreground">Decisão registrada em {portalDate(contract.decided_at)}</p> : null}
+              </article>
+            ))}
+          </section>
+        )}
         {selected === "overview" &&
           (publications.length ? (
             publications.map((p) => (

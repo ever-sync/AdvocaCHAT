@@ -84,6 +84,22 @@ export function createPortalAccessHandler(createAdmin: () => PortalAdmin, env: C
         portalFields(body, ["action", "membership_id"]);
         return portalReply(await portalRpc(admin, `legal_portal_service_${action}`, { p_actor_id: actor.id, p_membership_id: portalId(body.membership_id) }));
       }
+      if (action === "contracts") {
+        portalFields(body, ["action", "membership_id"]);
+        return portalReply(await portalRpc(admin, "legal_portal_service_contracts", { p_actor_id: actor.id, p_membership_id: portalId(body.membership_id) }));
+      }
+      if (action === "decide_contract") {
+        portalFields(body, ["action", "membership_id", "release_id", "decision", "typed_name", "idempotency_key"]);
+        if (body.decision !== "accepted" && body.decision !== "declined") throw new PortalError(400, "Decisão inválida.");
+        return portalReply(await portalRpc(admin, "legal_portal_service_contract_decide", {
+          p_actor_id: actor.id,
+          p_membership_id: portalId(body.membership_id),
+          p_release_id: portalId(body.release_id),
+          p_decision: body.decision,
+          p_typed_name: portalString(body.typed_name, 200),
+          p_idempotency_key: portalId(body.idempotency_key),
+        }), 201);
+      }
       if (action === "reply") {
         portalFields(body, ["action", "membership_id", "category", "body", "idempotency_key"]);
         return portalReply(await portalRpc(admin, "legal_portal_service_reply", {

@@ -85,6 +85,18 @@ export type PortalExportManifest = {
     sha256: string;
   }[];
 };
+export type PortalContract = {
+  id: string;
+  title: string;
+  category: PortalCategory;
+  content: string;
+  content_hash: string;
+  state: "active" | "accepted" | "declined" | "revoked" | "expired";
+  expires_at: string;
+  created_at: string;
+  decision: "accepted" | "declined" | null;
+  decided_at: string | null;
+};
 export type PortalCase = {
   membership: PortalMembership;
   publications: PortalPublication[];
